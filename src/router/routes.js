@@ -19,7 +19,7 @@ const routes = [
     children: [
       {
         path: "dashboard",
-        name: "dashboard",
+        name: "数据分析",
         component: Dashboard,
       },
       {

@@ -2,7 +2,7 @@
   <div class="wrapper">
     <side-bar>
       <template slot="links">
-        <sidebar-link to="/dashboard" name="Dashboard" icon="ti-panel" />
+        <sidebar-link to="/dashboard" name="数据分析" icon="ti-panel" />
         <sidebar-link to="/stats" name="User Profile" icon="ti-user" />
         <sidebar-link
           to="/table-list"
@@ -27,7 +27,7 @@
           title-classes="nav-link"
           icon="ti-bell"
         >
-          <a class="dropdown-item">Notification 1</a>
+          <a class="dropdown-item">Notification 4</a>
           <a class="dropdown-item">Notification 2</a>
           <a class="dropdown-item">Notification 3</a>
           <a class="dropdown-item">Notification 4</a>

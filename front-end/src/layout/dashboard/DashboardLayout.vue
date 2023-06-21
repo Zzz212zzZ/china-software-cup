@@ -2,7 +2,11 @@
   <div class="wrapper">
     <side-bar>
       <template slot="links">
-        <sidebar-link to="/dashboard" name="数据分析" icon="ti-panel" />
+        <sidebar-link to="/dataAnalysis" name="数据特征分析" icon="ti-panel" />
+        <sidebar-link to="/dataPreprocess" name="数据预处理" icon="ti-panel" />
+        <sidebar-link to="/modelTrain" name="模型训练" icon="ti-panel" />
+
+        <sidebar-link to="/dashboard" name="dashboard" icon="ti-panel" />
         <sidebar-link to="/stats" name="User Profile" icon="ti-user" />
         <sidebar-link
           to="/table-list"
@@ -18,7 +22,7 @@
         <li class="nav-item">
           <a class="nav-link">
             <i class="ti-panel"></i>
-            <p>Stats</p>
+            <p>213</p>
           </a>
         </li>
         <drop-down
@@ -30,7 +34,7 @@
           <a class="dropdown-item">Notification 4</a>
           <a class="dropdown-item">Notification 2</a>
           <a class="dropdown-item">Notification 3</a>
-          <a class="dropdown-item">Notification 4</a>
+          <a class="dropdown-item">Notification 6</a>
           <a class="dropdown-item">Another notification</a>
         </drop-down>
         <li class="nav-item">

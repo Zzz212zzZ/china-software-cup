@@ -3,6 +3,9 @@ import DashboardLayout from "@/layout/dashboard/DashboardLayout.vue";
 import NotFound from "@/pages/NotFoundPage.vue";
 
 // Admin pages
+import dataAnalysis from "@/pages/dataAnalysis.vue";
+import dataPreprocess from "@/pages/dataPreprocess.vue";
+import modelTrain from "@/pages/modelTrain.vue";
 import Dashboard from "@/pages/Dashboard.vue";
 import UserProfile from "@/pages/UserProfile.vue";
 import Notifications from "@/pages/Notifications.vue";
@@ -18,8 +21,23 @@ const routes = [
     redirect: "/dashboard",
     children: [
       {
+        path:"dataAnalysis",
+        name:"数据特征分析",
+        component:dataAnalysis,
+      },
+      {
+        path:"dataPreprocess",
+        name:"数据预处理",
+        component:dataPreprocess,
+      },
+      {
+        path:"modelTrain",
+        name:"模型训练",
+        component:modelTrain,
+      },
+      {
         path: "dashboard",
-        name: "数据分析",
+        name: "dashboard",
         component: Dashboard,
       },
       {

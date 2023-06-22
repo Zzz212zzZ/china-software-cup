@@ -54,7 +54,7 @@ export default {
         },
         chartHeight: { // 添加chartHeight属性
             type: String,
-            default: '400px'
+            default: '500px'
         }
     },
     data(){
@@ -69,8 +69,9 @@ export default {
     beforeUnmount() {
         window.removeEventListener("resize", this.handleResize);
     },
-
+   
     methods: {
+        // 初始化图片
         initEcharts() {
             const chartDom = this.$refs.echarts;
             this.chartInstance = echarts.init(chartDom);
@@ -82,8 +83,11 @@ export default {
                 this.chartInstance.resize();
             }
         },
+        setOption(){
+            this.chartInstance.setOption(this.chartOptions);
+        }
     },
-
+    
 
 };
 </script>

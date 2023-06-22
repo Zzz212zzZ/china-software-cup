@@ -5,7 +5,6 @@ from flask_restful import Resource
 import json
 
 from DatabaseConnector import DatabaseConnector
-import helper
 
 app = Flask(__name__)
 CORS(app)

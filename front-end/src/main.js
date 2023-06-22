@@ -20,6 +20,9 @@ import router from "./router/index";
 import PaperDashboard from "./plugins/paperDashboard";
 import "vue-notifyjs/themes/default.css";
 import store from './store';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'bootstrap/dist/js/bootstrap.js';
+import 'popper.js/dist/popper.js';
 
 Vue.use(PaperDashboard);
 

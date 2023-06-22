@@ -44,5 +44,21 @@ class DatabaseConnector(object):
                 select_sql += '`' + c + '`,'
             select_sql = select_sql.rstrip(',')
         select_sql += " FROM `" + table_name + '`'
-        df = pd.read_sql(select_sql, self.engine)
+        df = pd.read_sql(select_sql, self.engine,parse_dates=['DATATIME'])
         return df
+
+
+    def get_basic_info(self,table_name):
+        """
+        获取该表的基本信息，返回字典，其中Data dimension：数据维度，Records number ：数据记录数，NULL values：YD15缺失值条数，Record days：记录天数
+
+        :param table_name:表名
+        :return:返回包含基本信息的字典
+        """
+        dict={}
+        df=self.read_db(table_name)
+        dict['Data dimension']=df.shape[1]
+        dict['Records number']=df.shape[0]
+        dict['NULL values']=df['YD15'].isna().sum().item()
+        dict['Record days']=(df['DATATIME'].max()-df['DATATIME'].min()).days
+        return dict

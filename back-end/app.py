@@ -38,7 +38,7 @@ def correlation():
     table_name=request.args['number']
     y=request.args['y']
     x=request.args['x']
-    data=data_src.get_data(table_name,[y,x]).dropna()
+    data=data_src.get_data(table_name,[x,y]).dropna()
     dict = {}
     dict[x] = data[x].tolist()
     dict[y] = data[y].tolist()

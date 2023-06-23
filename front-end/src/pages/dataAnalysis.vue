@@ -143,7 +143,13 @@ export default {
   created() {
     this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
   },
+  mounted(){
+    this.CorrelationData.chartOptions.xAxis.name = this.dropdownTitle2;
+    this.CorrelationData.chartOptions.yAxis.name = this.dropdownTitle1;
+    //初始化相关性散点图的数据，因为数据本身只有靠变化才能调用，这里直接手动调用changeTitle
+    this.changeTitle1(this.dropdownTitle1)
 
+  },
 
   methods: {
     changeTitle1(item) {

@@ -141,11 +141,14 @@ export default {
     changeTitle1(item) {
       this.dropdownTitle1 = item;
       this.CorrelationData.chartOptions.yAxis.name = item;
+      const x_name = this.CorrelationData.chartOptions.xAxis.name;
+      const y_name = this.CorrelationData.chartOptions.yAxis.name;
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
-      fetch('http://127.0.0.1:5000/basic_info?number=01')
+      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}`)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        console.log(data['Combine']);
+        this.CorrelationData.chartOptions.series[0].data = data['Combine'];
       })
       .catch(error => console.error(error));
 
@@ -153,31 +156,24 @@ export default {
     changeTitle2(item) {
       this.dropdownTitle2 = item;
       this.CorrelationData.chartOptions.xAxis.name = item;
+      const x_name = this.CorrelationData.chartOptions.xAxis.name;
+      const y_name = this.CorrelationData.chartOptions.yAxis.name;
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
-      fetch('http://127.0.0.1:5000/basic_info?number=02')
+      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}`)
       .then(response => response.json())
       .then(data => {
-        console.log(data);
+        console.log(data['Combine']);
+        this.CorrelationData.chartOptions.series[0].data = data['Combine'];
       })
       .catch(error => console.error(error));
     },
   },
 
   watch: {
-      'CorrelationData.chartOptions.yAxis.name': {
+      'CorrelationData.chartOptions': {
         handler(newVal, oldVal) {    
           const correlation = this.$refs.correlation;  
         // 如果存在 ref = correlation 并且 setOption 存在
-          if (correlation && correlation.setOption) {
-          correlation.setOption(this.chartOptions);
-        }
-      },
-      deep: true
-    },
-    'CorrelationData.chartOptions.xAxis.name': {
-        handler(newVal, oldVal) {    
-          const correlation = this.$refs.correlation;    
-        // 如果存在 EchartsCard 并且 setOption 存在
           if (correlation && correlation.setOption) {
           correlation.setOption(this.chartOptions);
         }
@@ -203,9 +199,6 @@ export default {
         'ROUND(A.POWER,0)',
         'YD15'
       ],
-
-
-
       CorrelationData: {
           chartOptions: {
           xAxis: {
@@ -244,7 +237,8 @@ export default {
           {
             symbolSize: 20,
             data: [[10.0, 8.04],[8.07, 6.95],[13.0, 7.58],[9.05, 8.81],[11.0, 8.33]], 
-            type: 'scatter'
+            type: 'scatter',
+            symbolSize: 5 // 设置散点大小为 20
           }
         ]
       }

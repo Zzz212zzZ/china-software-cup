@@ -42,7 +42,7 @@ def correlation():
     dict = {}
     dict[x] = data[x].tolist()
     dict[y] = data[y].tolist()
-    dict['Combine'] = data.values.tolist()
+    dict['Combine'] = data.drop_duplicates().values.tolist()
     return json.dumps(dict, ensure_ascii=False)
 
 

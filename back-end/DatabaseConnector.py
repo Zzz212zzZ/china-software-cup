@@ -44,7 +44,7 @@ class DatabaseConnector(object):
                 select_sql += '`' + c + '`,'
             select_sql = select_sql.rstrip(',')
         select_sql += " FROM `" + table_name + '`'
-        df = pd.read_sql(select_sql, self.engine,parse_dates=['DATATIME'])
+        df = pd.read_sql(select_sql, self.engine, parse_dates=['DATATIME'])
         return df
 
 

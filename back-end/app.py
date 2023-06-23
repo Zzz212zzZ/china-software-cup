@@ -3,6 +3,7 @@ from flask_cors import CORS
 from flask_restful import Api
 from flask_restful import Resource
 import json
+import numpy as np
 
 from DatabaseConnector import DatabaseConnector
 from DataSource import DataSource
@@ -35,14 +36,15 @@ def correlation():
     输入风机编号number,y轴y，x轴x
     :return: 对应数据
     """
-    table_name=request.args['number']
-    y=request.args['y']
-    x=request.args['x']
-    data=data_src.get_data(table_name,[x,y]).dropna()
+    table_name = request.args['number']
+    y = request.args['y']
+    x = request.args['x']
+    step = 1 / float(request.args['percentage'])
+    data = data_src.get_data(table_name, [x, y]).dropna()
+
     dict = {}
-    dict[x] = data[x].tolist()
-    dict[y] = data[y].tolist()
-    dict['Combine'] = data.drop_duplicates().values.tolist()
+    dict['data'] = data.values.tolist()
+    dict['Combine'] = data[np.floor(data.index % step) == 0].values.tolist()
     return json.dumps(dict, ensure_ascii=False)
 
 
@@ -55,9 +57,16 @@ def dimension_data():
     """
     table_name = request.args['number']
     dimension = request.args['dimension']
-    return json.dumps(dbcon.get_dimension_data(table_name, dimension), ensure_ascii=False)
+    return json.dumps(data_src.get_dimension_data(table_name, dimension), ensure_ascii=False)
 
+@app.route('/bin_data', methods=['GET'])
+def bin_data():
+    table_name = request.args['number']
+    r = request.args['r']
 
+    dict = {}
+    dict['bin_data'] = data_src.data_bin_process(table_name, r).values.tolist()
+    return json.dumps(dict, ensure_ascii=False)
 
 
 if __name__ == '__main__':

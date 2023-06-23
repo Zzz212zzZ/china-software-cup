@@ -242,7 +242,7 @@ export default {
         chartOptions: {
           xAxis: {
             name: this.dropdownTitle2,
-            nameGap: 60,
+            nameGap: 30,
             nameLocation: 'middle',
             nameTextStyle: {
               color: '#666',
@@ -259,7 +259,7 @@ export default {
           yAxis: {
             name: this.dropdownTitle1,
             nameLocation: 'middle',
-            nameGap: 30,
+            nameGap: 60,
             nameTextStyle: {
               color: '#666',
               fontSize: 20,

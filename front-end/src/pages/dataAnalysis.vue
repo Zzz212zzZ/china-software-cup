@@ -148,12 +148,13 @@ export default {
       this.CorrelationData.chartOptions.yAxis.name = item;
       const x_name = this.CorrelationData.chartOptions.xAxis.name;
       const y_name = this.CorrelationData.chartOptions.yAxis.name;
+      const percentage = 0.2;  //显示20%的散点
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
-      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}`)
+      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}&percentage=${percentage}`)
       .then(response => response.json())
       .then(data => {
-        console.log(data['Combine']);
-        this.CorrelationData.chartOptions.series[0].data = data['Combine'];
+        console.log(data);
+        this.CorrelationData.chartOptions.series[0].data = data['data_mini'];
       })
       .catch(error => console.error(error));
 
@@ -163,12 +164,13 @@ export default {
       this.CorrelationData.chartOptions.xAxis.name = item;
       const x_name = this.CorrelationData.chartOptions.xAxis.name;
       const y_name = this.CorrelationData.chartOptions.yAxis.name;
+      const percentage = 0.2;  //显示20%的散点
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
-      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}`)
+      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}&percentage=${percentage}`)
       .then(response => response.json())
       .then(data => {
-        console.log(data['Combine']);
-        this.CorrelationData.chartOptions.series[0].data = data['Combine'];
+        console.log(data);
+        this.CorrelationData.chartOptions.series[0].data = data['data_mini'];
       })
       .catch(error => console.error(error));
     },

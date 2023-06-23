@@ -5,11 +5,13 @@ from flask_restful import Resource
 import json
 
 from DatabaseConnector import DatabaseConnector
+from DataSource import DataSource
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
 dbcon=DatabaseConnector(app)
+data_src=DataSource(dbcon)
 
 
 @app.route('/hello', methods=['GET'])
@@ -25,7 +27,23 @@ def basic_info():
     :return: json格式的字典，其中Data dimension：数据维度，Records number ：数据记录数，NULL values：YD15缺失值条数，Record days：记录天数
     """
     table_name=request.args['number']
-    return json.dumps(dbcon.get_basic_info(table_name), ensure_ascii=False)
+    return json.dumps(data_src.get_basic_info(table_name), ensure_ascii=False)
+
+@app.route('/correlation', methods=['GET'])
+def correlation():
+    """
+    输入风机编号number,y轴y，x轴x
+    :return: 对应数据
+    """
+    table_name=request.args['number']
+    y=request.args['y']
+    x=request.args['x']
+    data=data_src.get_data(table_name,[x,y]).dropna()
+    dict = {}
+    dict[x] = data[x].tolist()
+    dict[y] = data[y].tolist()
+    dict['Combine'] = data.drop_duplicates().values.tolist()
+    return json.dumps(dict, ensure_ascii=False)
 
 
 @app.route('/dimension_data', methods=['GET'])

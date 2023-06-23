@@ -137,43 +137,42 @@ export default {
    */
 
 
-
-
-  created() {
+   created() {
     this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
   },
 
-  watch: {
-    '$store.state.selectedWindTurbine': {
-      handler(newVal) {
-        this.fetchStatsCardsData(newVal);
-      },
-      deep: true
-    },
-    'CorrelationData.chartOptions.yAxis.name': {
-        handler() {    
-          const correlation = this.$refs.correlation;  
-        // 如果存在 ref = correlation 并且 setOption 存在
-          if (correlation && correlation.setOption) {
-          correlation.setOption(this.chartOptions);
-        }
-      },
-      deep: true
-    },
-    // 'CorrelationData.chartOptions.xAxis.name': {
-    //     handler(newVal, oldVal) {    
-    //       const correlation = this.$refs.correlation;    
-    //     // 如果存在 EchartsCard 并且 setOption 存在
-    //       if (correlation && correlation.setOption) {
-    //       correlation.setOption(this.chartOptions);
-    //     }
-    //   },
-    //   deep: true
-    // },
-
-  },
 
   methods: {
+    changeTitle1(item) {
+      this.dropdownTitle1 = item;
+      this.CorrelationData.chartOptions.yAxis.name = item;
+      const x_name = this.CorrelationData.chartOptions.xAxis.name;
+      const y_name = this.CorrelationData.chartOptions.yAxis.name;
+      // 以下是前后端交接功能，这里是接受相关性数据，两个list
+      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data['Combine']);
+        this.CorrelationData.chartOptions.series[0].data = data['Combine'];
+      })
+      .catch(error => console.error(error));
+
+    },
+    changeTitle2(item) {
+      this.dropdownTitle2 = item;
+      this.CorrelationData.chartOptions.xAxis.name = item;
+      const x_name = this.CorrelationData.chartOptions.xAxis.name;
+      const y_name = this.CorrelationData.chartOptions.yAxis.name;
+      // 以下是前后端交接功能，这里是接受相关性数据，两个list
+      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data['Combine']);
+        this.CorrelationData.chartOptions.series[0].data = data['Combine'];
+      })
+      .catch(error => console.error(error));
+    },
+
     fetchStatsCardsData(windTurbineName) {
       //截取'风机 ',取后面的数字
       let windTurbineNumber = windTurbineName.slice(3)
@@ -200,38 +199,27 @@ export default {
     },
 
 
-    changeTitle1(item) {
-      this.dropdownTitle1 = item;
-      this.CorrelationData.chartOptions.yAxis.name = item;
-      // fetch('http://127.0.0.1:5000/dimension_data?number=01&dimension=' + item)
-      //   .then(response => response.json())
-      //   .then(data => {
-      //     // data 是一个单元素字典，直接取字典的value，作为series的data作为y值
-      //     //再取一遍dimension作为x值，
-          
-
-      //     //
-          
-      //   });
-      // 如果存在 ref = correlation 并且 setOption 存在
-      const correlation = this.$refs.correlation;
-      if (correlation && correlation.setOption) {
-          correlation.setOption(this.chartOptions);
-        }
-        
-
-    },
-    changeTitle2(item) {
-      this.dropdownTitle2 = item;
-      this.CorrelationData.chartOptions.xAxis.name = item;
-      // 以下是前后端交接功能
-
-    },
-
-
   },
 
+  watch: {
+      'CorrelationData.chartOptions': {
+        handler(newVal, oldVal) {    
+          const correlation = this.$refs.correlation;  
+        // 如果存在 ref = correlation 并且 setOption 存在
+          if (correlation && correlation.setOption) {
+          correlation.setOption(this.chartOptions);
+        }
+      },
+      deep: true
+    },
 
+    '$store.state.selectedWindTurbine': function(newVal) {
+    console.log(newVal);
+    this.fetchStatsCardsData(newVal);
+  },
+  },
+
+ 
 
 
   data() {
@@ -250,10 +238,6 @@ export default {
         'ROUND(A.POWER,0)',
         'YD15'
       ],
-      data1: [123213, 123321],
-
-
-
       CorrelationData: {
         chartOptions: {
           xAxis: {

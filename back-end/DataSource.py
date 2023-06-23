@@ -17,20 +17,21 @@ class DataSource(object):
             self.table_name=table_name
             self.synchronization=True
 
-    def get_basic_info(self, table_name):
+    def get_basic_info(self,table_name):
         """
-        获取基本信息，返回字典，其中Data dimension：数据维度，Records number ：数据记录数，NULL values：YD15缺失值条数，Record days：记录天数
+        获取该表的基本信息，返回字典，其中Data dimension：数据维度，Records number ：数据记录数，NULL values：YD15缺失值条数，Record days：记录天数，最后一天：最后一天的日期
 
         :param table_name:表名
         :return:返回包含基本信息的字典
         """
-        self.update(table_name)
-        dict = {}
-        df = self.data
-        dict['Data dimension'] = df.shape[1]
-        dict['Records number'] = df.shape[0]
-        dict['NULL values'] = df['YD15'].isna().sum().item()
-        dict['Record days'] = (df['DATATIME'].max() - df['DATATIME'].min()).days
+        dict={}
+        df=self.dbcon.read_db(table_name)
+        dict['数据维度']=df.shape[1]
+        dict['数据记录数']=df.shape[0]
+        dict['YD15缺失数']=df['YD15'].isna().sum().item()
+        dict['记录天数']=(df['DATATIME'].max()-df['DATATIME'].min()).days
+        #还要返回最后一天的日期
+        dict['最后一天']=df['DATATIME'].max().strftime('%Y/%m/%d')
         return dict
 
     def get_data(self,table_name,columns=None) ->pd.DataFrame:

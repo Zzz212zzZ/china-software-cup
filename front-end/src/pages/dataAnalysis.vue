@@ -78,22 +78,9 @@
       </div>
 
 
-      <div class="col-12">
-        <chart-card title="Users behavior" sub-title="24 Hours performance" :chart-data="usersChart.data"
-          :chart-options="usersChart.options">
-          <span slot="footer">
-            <i class="ti-reload"></i> Updated 3 minutes ago
-          </span>
-          <div slot="legend">
-            <i class="fa fa-circle text-info"></i> Open
-            <i class="fa fa-circle text-danger"></i> Click
-            <i class="fa fa-circle text-warning"></i> Click Second Time
-          </div>
-        </chart-card>
-      </div>
 
       <div class="col-md-6 col-12">
-        <chart-card title="Email Statistics" sub-title="Last campaign performance" :chart-data="preferencesChart.data"
+        <chart-card title="Email Statistics" sub-title="Last campaign performance" :chart-data="preferencesChart.data" class="emailStatistics"
           chart-type="Pie">
           <span slot="footer">
             <i class="ti-timer"></i> Campaign set 2 days ago</span>
@@ -117,6 +104,23 @@
           </div>
         </chart-card>
       </div>
+
+
+
+      <div class="col-12">
+        <chart-card title="Users behavior" sub-title="24 Hours performance" :chart-data="usersChart.data"
+          :chart-options="usersChart.options">
+          <span slot="footer">
+            <i class="ti-reload"></i> Updated 3 minutes ago
+          </span>
+          <div slot="legend">
+            <i class="fa fa-circle text-info"></i> Open
+            <i class="fa fa-circle text-danger"></i> Click
+            <i class="fa fa-circle text-warning"></i> Click Second Time
+          </div>
+        </chart-card>
+      </div>
+
 
 
 
@@ -386,7 +390,10 @@ export default {
           labels: ["62%", "32%", "6%"],
           series: [62, 32, 6],
         },
-        options: {},
+        options: {
+          height: "100px"
+
+        },
       },
     };
   },
@@ -428,4 +435,10 @@ export default {
   width: 100%;
 
 }
+
+
+/* .emailStatistics {
+  height: 200px;
+} */
+
 </style>

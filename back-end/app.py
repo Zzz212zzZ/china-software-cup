@@ -43,8 +43,8 @@ def correlation():
     data = data_src.get_data(table_name, [x, y]).dropna()
 
     dict = {}
-    dict['data'] = data.values.tolist()
-    dict['Combine'] = data[np.floor(data.index % step) == 0].values.tolist()
+    dict['data_all'] = data.values.tolist()
+    dict['data_mini'] = data[np.floor(data.index % step) == 0].values.tolist()
     return json.dumps(dict, ensure_ascii=False)
 
 

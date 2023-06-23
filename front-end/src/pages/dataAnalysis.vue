@@ -22,9 +22,8 @@
     <div class="row">
 
       <div class="col-md-6 col-12">
-        <echarts-card title="Sales Statistics" sub-title="Monthly sales data" :chart-options="salesData.chartOptions"
-          chart-height="400px">
-
+        <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标" :chart-options="CorrelationData.chartOptions"
+          chart-height="500px">
           <span slot="footer">
             <!-- <i class="ti-timer"></i> Last updated 1 hour ago -->
             <!-- <button class="your-button-class">Your Button Text</button> -->
@@ -67,10 +66,10 @@
 
 
           </span>
-          <div slot="legend">
+          <!-- <div slot="legend">
             <i class="fa fa-circle text-success"></i> Profit
             <i class="fa fa-circle text-warning"></i> Expenses
-          </div>
+          </div> -->
         </echarts-card>
 
 
@@ -137,16 +136,61 @@ export default {
    * Chart data used to render stats, charts. Should be replaced with server data
    */
 
+
   methods: {
     changeTitle1(item) {
       this.dropdownTitle1 = item;
+<<<<<<< HEAD
+=======
+      this.CorrelationData.chartOptions.yAxis.name = item;
+      // 以下是前后端交接功能，这里是接受相关性数据，两个list
+      fetch('http://127.0.0.1:5000/basic_info?number=01')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => console.error(error));
+>>>>>>> 32f11f73d82188b7c76f1479b3f7a5eea567dfc3
 
     },
     changeTitle2(item) {
       this.dropdownTitle2 = item;
+      this.CorrelationData.chartOptions.xAxis.name = item;
+      // 以下是前后端交接功能，这里是接受相关性数据，两个list
+      fetch('http://127.0.0.1:5000/basic_info?number=02')
+      .then(response => response.json())
+      .then(data => {
+        console.log(data);
+      })
+      .catch(error => console.error(error));
     },
     
   },
+
+  watch: {
+      'CorrelationData.chartOptions.yAxis.name': {
+        handler(newVal, oldVal) {    
+          const correlation = this.$refs.correlation;  
+        // 如果存在 ref = correlation 并且 setOption 存在
+          if (correlation && correlation.setOption) {
+          correlation.setOption(this.chartOptions);
+        }
+      },
+      deep: true
+    },
+    'CorrelationData.chartOptions.xAxis.name': {
+        handler(newVal, oldVal) {    
+          const correlation = this.$refs.correlation;    
+        // 如果存在 EchartsCard 并且 setOption 存在
+          if (correlation && correlation.setOption) {
+          correlation.setOption(this.chartOptions);
+        }
+      },
+      deep: true
+    },
+  },
+
+
   data() {
     return {
       dropdownTitle1: 'YD15',
@@ -167,12 +211,18 @@ export default {
 
 
 
-      salesData: {
-        chartOptions: {
+      CorrelationData: {
+          chartOptions: {
           xAxis: {
-            type: 'category',
-            data: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+          name: 'ROUND(A.POWER,0)',
+          nameGap: 30,
+          nameLocation: 'middle',
+          nameTextStyle: {
+            color: '#666',
+            fontSize: 20,
+            fontWeight: 'bold',
           },
+<<<<<<< HEAD
           yAxis: {
             type: 'value'
           },
@@ -190,6 +240,40 @@ export default {
           ]
         }
       },
+=======
+          axisLine: {
+            lineStyle: {
+              color: '#999',
+              width: 1,
+            },
+          },
+        },
+        yAxis: {
+          name: 'YD15',
+          nameLocation: 'middle',
+          nameGap: 30,
+          nameTextStyle: {
+            color: '#666',
+            fontSize: 20,
+            fontWeight: 'bold',
+          },
+          axisLine: {
+            lineStyle: {
+              color: '#999',
+              width: 1,
+            },
+          },
+        },
+        series: [
+          {
+            symbolSize: 20,
+            data: [[10.0, 8.04],[8.07, 6.95],[13.0, 7.58],[9.05, 8.81],[11.0, 8.33]], 
+            type: 'scatter'
+          }
+        ]
+      }
+    },
+>>>>>>> 32f11f73d82188b7c76f1479b3f7a5eea567dfc3
 
       statsCards: [
         {
@@ -225,6 +309,7 @@ export default {
           footerIcon: "ti-reload",
         },
       ],
+
       usersChart: {
         data: {
           labels: [
@@ -258,6 +343,7 @@ export default {
           showPoint: false,
         },
       },
+
       activityChart: {
         data: {
           labels: [
@@ -287,6 +373,7 @@ export default {
           height: "245px",
         },
       },
+
       preferencesChart: {
         data: {
           labels: ["62%", "32%", "6%"],

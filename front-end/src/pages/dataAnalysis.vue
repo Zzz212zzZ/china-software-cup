@@ -19,11 +19,11 @@
     </div>
 
     <!--Charts-->
-    <div class="row">
 
+    <div class="row d-flex align-items-center">
       <div class="col-md-6 col-12">
         <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标"
-          :chart-options="CorrelationData.chartOptions" chart-height="500px">
+          :chart-options="CorrelationData.chartOptions" chart-height="700px">
           <span slot="footer">
             <!-- <i class="ti-timer"></i> Last updated 1 hour ago -->
             <!-- <button class="your-button-class">Your Button Text</button> -->
@@ -46,7 +46,7 @@
                 </div>
               </div>
 
-              <div class="col-md-6 col-12">
+              <div class="col-md-6 col-12 ">
                 <div class="btn-group dropup dropdownAtr">
                   <button type="button" class="btn btn-info dropdown-toggle btn-block" data-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
@@ -64,67 +64,66 @@
               </div>
             </div>
 
-
           </span>
           <!-- <div slot="legend">
             <i class="fa fa-circle text-success"></i> Profit
             <i class="fa fa-circle text-warning"></i> Expenses
           </div> -->
         </echarts-card>
-
-
-
-
       </div>
 
 
 
-      <div class="col-md-6 col-12">
-        <chart-card title="Email Statistics" sub-title="Last campaign performance" :chart-data="preferencesChart.data" class="emailStatistics"
-          chart-type="Pie">
-          <span slot="footer">
-            <i class="ti-timer"></i> Campaign set 2 days ago</span>
-          <div slot="legend">
-            <i class="fa fa-circle text-info"></i> Open
-            <i class="fa fa-circle text-danger"></i> Bounce
-            <i class="fa fa-circle text-warning"></i> Unsubscribe
-          </div>
-        </chart-card>
+      <div class="col-md-6 col-12 d-flex flex-column">
+        <div class="flex-grow-1">
+          <chart-card title="直方图Y" sub-title="Last campaign performance" :chart-data="preferencesChart.data"
+            class="emailStatistics" chart-type="Pie">
+            <span slot="footer">
+              <i class="ti-timer"></i> Campaign set 2 days ago</span>
+            <div slot="legend">
+              <i class="fa fa-circle text-info"></i> Open
+              <i class="fa fa-circle text-danger"></i> Bounce
+              <i class="fa fa-circle text-warning"></i> Unsubscribe
+            </div>
+          </chart-card>
+        </div>
+
+
+
+        <div class="flex-grow-1">
+          <chart-card title="直方图X" sub-title="All products including Taxes" :chart-data="activityChart.data"
+            :chart-options="activityChart.options">
+            <span slot="footer">
+              <i class="ti-check"></i> Data information certified
+            </span>
+            <div slot="legend">
+              <i class="fa fa-circle text-info"></i> Tesla Model S
+              <i class="fa fa-circle text-warning"></i> BMW 5 Series
+            </div>
+          </chart-card>
+        </div>
       </div>
-
-      <div class="col-md-6 col-12">
-        <chart-card title="2015 Sales" sub-title="All products including Taxes" :chart-data="activityChart.data"
-          :chart-options="activityChart.options">
-          <span slot="footer">
-            <i class="ti-check"></i> Data information certified
-          </span>
-          <div slot="legend">
-            <i class="fa fa-circle text-info"></i> Tesla Model S
-            <i class="fa fa-circle text-warning"></i> BMW 5 Series
-          </div>
-        </chart-card>
-      </div>
-
-
-
-      <div class="col-12">
-        <chart-card title="Users behavior" sub-title="24 Hours performance" :chart-data="usersChart.data"
-          :chart-options="usersChart.options">
-          <span slot="footer">
-            <i class="ti-reload"></i> Updated 3 minutes ago
-          </span>
-          <div slot="legend">
-            <i class="fa fa-circle text-info"></i> Open
-            <i class="fa fa-circle text-danger"></i> Click
-            <i class="fa fa-circle text-warning"></i> Click Second Time
-          </div>
-        </chart-card>
-      </div>
-
-
-
 
     </div>
+
+
+    <div class="col-12">
+      <chart-card title="Users behavior" sub-title="24 Hours performance" :chart-data="usersChart.data"
+        :chart-options="usersChart.options">
+        <span slot="footer">
+          <i class="ti-reload"></i> Updated 3 minutes ago
+        </span>
+        <div slot="legend">
+          <i class="fa fa-circle text-info"></i> Open
+          <i class="fa fa-circle text-danger"></i> Click
+          <i class="fa fa-circle text-warning"></i> Click Second Time
+        </div>
+      </chart-card>
+    </div>
+
+
+
+
   </div>
 </template>
 <script>
@@ -141,7 +140,7 @@ export default {
    */
 
 
-   created() {
+  created() {
     this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
   },
 
@@ -155,12 +154,12 @@ export default {
       const percentage = 0.2;  //显示20%的散点
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
       fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}&percentage=${percentage}`)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        this.CorrelationData.chartOptions.series[0].data = data['data_mini'];
-      })
-      .catch(error => console.error(error));
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          this.CorrelationData.chartOptions.series[0].data = data['data_mini'];
+        })
+        .catch(error => console.error(error));
 
     },
     changeTitle2(item) {
@@ -171,12 +170,12 @@ export default {
       const percentage = 0.2;  //显示20%的散点
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
       fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}&percentage=${percentage}`)
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-        this.CorrelationData.chartOptions.series[0].data = data['data_mini'];
-      })
-      .catch(error => console.error(error));
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          this.CorrelationData.chartOptions.series[0].data = data['data_mini'];
+        })
+        .catch(error => console.error(error));
     },
 
     fetchStatsCardsData(windTurbineName) {
@@ -208,24 +207,24 @@ export default {
   },
 
   watch: {
-      'CorrelationData.chartOptions': {
-        handler() {    
-          const correlation = this.$refs.correlation;  
+    'CorrelationData.chartOptions': {
+      handler() {
+        const correlation = this.$refs.correlation;
         // 如果存在 ref = correlation 并且 setOption 存在
-          if (correlation && correlation.setOption) {
+        if (correlation && correlation.setOption) {
           correlation.setOption(this.chartOptions);
         }
       },
       deep: true
     },
 
-    '$store.state.selectedWindTurbine': function(newVal) {
-    console.log(newVal);
-    this.fetchStatsCardsData(newVal);
-  },
+    '$store.state.selectedWindTurbine': function (newVal) {
+      console.log(newVal);
+      this.fetchStatsCardsData(newVal);
+    },
   },
 
- 
+
 
 
   data() {
@@ -383,7 +382,7 @@ export default {
           axisX: {
             showGrid: false,
           },
-          height: "245px",
+          height: "250px",
         },
       },
 
@@ -393,7 +392,7 @@ export default {
           series: [62, 32, 6],
         },
         options: {
-          height: "100px"
+          height: "200px"
 
         },
       },
@@ -442,5 +441,4 @@ export default {
 /* .emailStatistics {
   height: 200px;
 } */
-
 </style>

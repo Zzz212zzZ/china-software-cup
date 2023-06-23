@@ -140,10 +140,12 @@ export default {
   methods: {
     changeTitle1(item) {
       this.dropdownTitle1 = item;
+
     },
     changeTitle2(item) {
       this.dropdownTitle2 = item;
     },
+    
   },
   data() {
     return {
@@ -158,9 +160,10 @@ export default {
         'HUMIDITY',
         'PRESSURE',
         'ROUND(A.WS,1)',
-        'ROUND(A.POWER,0)',
+        'ROUND(A.POWER,0)', 
         'YD15'
       ],
+      data1:[123213,123321],
 
 
 
@@ -175,12 +178,12 @@ export default {
           },
           series: [
             {
-              data: [120, 200, 150, 80, 70, 110, 130, 200, 180, 230, 150, 200],
+              data: this.data1 ,
               type: 'bar',
               name: 'Profit'
             },
             {
-              data: [90, 100, 80, 90, 120, 130, 110, 90, 80, 130, 140, 110],
+              data: null,
               type: 'bar',
               name: 'Expenses'
             }
@@ -208,7 +211,7 @@ export default {
         {
           type: "danger",
           icon: "ti-layout-sidebar-left",
-          title: "缺失值条数",
+          title: "YD15缺失数",
           value: "2345",
           footerText: "NULL values",
           footerIcon: "ti-timer",

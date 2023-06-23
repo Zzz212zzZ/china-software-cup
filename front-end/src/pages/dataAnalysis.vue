@@ -22,13 +22,13 @@
     <div class="row">
 
       <div class="col-md-6 col-12">
-        <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标" :chart-options="CorrelationData.chartOptions"
-          chart-height="500px">
+        <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标"
+          :chart-options="CorrelationData.chartOptions" chart-height="500px">
           <span slot="footer">
             <!-- <i class="ti-timer"></i> Last updated 1 hour ago -->
             <!-- <button class="your-button-class">Your Button Text</button> -->
 
-            <div class="twoBtnRow" >
+            <div class="twoBtnRow">
               <div class="col-md-6 col-12">
                 <div class="btn-group dropup dropdownAtr">
                   <button type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown"
@@ -55,7 +55,7 @@
                   <div class="dropdown-menu">
                     <a v-for="item in dropdownOptions" :key="item + 'a'"
                       @click.prevent="item !== dropdownTitle1 ? changeTitle2(item) : undefined"
-                      :class="{ 'dropdown-item': true, disabled: item === dropdownTitle1 || item ===dropdownTitle2, selected: item === dropdownTitle2 }"
+                      :class="{ 'dropdown-item': true, disabled: item === dropdownTitle1 || item === dropdownTitle2, selected: item === dropdownTitle2 }"
                       href="#">
                       {{ item }}
                     </a>
@@ -137,39 +137,21 @@ export default {
    */
 
 
-  methods: {
-    changeTitle1(item) {
-      this.dropdownTitle1 = item;
-<<<<<<< HEAD
-=======
-      this.CorrelationData.chartOptions.yAxis.name = item;
-      // 以下是前后端交接功能，这里是接受相关性数据，两个list
-      fetch('http://127.0.0.1:5000/basic_info?number=01')
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-      })
-      .catch(error => console.error(error));
->>>>>>> 32f11f73d82188b7c76f1479b3f7a5eea567dfc3
 
-    },
-    changeTitle2(item) {
-      this.dropdownTitle2 = item;
-      this.CorrelationData.chartOptions.xAxis.name = item;
-      // 以下是前后端交接功能，这里是接受相关性数据，两个list
-      fetch('http://127.0.0.1:5000/basic_info?number=02')
-      .then(response => response.json())
-      .then(data => {
-        console.log(data);
-      })
-      .catch(error => console.error(error));
-    },
-    
+
+  created() {
+    this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
   },
 
   watch: {
-      'CorrelationData.chartOptions.yAxis.name': {
-        handler(newVal, oldVal) {    
+    '$store.state.selectedWindTurbine': {
+      handler(newVal) {
+        this.fetchStatsCardsData(newVal);
+      },
+      deep: true
+    },
+    'CorrelationData.chartOptions.yAxis.name': {
+        handler() {    
           const correlation = this.$refs.correlation;  
         // 如果存在 ref = correlation 并且 setOption 存在
           if (correlation && correlation.setOption) {
@@ -178,17 +160,78 @@ export default {
       },
       deep: true
     },
-    'CorrelationData.chartOptions.xAxis.name': {
-        handler(newVal, oldVal) {    
-          const correlation = this.$refs.correlation;    
-        // 如果存在 EchartsCard 并且 setOption 存在
-          if (correlation && correlation.setOption) {
+    // 'CorrelationData.chartOptions.xAxis.name': {
+    //     handler(newVal, oldVal) {    
+    //       const correlation = this.$refs.correlation;    
+    //     // 如果存在 EchartsCard 并且 setOption 存在
+    //       if (correlation && correlation.setOption) {
+    //       correlation.setOption(this.chartOptions);
+    //     }
+    //   },
+    //   deep: true
+    // },
+
+  },
+
+  methods: {
+    fetchStatsCardsData(windTurbineName) {
+      //截取'风机 ',取后面的数字
+      let windTurbineNumber = windTurbineName.slice(3)
+      //如果windTurbineNumber编号为单个数字，前面加0
+      if (windTurbineNumber.length == 1) {
+        windTurbineNumber = '0' + windTurbineNumber
+      }
+
+      console.log(windTurbineNumber)
+      fetch('http://127.0.0.1:5000/basic_info?number=' + windTurbineNumber)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          this.statsCards = this.statsCards.map(card => {
+            return {
+              ...card,
+              value: data[card.title], // 使用字典的键来获取值
+            };
+          },
+            //还要更新最后一个statsCard的footerText: "Until 2022/06/30"
+            this.statsCards[3].footerText = "Until " + data['最后一天']
+          );
+        })
+    },
+
+
+    changeTitle1(item) {
+      this.dropdownTitle1 = item;
+      this.CorrelationData.chartOptions.yAxis.name = item;
+      // fetch('http://127.0.0.1:5000/dimension_data?number=01&dimension=' + item)
+      //   .then(response => response.json())
+      //   .then(data => {
+      //     // data 是一个单元素字典，直接取字典的value，作为series的data作为y值
+      //     //再取一遍dimension作为x值，
+          
+
+      //     //
+          
+      //   });
+      // 如果存在 ref = correlation 并且 setOption 存在
+      const correlation = this.$refs.correlation;
+      if (correlation && correlation.setOption) {
           correlation.setOption(this.chartOptions);
         }
-      },
-      deep: true
+        
+
     },
+    changeTitle2(item) {
+      this.dropdownTitle2 = item;
+      this.CorrelationData.chartOptions.xAxis.name = item;
+      // 以下是前后端交接功能
+
+    },
+
+
   },
+
+
 
 
   data() {
@@ -204,76 +247,56 @@ export default {
         'HUMIDITY',
         'PRESSURE',
         'ROUND(A.WS,1)',
-        'ROUND(A.POWER,0)', 
+        'ROUND(A.POWER,0)',
         'YD15'
       ],
-      data1:[123213,123321],
+      data1: [123213, 123321],
 
 
 
       CorrelationData: {
-          chartOptions: {
+        chartOptions: {
           xAxis: {
-          name: 'ROUND(A.POWER,0)',
-          nameGap: 30,
-          nameLocation: 'middle',
-          nameTextStyle: {
-            color: '#666',
-            fontSize: 20,
-            fontWeight: 'bold',
+            name: this.dropdownTitle2,
+            nameGap: 30,
+            nameLocation: 'middle',
+            nameTextStyle: {
+              color: '#666',
+              fontSize: 20,
+              fontWeight: 'bold',
+            },
+            axisLine: {
+              lineStyle: {
+                color: '#999',
+                width: 1,
+              },
+            },
           },
-<<<<<<< HEAD
           yAxis: {
-            type: 'value'
+            name: this.dropdownTitle1,
+            nameLocation: 'middle',
+            nameGap: 30,
+            nameTextStyle: {
+              color: '#666',
+              fontSize: 20,
+              fontWeight: 'bold',
+            },
+            axisLine: {
+              lineStyle: {
+                color: '#999',
+                width: 1,
+              },
+            },
           },
           series: [
             {
-              data: this.data1 ,
-              type: 'bar',
-              name: 'Profit'
-            },
-            {
-              data: null,
-              type: 'bar',
-              name: 'Expenses'
+              symbolSize: 20,
+              data: [[10.0, 8.04], [8.07, 6.95], [13.0, 7.58], [9.05, 8.81], [11.0, 8.33]],
+              type: 'scatter'
             }
           ]
         }
       },
-=======
-          axisLine: {
-            lineStyle: {
-              color: '#999',
-              width: 1,
-            },
-          },
-        },
-        yAxis: {
-          name: 'YD15',
-          nameLocation: 'middle',
-          nameGap: 30,
-          nameTextStyle: {
-            color: '#666',
-            fontSize: 20,
-            fontWeight: 'bold',
-          },
-          axisLine: {
-            lineStyle: {
-              color: '#999',
-              width: 1,
-            },
-          },
-        },
-        series: [
-          {
-            symbolSize: 20,
-            data: [[10.0, 8.04],[8.07, 6.95],[13.0, 7.58],[9.05, 8.81],[11.0, 8.33]], 
-            type: 'scatter'
-          }
-        ]
-      }
-    },
->>>>>>> 32f11f73d82188b7c76f1479b3f7a5eea567dfc3
 
       statsCards: [
         {
@@ -304,7 +327,7 @@ export default {
           type: "info",
           icon: "ti-calendar",
           title: "记录天数",
-          value: "242天",
+          value: "242",
           footerText: "Until 2022/06/30",
           footerIcon: "ti-reload",
         },
@@ -402,8 +425,8 @@ export default {
 
 
 
-.stats{
-    display: block !important;
+.stats {
+  display: block !important;
 }
 
 
@@ -419,6 +442,6 @@ export default {
 
 .btn-group.dropup.dropdownAtr {
   width: 100%;
-  
+
 }
 </style>

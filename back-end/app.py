@@ -6,7 +6,7 @@ from flask_restful import Resource
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
-dbcon=DatabaseConnector(app)
+
 
 
 @app.route('/hello', methods=['GET'])

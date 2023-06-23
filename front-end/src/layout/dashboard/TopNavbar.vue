@@ -48,8 +48,8 @@ export default {
     },
      // 从 Vuex store 获取选中的风机
      selectedWindTurbineTitle() {
-        // 如果 Vuex store 中有选中的风机，则使用其作为标题，否则使用默认标题 "风机数据集"
-        return this.$store.state.selectedWindTurbine || '风机数据集';
+        // 如果 Vuex store 中有选中的风机，则使用其作为标题，默认为1
+        return this.$store.state.selectedWindTurbine ;
     }
   },
   data() {

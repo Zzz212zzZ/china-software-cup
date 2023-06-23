@@ -259,7 +259,7 @@ export default {
           yAxis: {
             name: this.dropdownTitle1,
             nameLocation: 'middle',
-            nameGap: 30,
+            nameGap: 60,
             nameTextStyle: {
               color: '#666',
               fontSize: 20,
@@ -274,8 +274,8 @@ export default {
           },
           series: [
             {
-              symbolSize: 20,
-              data: [[10.0, 8.04], [8.07, 6.95], [13.0, 7.58], [9.05, 8.81], [11.0, 8.33]],
+              symbolSize: 10,
+              data: [],
               type: 'scatter'
             }
           ]

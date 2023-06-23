@@ -1,7 +1,7 @@
 import pandas as pd
 
 from DatabaseConnector import DatabaseConnector
-import time
+from process_with_bin import process_with_bin
 
 class DataSource(object):
     def __init__(self,dbcon:DatabaseConnector):
@@ -17,22 +17,6 @@ class DataSource(object):
             self.table_name=table_name
             self.synchronization=True
 
-    def get_basic_info(self, table_name):
-        """
-        获取基本信息，返回字典，其中Data dimension：数据维度，Records number ：数据记录数，NULL values：YD15缺失值条数，Record days：记录天数
-
-        :param table_name:表名
-        :return:返回包含基本信息的字典
-        """
-        self.update(table_name)
-        dict = {}
-        df = self.data
-        dict['Data dimension'] = df.shape[1]
-        dict['Records number'] = df.shape[0]
-        dict['NULL values'] = df['YD15'].isna().sum().item()
-        dict['Record days'] = (df['DATATIME'].max() - df['DATATIME'].min()).days
-        return dict
-
     def get_data(self,table_name,columns=None) ->pd.DataFrame:
         """
         获取表信息
@@ -44,3 +28,28 @@ class DataSource(object):
         if columns is None:
             return self.data
         return self.data[columns]
+
+    def get_dimension_data(self, table_name, dimension):
+        """
+        获取指定表的指定维度的数据
+
+        :param table_name: 表名
+        :param dimension: 数据维度
+        :return: 包含指定维度数据的字典
+        """
+        # 从表中读取数据
+        self.update()
+
+        # 检查维度是否存在
+        if dimension not in self.data.columns:
+            raise ValueError(f"Dimension {dimension} does not exist in table {table_name}.")
+
+        # 获取指定维度的数据
+        data = self.data[dimension].tolist()
+
+        # 返回数据
+        return {dimension: data}
+
+    def data_bin_process(self,table_name,r):
+        self.update(table_name)
+        return process_with_bin(self.data,range_x=r)

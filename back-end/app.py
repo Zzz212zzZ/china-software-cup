@@ -38,7 +38,7 @@ def correlation():
     table_name=request.args['number']
     y=request.args['y']
     x=request.args['x']
-    return data_src.get_data(table_name,[y,x]).to_json()
+    return data_src.get_data(table_name,[y,x]).dropna().to_json()
 
 
 

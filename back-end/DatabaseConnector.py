@@ -30,7 +30,7 @@ class DatabaseConnector(object):
 
     def read_db(self, table_name, *columns):
         """
-        从表中读取对应数据
+        从表中读取对应维度的数据
 
         :param table_name: 表名
         :param columns: 要选取的列，如果为空默认为所有列
@@ -48,3 +48,41 @@ class DatabaseConnector(object):
         return df
 
 
+    def get_basic_info(self,table_name):
+        """
+        获取该表的基本信息，返回字典，其中Data dimension：数据维度，Records number ：数据记录数，NULL values：YD15缺失值条数，Record days：记录天数，最后一天：最后一天的日期
+
+        :param table_name:表名
+        :return:返回包含基本信息的字典
+        """
+        dict={}
+        df=self.read_db(table_name)
+        dict['数据维度']=df.shape[1]
+        dict['数据记录数']=df.shape[0]
+        dict['YD15缺失数']=df['YD15'].isna().sum().item()
+        dict['记录天数']=(df['DATATIME'].max()-df['DATATIME'].min()).days
+        #还要返回最后一天的日期
+        dict['最后一天']=df['DATATIME'].max().strftime('%Y/%m/%d')
+        return dict
+    
+
+    def get_dimension_data(self, table_name, dimension):
+        """
+        获取指定表的指定维度的数据
+
+        :param table_name: 表名
+        :param dimension: 数据维度
+        :return: 包含指定维度数据的字典
+        """
+        # 从表中读取数据
+        df = self.read_db(table_name)
+
+        # 检查维度是否存在
+        if dimension not in df.columns:
+            raise ValueError(f"Dimension {dimension} does not exist in table {table_name}.")
+
+        # 获取指定维度的数据
+        data = df[dimension].tolist()
+
+        # 返回数据
+        return {dimension: data}

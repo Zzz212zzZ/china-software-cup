@@ -22,13 +22,13 @@
     <div class="row">
 
       <div class="col-md-6 col-12">
-        <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标" :chart-options="CorrelationData.chartOptions"
-          chart-height="500px">
+        <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标"
+          :chart-options="CorrelationData.chartOptions" chart-height="500px">
           <span slot="footer">
             <!-- <i class="ti-timer"></i> Last updated 1 hour ago -->
             <!-- <button class="your-button-class">Your Button Text</button> -->
 
-            <div class="twoBtnRow" >
+            <div class="twoBtnRow">
               <div class="col-md-6 col-12">
                 <div class="btn-group dropup dropdownAtr">
                   <button type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown"
@@ -55,7 +55,7 @@
                   <div class="dropdown-menu">
                     <a v-for="item in dropdownOptions" :key="item + 'a'"
                       @click.prevent="item !== dropdownTitle1 ? changeTitle2(item) : undefined"
-                      :class="{ 'dropdown-item': true, disabled: item === dropdownTitle1 || item ===dropdownTitle2, selected: item === dropdownTitle2 }"
+                      :class="{ 'dropdown-item': true, disabled: item === dropdownTitle1 || item === dropdownTitle2, selected: item === dropdownTitle2 }"
                       href="#">
                       {{ item }}
                     </a>
@@ -137,6 +137,11 @@ export default {
    */
 
 
+   created() {
+    this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
+  },
+
+
   methods: {
     changeTitle1(item) {
       this.dropdownTitle1 = item;
@@ -167,11 +172,38 @@ export default {
       })
       .catch(error => console.error(error));
     },
+
+    fetchStatsCardsData(windTurbineName) {
+      //截取'风机 ',取后面的数字
+      let windTurbineNumber = windTurbineName.slice(3)
+      //如果windTurbineNumber编号为单个数字，前面加0
+      if (windTurbineNumber.length == 1) {
+        windTurbineNumber = '0' + windTurbineNumber
+      }
+
+      console.log(windTurbineNumber)
+      fetch('http://127.0.0.1:5000/basic_info?number=' + windTurbineNumber)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data);
+          this.statsCards = this.statsCards.map(card => {
+            return {
+              ...card,
+              value: data[card.title], // 使用字典的键来获取值
+            };
+          },
+            //还要更新最后一个statsCard的footerText: "Until 2022/06/30"
+            this.statsCards[3].footerText = "Until " + data['最后一天']
+          );
+        })
+    },
+
+
   },
 
   watch: {
       'CorrelationData.chartOptions': {
-        handler(newVal, oldVal) {    
+        handler() {    
           const correlation = this.$refs.correlation;  
         // 如果存在 ref = correlation 并且 setOption 存在
           if (correlation && correlation.setOption) {
@@ -180,7 +212,14 @@ export default {
       },
       deep: true
     },
+
+    '$store.state.selectedWindTurbine': function(newVal) {
+    console.log(newVal);
+    this.fetchStatsCardsData(newVal);
   },
+  },
+
+ 
 
 
   data() {
@@ -200,49 +239,48 @@ export default {
         'YD15'
       ],
       CorrelationData: {
-          chartOptions: {
+        chartOptions: {
           xAxis: {
-          name: 'ROUND(A.POWER,0)',
-          nameGap: 30,
-          nameLocation: 'middle',
-          nameTextStyle: {
-            color: '#666',
-            fontSize: 20,
-            fontWeight: 'bold',
-          },
-          axisLine: {
-            lineStyle: {
-              color: '#999',
-              width: 1,
+            name: this.dropdownTitle2,
+            nameGap: 60,
+            nameLocation: 'middle',
+            nameTextStyle: {
+              color: '#666',
+              fontSize: 20,
+              fontWeight: 'bold',
+            },
+            axisLine: {
+              lineStyle: {
+                color: '#999',
+                width: 1,
+              },
             },
           },
-        },
-        yAxis: {
-          name: 'YD15',
-          nameLocation: 'middle',
-          nameGap: 60,
-          nameTextStyle: {
-            color: '#666',
-            fontSize: 20,
-            fontWeight: 'bold',
-          },
-          axisLine: {
-            lineStyle: {
-              color: '#999',
-              width: 1,
+          yAxis: {
+            name: this.dropdownTitle1,
+            nameLocation: 'middle',
+            nameGap: 30,
+            nameTextStyle: {
+              color: '#666',
+              fontSize: 20,
+              fontWeight: 'bold',
+            },
+            axisLine: {
+              lineStyle: {
+                color: '#999',
+                width: 1,
+              },
             },
           },
-        },
-        series: [
-          {
-            symbolSize: 10,
-            data: [], 
-            type: 'scatter',
-            symbolSize: 5 // 设置散点大小为 20
-          }
-        ]
-      }
-    },
+          series: [
+            {
+              symbolSize: 10,
+              data: [],
+              type: 'scatter'
+            }
+          ]
+        }
+      },
 
       statsCards: [
         {
@@ -264,7 +302,7 @@ export default {
         {
           type: "danger",
           icon: "ti-layout-sidebar-left",
-          title: "缺失值条数",
+          title: "YD15缺失数",
           value: "2345",
           footerText: "NULL values",
           footerIcon: "ti-timer",
@@ -273,7 +311,7 @@ export default {
           type: "info",
           icon: "ti-calendar",
           title: "记录天数",
-          value: "242天",
+          value: "242",
           footerText: "Until 2022/06/30",
           footerIcon: "ti-reload",
         },
@@ -371,8 +409,8 @@ export default {
 
 
 
-.stats{
-    display: block !important;
+.stats {
+  display: block !important;
 }
 
 
@@ -388,6 +426,6 @@ export default {
 
 .btn-group.dropup.dropdownAtr {
   width: 100%;
-  
+
 }
 </style>

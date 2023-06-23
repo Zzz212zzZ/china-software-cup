@@ -46,6 +46,19 @@ def correlation():
     return json.dumps(dict, ensure_ascii=False)
 
 
+@app.route('/dimension_data', methods=['GET'])
+def dimension_data():
+    """
+    输入风机编号number和维度dimension，返回该风机的指定维度的数据
+
+    :return: json格式的字典，包含指定维度的数据
+    """
+    table_name = request.args['number']
+    dimension = request.args['dimension']
+    return json.dumps(dbcon.get_dimension_data(table_name, dimension), ensure_ascii=False)
+
+
+
 
 if __name__ == '__main__':
     app.run()

@@ -54,7 +54,7 @@ export default {
         },
         chartHeight: { // 添加chartHeight属性
             type: String,
-            default: '500px'
+            default: '400px'
         }
     },
     data(){
@@ -93,9 +93,6 @@ export default {
 </script>
   
 <style>
-.echarts-chart {
-    width: 100%;
-    height: 400px;
-}
+
 </style>
   

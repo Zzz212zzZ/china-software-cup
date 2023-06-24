@@ -31,7 +31,7 @@
 <script>
 import Card from "./Card.vue";
 import * as echarts from "echarts";
-
+// import ecStat from "ecStat"
 export default {
     name: "echarts-card",
     components: {

@@ -23,11 +23,8 @@
     <div class="row d-flex align-items-center">
       <div class="col-md-6 col-12">
         <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标"
-          :chart-options="CorrelationData.chartOptions" chart-height="700px">
+          :chart-options="correlationOption" chart-height="700px">
           <span slot="footer">
-            <!-- <i class="ti-timer"></i> Last updated 1 hour ago -->
-            <!-- <button class="your-button-class">Your Button Text</button> -->
-
             <div class="twoBtnRow">
               <div class="col-md-6 col-12">
                 <div class="btn-group dropup dropdownAtr">
@@ -76,31 +73,21 @@
 
       <div class="col-md-6 col-12 d-flex flex-column">
         <div class="flex-grow-1">
-          <chart-card title="直方图Y" sub-title="Last campaign performance" :chart-data="preferencesChart.data"
+          <echarts-card ref="histogramy" title="直方图Y" sub-title="Last campaign performance" :chart-options="histogramOptiony"
             class="emailStatistics" chart-type="Pie">
             <span slot="footer">
               <i class="ti-timer"></i> Campaign set 2 days ago</span>
-            <div slot="legend">
-              <i class="fa fa-circle text-info"></i> Open
-              <i class="fa fa-circle text-danger"></i> Bounce
-              <i class="fa fa-circle text-warning"></i> Unsubscribe
-            </div>
-          </chart-card>
+          </echarts-card>
         </div>
 
 
 
         <div class="flex-grow-1">
-          <chart-card title="直方图X" sub-title="All products including Taxes" :chart-data="activityChart.data"
-            :chart-options="activityChart.options">
+          <echarts-card ref="histogramx" title="直方图X" sub-title="All products including Taxes" :chart-options="histogramOptionx">
             <span slot="footer">
               <i class="ti-check"></i> Data information certified
             </span>
-            <div slot="legend">
-              <i class="fa fa-circle text-info"></i> Tesla Model S
-              <i class="fa fa-circle text-warning"></i> BMW 5 Series
-            </div>
-          </chart-card>
+          </echarts-card>
         </div>
       </div>
 
@@ -129,6 +116,7 @@
 <script>
 import { StatsCard, ChartCard, EchartsCard } from "@/components/index";
 import Chartist from "chartist";
+import * as echarts from "echarts";
 export default {
   components: {
     StatsCard,
@@ -144,8 +132,8 @@ export default {
     this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
   },
   mounted(){
-    this.CorrelationData.chartOptions.xAxis.name = this.dropdownTitle2;
-    this.CorrelationData.chartOptions.yAxis.name = this.dropdownTitle1;
+    this.correlationOption.xAxis.name = this.dropdownTitle2;
+    this.correlationOption.yAxis.name = this.dropdownTitle1;
     //初始化相关性散点图的数据，因为数据本身只有靠变化才能调用，这里直接手动调用changeTitle
     this.changeTitle1(this.dropdownTitle1)
 
@@ -154,46 +142,48 @@ export default {
   methods: {
     changeTitle1(item) {
       this.dropdownTitle1 = item;
-      this.CorrelationData.chartOptions.yAxis.name = item;
-      const x_name = this.CorrelationData.chartOptions.xAxis.name;
-      const y_name = this.CorrelationData.chartOptions.yAxis.name;
+      this.correlationOption.yAxis.name = item;
+      const x_name = this.correlationOption.xAxis.name;
+      const y_name = this.correlationOption.yAxis.name;
       const percentage = 0.2;  //显示20%的散点
+      const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
-      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}&percentage=${percentage}`)
-        .then(response => response.json())
-        .then(data => {
-          console.log(data);
-          this.CorrelationData.chartOptions.series[0].data = data['data_mini'];
-        })
-        .catch(error => console.error(error));
-
+      this.getCorrlationData(Number,y_name,x_name,percentage);
     },
     changeTitle2(item) {
       this.dropdownTitle2 = item;
-      this.CorrelationData.chartOptions.xAxis.name = item;
-      const x_name = this.CorrelationData.chartOptions.xAxis.name;
-      const y_name = this.CorrelationData.chartOptions.yAxis.name;
+      this.correlationOption.xAxis.name = item;
+      const x_name = this.correlationOption.xAxis.name;
+      const y_name = this.correlationOption.yAxis.name;
       const percentage = 0.2;  //显示20%的散点
+      const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
-      fetch(`http://127.0.0.1:5000/correlation?number=01&y=${y_name}&x=${x_name}&percentage=${percentage}`)
+      this.getCorrlationData(Number,y_name,x_name,percentage);
+    },
+    //把获取相关性数据封装为函数
+    getCorrlationData(Number,y_name,x_name,percentage){
+      fetch(`http://127.0.0.1:5000/correlation?number=${Number}&y=${y_name}&x=${x_name}&percentage=${percentage}`)
         .then(response => response.json())
         .then(data => {
           console.log(data);
-          this.CorrelationData.chartOptions.series[0].data = data['data_mini'];
+          this.correlationOption.series[0].data = data['data_mini'];
+          this.histogramOptionx.dataset[0].source = data['data_all'];
         })
         .catch(error => console.error(error));
     },
-
-    fetchStatsCardsData(windTurbineName) {
-      //截取'风机 ',取后面的数字
-      let windTurbineNumber = windTurbineName.slice(3)
+    //获取风机名称封装函数
+    getWindTurbineName(windTurbineName){
+      windTurbineName = windTurbineName.slice(3);
       //如果windTurbineNumber编号为单个数字，前面加0
-      if (windTurbineNumber.length == 1) {
-        windTurbineNumber = '0' + windTurbineNumber
+      if (windTurbineName.length == 1) {
+        windTurbineName = '0' + windTurbineName;
       }
-
-      console.log(windTurbineNumber)
-      fetch('http://127.0.0.1:5000/basic_info?number=' + windTurbineNumber)
+      return windTurbineName
+    },
+    //更新头部四个card内容
+    fetchStatsCardsData(windTurbineName) {
+      windTurbineName = this.getWindTurbineName(windTurbineName) //截取'风机 ',取后面的数字
+      fetch('http://127.0.0.1:5000/basic_info?number=' + windTurbineName)
         .then(response => response.json())
         .then(data => {
           console.log(data);
@@ -213,12 +203,15 @@ export default {
   },
 
   watch: {
-    'CorrelationData.chartOptions': {
+    'correlationOption': {
       handler() {
         const correlation = this.$refs.correlation;
+        const histogramx = this.$refs.histogramx;
         // 如果存在 ref = correlation 并且 setOption 存在
         if (correlation && correlation.setOption) {
-          correlation.setOption(this.chartOptions);
+          correlation.setOption(this.correlationOption);
+          echarts.registerTransform(ecStat.transform.histogram); //目前这里有问题，ecStat导入不进去
+          histogramx.setOption(this.histogramOptionx);
         }
       },
       deep: true
@@ -227,6 +220,11 @@ export default {
     '$store.state.selectedWindTurbine': function (newVal) {
       console.log(newVal);
       this.fetchStatsCardsData(newVal);
+      const x_name = this.correlationOption.xAxis.name;
+      const y_name = this.correlationOption.yAxis.name;
+      const percentage = 0.2;  //显示20%的散点
+      const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
+      this.getCorrlationData(Number,y_name,x_name,percentage);
     },
   },
 
@@ -249,8 +247,8 @@ export default {
         'ROUND(A.POWER,0)',
         'YD15'
       ],
-      CorrelationData: {
-        chartOptions: {
+      //相关性option
+      correlationOption: {
           xAxis: {
             name: this.dropdownTitle2,
             nameGap: 30,
@@ -290,8 +288,52 @@ export default {
               type: 'scatter'
             }
           ]
-        }
       },
+      //直方图x的option
+      histogramOptionx:{
+        dataset: [
+          {
+            source: [
+              [8.3, 143],
+              [8.6, 214],
+            ]
+          },
+          {
+            transform: {
+              type: 'ecStat:histogram',
+              config: {}
+            }
+          },
+        ],
+        tooltip: {},
+        xAxis: [
+          {
+            scale: true,
+            gridIndex: 0
+          },
+        ],
+        yAxis: [
+          {
+            gridIndex: 0
+          },
+        ],
+        series: [
+          {
+            name: 'histogram',
+            type: 'bar',
+            xAxisIndex: 0,
+            yAxisIndex: 0,
+            barWidth: '99.3%',
+            label: {
+              show: true,
+              position: 'top'
+            },
+            encode: { x: 0, y: 1, itemName: 4},
+            datasetIndex: 1
+          }
+        ]
+      },
+
 
       statsCards: [
         {

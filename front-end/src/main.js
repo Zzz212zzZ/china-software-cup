@@ -24,6 +24,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import 'popper.js/dist/popper.js';
 
+
 Vue.use(PaperDashboard);
 
 /* eslint-disable no-new */

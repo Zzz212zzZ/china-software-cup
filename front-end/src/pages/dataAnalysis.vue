@@ -76,8 +76,8 @@
 
       <div class="col-md-6 col-12 d-flex flex-column">
         <div class="flex-grow-1">
-          <chart-card title="直方图Y" sub-title="Last campaign performance" :chart-data="preferencesChart.data"
-            class="emailStatistics" chart-type="Pie">
+          <chart-card  ref="histoYRef" title="直方图Y" sub-title="Last campaign performance" :chart-options="histoY.chartOptions"
+            >
             <span slot="footer">
               <i class="ti-timer"></i> Campaign set 2 days ago</span>
             <div slot="legend">
@@ -129,6 +129,10 @@
 <script>
 import { StatsCard, ChartCard, EchartsCard } from "@/components/index";
 import Chartist from "chartist";
+
+
+
+
 export default {
   components: {
     StatsCard,
@@ -143,15 +147,27 @@ export default {
   created() {
     this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
   },
-  mounted(){
+  mounted() {
     this.CorrelationData.chartOptions.xAxis.name = this.dropdownTitle2;
     this.CorrelationData.chartOptions.yAxis.name = this.dropdownTitle1;
     //初始化相关性散点图的数据，因为数据本身只有靠变化才能调用，这里直接手动调用changeTitle
-    this.changeTitle1(this.dropdownTitle1)
+    this.changeTitle1(this.dropdownTitle1);
+    this.startPrintingChartOptions();
 
   },
 
   methods: {
+   
+  printChartOptions() {
+    console.log(this.$refs.histoYRef.chartOptions);
+  },
+  startPrintingChartOptions() {
+    setInterval(this.printChartOptions, 5000);
+  },
+
+
+
+
     changeTitle1(item) {
       this.dropdownTitle1 = item;
       this.CorrelationData.chartOptions.yAxis.name = item;
@@ -392,15 +408,90 @@ export default {
         },
       },
 
-      preferencesChart: {
-        data: {
-          labels: ["62%", "32%", "6%"],
-          series: [62, 32, 6],
+      histoY: {
+        
+        chartOptions : {
+          dataset: [
+            {
+              source: [
+                [8.3, 143],
+                [8.6, 214],
+                [8.8, 251],
+                [10.5, 26],
+                [10.7, 86],
+                [10.8, 93],
+                [11.0, 176],
+                [11.0, 39],
+                [11.1, 221],
+                [11.2, 188],
+                [11.3, 57],
+                [11.4, 91],
+                [11.4, 191],
+                [11.7, 8],
+                [12.0, 196],
+                [12.9, 177],
+                [12.9, 153],
+                [13.3, 201],
+                [13.7, 199],
+                [13.8, 47],
+                [14.0, 81],
+                [14.2, 98],
+                [14.5, 121],
+                [16.0, 37],
+                [16.3, 12],
+                [17.3, 105],
+                [17.5, 168],
+                [17.9, 84],
+                [18.0, 197],
+                [18.0, 155],
+                [20.6, 125]
+              ]
+            },
+            {
+              transform: {
+                type: 'ecStat:histogram',
+                config: {}
+              }
+            },
+            {
+              transform: {
+                type: 'ecStat:histogram',
+                // print: true,
+                config: { dimensions: [1] }
+              }
+            }
+          ],
+          tooltip: {},
+          xAxis: [
+            {
+              scale: true,
+              gridIndex: 0
+            },
+          ],
+          yAxis: [
+            {
+              gridIndex: 0
+            },
+          ],
+          series: [
+            {
+              name: 'histogram',
+              type: 'bar',
+              subtext: '子图 1',
+              xAxisIndex: 0,
+              yAxisIndex: 0,
+              barWidth: '99.3%',
+              label: {
+                show: true,
+                position: 'top'
+              },
+              encode: { x: 0, y: 1, itemName: 4 },
+              datasetIndex: 1
+            }
+          ]
         },
-        options: {
-          height: "200px"
 
-        },
+
       },
     };
   },

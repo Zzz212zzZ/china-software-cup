@@ -31,8 +31,15 @@
 <script>
 import Card from "./Card.vue";
 import * as echarts from "echarts";
+import ecStat from 'echarts-stat';
+
+
+
+
 
 export default {
+
+
     name: "echarts-card",
     components: {
         Card,
@@ -63,8 +70,11 @@ export default {
     }
     },
     mounted() {
+        
+        echarts.registerTransform(ecStat.transform.histogram);
         this.initEcharts();
         window.addEventListener("resize", this.handleResize);
+        
     },
     beforeUnmount() {
         window.removeEventListener("resize", this.handleResize);
@@ -76,7 +86,9 @@ export default {
             const chartDom = this.$refs.echarts;
             this.chartInstance = echarts.init(chartDom);
             this.chartInstance.setOption(this.chartOptions);
-            console.log(this.chartOptions)
+            // console.log("this.chartOptions");
+            // console.log(this.chartOptions);
+            
         },
         handleResize() {
             if (this.chartInstance) {

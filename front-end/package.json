@@ -30,8 +30,8 @@
     "@vue/cli-plugin-eslint": "3.12.1",
     "@vue/cli-service": "3.12.1",
     "@vue/eslint-config-prettier": "5.1.0",
-    "sass": "^1.56.2",
-    "sass-loader": "10.2.0",
+    "sass": "^1.63.6",
+    "sass-loader": "^10.2.0",
     "vue-template-compiler": "2.7.14"
   },
   "description": "A sample admin dashboard based on paper dashboard UI template",

@@ -35,8 +35,6 @@ import ecStat from 'echarts-stat';
 
 
 
-
-
 export default {
 
 
@@ -74,7 +72,7 @@ export default {
         echarts.registerTransform(ecStat.transform.histogram);
         this.initEcharts();
         window.addEventListener("resize", this.handleResize);
-        
+        echarts.registerTransform(ecStat.transform.histogram); //目前这里有问题，ecStat导入不进去
     },
     beforeUnmount() {
         window.removeEventListener("resize", this.handleResize);

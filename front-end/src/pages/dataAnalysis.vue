@@ -73,7 +73,7 @@
 
       <div class="col-md-6 col-12 d-flex flex-column">
         <div class="flex-grow-1">
-          <echarts-card ref="histogramy" title="直方图Y" sub-title="Last campaign performance" :chart-options="histogramOptiony"
+          <echarts-card ref="histogramy" :title="dropdownTitle1+' 分布直方图'" sub-title="相关性数据的y轴边缘分布直方图，用以分析数据频率分布情况" :chart-options="histogramyOption"
             class="emailStatistics" chart-type="Pie">
             <span slot="footer">
               <i class="ti-timer"></i> Campaign set 2 days ago</span>
@@ -83,7 +83,7 @@
 
 
         <div class="flex-grow-1">
-          <echarts-card ref="histogramx" title="直方图X" sub-title="All products including Taxes" :chart-options="histogramOptionx">
+          <echarts-card ref="histogramx" :title="dropdownTitle2+' 分布直方图'" sub-title="相关性数据的x轴边缘分布直方图，用以分析数据频率分布情况" :chart-options="histogramxOption">
             <span slot="footer">
               <i class="ti-check"></i> Data information certified
             </span>
@@ -117,6 +117,7 @@
 import { StatsCard, ChartCard, EchartsCard } from "@/components/index";
 import Chartist from "chartist";
 import * as echarts from "echarts";
+import ecStat from "echarts-stat"
 export default {
   components: {
     StatsCard,
@@ -132,6 +133,7 @@ export default {
     this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
   },
   mounted(){
+    echarts.registerTransform(ecStat.transform.histogram); //目前这里有问题，ecStat导入不进去
     this.correlationOption.xAxis.name = this.dropdownTitle2;
     this.correlationOption.yAxis.name = this.dropdownTitle1;
     //初始化相关性散点图的数据，因为数据本身只有靠变化才能调用，这里直接手动调用changeTitle
@@ -167,7 +169,8 @@ export default {
         .then(data => {
           console.log(data);
           this.correlationOption.series[0].data = data['data_mini'];
-          this.histogramOptionx.dataset[0].source = data['data_all'];
+          this.histogramxOption.dataset[0].source = data['data_all'];
+          this.histogramyOption.dataset[0].source = data['data_all'];
         })
         .catch(error => console.error(error));
     },
@@ -207,11 +210,12 @@ export default {
       handler() {
         const correlation = this.$refs.correlation;
         const histogramx = this.$refs.histogramx;
+        const histogramy = this.$refs.histogramy;
         // 如果存在 ref = correlation 并且 setOption 存在
         if (correlation && correlation.setOption) {
-          correlation.setOption(this.correlationOption);
-          echarts.registerTransform(ecStat.transform.histogram); //目前这里有问题，ecStat导入不进去
-          histogramx.setOption(this.histogramOptionx);
+          correlation.setOption(this.correlationOption); //更新相关性图
+          histogramx.setOption(this.histogramxOption); //更新直方图x
+          histogramy.setOption(this.histogramyOption); //更新直方图y
         }
       },
       deep: true
@@ -290,12 +294,11 @@ export default {
           ]
       },
       //直方图x的option
-      histogramOptionx:{
+      histogramxOption:{
         dataset: [
           {
             source: [
-              [8.3, 143],
-              [8.6, 214],
+              [0,0]
             ]
           },
           {
@@ -306,17 +309,23 @@ export default {
           },
         ],
         tooltip: {},
-        xAxis: [
+        xAxis: 
           {
+            name: 'Value',
+            nameGap: 30,
+            nameLocation: 'middle',
+            nameTextStyle: {
+              color: '#666',
+              fontSize: 20,
+              fontWeight: 'bold',
+            },
             scale: true,
             gridIndex: 0
           },
-        ],
-        yAxis: [
+        yAxis: 
           {
             gridIndex: 0
           },
-        ],
         series: [
           {
             name: 'histogram',
@@ -333,7 +342,56 @@ export default {
           }
         ]
       },
-
+      //直方图y的option
+      histogramyOption:{
+              dataset: [
+                {
+                  source: [
+                    [0, 0],
+                  ]
+                },
+                {
+                  transform: {
+                    type: 'ecStat:histogram',
+                    config: { dimensions: [1] }
+                  }
+                },
+              ],
+              tooltip: {},
+              xAxis: 
+                {
+                  name: 'Value',
+                  nameGap: 30,
+                  nameLocation: 'middle',
+                  nameTextStyle: {
+                    color: '#666',
+                    fontSize: 20,
+                    fontWeight: 'bold',
+                  },
+                  scale: true,
+                  gridIndex: 0
+                },
+              
+              yAxis: 
+                {
+                  gridIndex: 0
+                },
+              series: [
+                {
+                  name: 'histogram',
+                  type: 'bar',
+                  xAxisIndex: 0,
+                  yAxisIndex: 0,
+                  barWidth: '99.3%',
+                  label: {
+                    show: true,
+                    position: 'top'
+                  },
+                  encode: { x: 0, y: 1, itemName: 4},
+                  datasetIndex: 1
+                }
+              ]
+            },
 
       statsCards: [
         {

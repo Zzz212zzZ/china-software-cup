@@ -14,6 +14,7 @@
     "bootstrap": "4.6.2",
     "chartist": "0.11.0",
     "echarts": "^5.4.2",
+    "echarts-stat": "^1.2.0",
     "es6-promise": "4.2.8",
     "eslint-plugin-vue": "^9.8.0",
     "popper.js": "^1.16.1",

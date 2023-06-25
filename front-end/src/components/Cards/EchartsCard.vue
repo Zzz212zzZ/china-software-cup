@@ -31,7 +31,7 @@
 <script>
 import Card from "./Card.vue";
 import * as echarts from "echarts";
-// import ecStat from "ecStat"
+import ecStat from "echarts-stat"
 export default {
     name: "echarts-card",
     components: {
@@ -65,6 +65,7 @@ export default {
     mounted() {
         this.initEcharts();
         window.addEventListener("resize", this.handleResize);
+        echarts.registerTransform(ecStat.transform.histogram); //目前这里有问题，ecStat导入不进去
     },
     beforeUnmount() {
         window.removeEventListener("resize", this.handleResize);

@@ -23,7 +23,7 @@
     <div class="row d-flex align-items-center">
       <div class="col-md-6 col-12">
         <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标"
-          :chart-options="correlationOption" chart-height="700px">
+          :chart-options="correlationOption" chart-height="800px">
           <span slot="footer">
             <div class="twoBtnRow">
               <div class="col-md-6 col-12">
@@ -74,7 +74,7 @@
       <div class="col-md-6 col-12 d-flex flex-column">
         <div class="flex-grow-1">
           <echarts-card ref="histogramy" :title="dropdownTitle1 + ' 分布直方图'" sub-title="相关性数据的y轴边缘分布直方图，用以分析数据频率分布情况"
-            :chart-options="histogramyOption" class="emailStatistics" chart-type="Pie">
+            :chart-options="histogramyOption" class="emailStatistics" chart-type="Pie" chart-height="350px">
             <span slot="footer">
               <i class="ti-timer"></i> Campaign set 2 days ago</span>
           </echarts-card>
@@ -84,7 +84,7 @@
 
         <div class="flex-grow-1">
           <echarts-card ref="histogramx" :title="dropdownTitle2 + ' 分布直方图'" sub-title="相关性数据的x轴边缘分布直方图，用以分析数据频率分布情况"
-            :chart-options="histogramxOption">
+            :chart-options="histogramxOption" chart-height="350px">
             <span slot="footer">
               <i class="ti-check"></i> Data information certified
             </span>
@@ -298,8 +298,7 @@ export default {
         },
         yAxis: {
           name: this.dropdownTitle1,
-          nameLocation: 'middle',
-          nameGap: 60,
+          nameGap: 10,
           nameTextStyle: {
             color: '#666',
             fontSize: 20,
@@ -361,10 +360,6 @@ export default {
             xAxisIndex: 0,
             yAxisIndex: 0,
             barWidth: '99.3%',
-            label: {
-              show: true,
-              position: 'top'
-            },
             encode: { x: 0, y: 1, itemName: 4 },
             datasetIndex: 1
           }
@@ -411,10 +406,6 @@ export default {
             xAxisIndex: 0,
             yAxisIndex: 0,
             barWidth: '99.3%',
-            label: {
-              show: true,
-              position: 'top'
-            },
             encode: { x: 0, y: 1, itemName: 4 },
             datasetIndex: 1
           }

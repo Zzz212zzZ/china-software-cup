@@ -6,14 +6,14 @@
         <div class="col-md-7 col-12 d-flex flex-column">
           <!-- 数据图 -->
           <div class="flex-grow-1">
-            <EchartsCard ref="preprocessMain" title="数据散点图" sub-title="subtitle" :chart-options="windPowerOption">
+            <EchartsCard ref="preprocessMain" title="风速-功率曲线图" sub-title="正常数据表示满足风速-功率曲线规律的数据；甲类异常点表示长时间保持完全停滞的数据；乙类异常点表示不满足风速-功率曲线的数据" :chart-options="windPowerOption" chartHeight="600px">
 
             </EchartsCard>
           </div>
 
           <!-- 参数控制 -->
 
-          <Card ref="control" title="参数调整" subTitle="我是介绍信息">
+          <Card ref="control" title="参数调整" subTitle="本模型采用bin算法修正风速-功率曲线，异常阈值和区间宽度为bin算法参数；停滞阈值表示能够容忍数据停滞的最大时间点步数">
             <div class="container">
               <div class="row align-items-center col-12">
 
@@ -29,7 +29,7 @@
                       </vue-slider>
                     </div>
                     <div class="col-3 align-self-center">
-                      <label>sigma</label>
+                      <label>异常阈值</label>
                     </div>
                   </div>
 
@@ -49,7 +49,7 @@
 
                 <div class="row col-12" style="margin-top: 10px;">
                   <div class="row col-7">
-                    <!--死值进度条-->
+                    <!--停滞阈值进度条-->
                     <div class="col-9 align-self-center">
                       <vue-slider v-model="deadCount" :lazy="true" :min="3" :max="20" :interval="1" :hide-label="true"
                         :height="5">
@@ -59,7 +59,7 @@
                       </vue-slider>
                     </div>
                     <div class="col-3 align-self-center">
-                      <label>死值</label>
+                      <label>停滞阈值</label>
                     </div>
                   </div>
 
@@ -76,7 +76,7 @@
 
                 <div class="row col-12" style="margin-top: 10px;">
                   <div class="row col-7">
-                    <!--步长进度条-->
+                    <!--bin算法区间进度条-->
                     <div class="col-9 align-self-center">
                       <vue-slider v-model="step" :lazy="true" :min="0.1" :max="1" :interval="0.1" :hide-label="true"
                         :height="5">
@@ -86,7 +86,7 @@
                       </vue-slider>
                     </div>
                     <div class="col-3 align-self-center">
-                      <label>步长</label>
+                      <label>区间宽度</label>
                     </div>
                   </div>
 
@@ -112,12 +112,12 @@
 
         <div class="col-md-5 col-12 d-flex flex-column">
           <div class="flex-grow-1">
-            <EchartsCard ref="abnormalPie" title="异常值比例" sub-title="subtitle" chartHeight="300px" :chart-options="abnormalOption">
+            <EchartsCard ref="abnormalPie" title="异常值比例" sub-title="甲类和乙类异常点的数量，用以分析随参数变化，异常点的占比情况" chartHeight="400px" :chart-options="abnormalOption">
 
             </EchartsCard>
           </div>
           <div class="flex-grow-1">
-            <EchartsCard ref="missingPie" title="缺失值比例" sub-title="subtitle" chartHeight="300px">
+            <EchartsCard ref="missingPie" title="缺失值比例" sub-title="数据缺失值的占比情况" chartHeight="400px" :chart-options="missingOption">
 
             </EchartsCard>
           </div>
@@ -167,8 +167,8 @@ export default {
               data: [],
               symbolSize: 7,
               itemStyle: {
-                  color: '#ffcc00'
-              }
+                  color: '#F3BB45'
+              },
           },
           {
               name: '乙类异常数据',  
@@ -176,7 +176,7 @@ export default {
               data: [],
               symbolSize: 7,
               itemStyle: {
-                  color: '#ff3333'
+                  color: '#EB5E28'
               }
           },
           {
@@ -185,7 +185,7 @@ export default {
             data: [],
             symbolSize: 7,
             itemStyle: {
-                color: '#0066ff'
+                color: '#68B3C8'
             }
           },
         ],
@@ -195,19 +195,20 @@ export default {
       tooltip: {
         trigger: 'item'
       },
-      legend: {
-        orient: 'vertical',
-        left: 'left'
-      },
+      // legend: {
+      //   orient: 'vertical',
+      //   left: 'left'
+      // },
       series: [
         {
           name: '各类数据点数量',
           type: 'pie',
-          radius: '50%',
+          radius: '70%',
+          color: ['#68B3C8','#F3BB45','#EB5E28'],
           data: [
-            { value: 1048, name: '正常数据' },
-            { value: 735, name: '甲类异常数据' },
-            { value: 580, name: '乙类异常数据' },
+            { value: 0, name: '正常数据量' },
+            { value: 0, name: '甲类异常数据量' },
+            { value: 0, name: '乙类异常数据量' },
           ],
           emphasis: {
             itemStyle: {
@@ -219,6 +220,31 @@ export default {
         }
       ]
     },
+
+      missingOption: {
+        tooltip: {
+          trigger: 'item'
+        },
+        series: [
+          {
+            name: '缺失数据量占比',
+            type: 'pie',
+            radius: '70%',
+            color: ['#68B3C8','#EB5E28'],
+            data: [
+              { value: 0, name: '完整数据量' },
+              { value: 0, name: '缺失数据量' },
+            ],
+            emphasis: {
+              itemStyle: {
+                shadowBlur: 10,
+                shadowOffsetX: 0,
+                shadowColor: 'rgba(0, 0, 0, 0.5)'
+              }
+            }
+          }
+        ]
+      },
 
 
     };
@@ -265,8 +291,16 @@ export default {
     'windPowerOption':{
       handler(){
         const preprocessMain = this.$refs.preprocessMain;
+        const abnormalPie = this.$refs.abnormalPie; 
+        const missingPie = this.$refs.missingPie; 
         if (preprocessMain && preprocessMain.setOption) {
           preprocessMain.setOption(this.windPowerOption); //更新风速功率曲线图
+        }
+        if (abnormalPie && abnormalPie.setOption) {
+          abnormalPie.setOption(this.abnormalOption); //更新风速功率曲线图
+        }
+        if (missingPie && missingPie.setOption) {
+          missingPie.setOption(this.missingOption); //更新风速功率曲线图
         }
       },
       deep: true
@@ -286,6 +320,11 @@ export default {
           this.windPowerOption.series[2].data = data['bin_data'];
           this.windPowerOption.series[0].data = data['a_data'];
           this.windPowerOption.series[1].data = data['b_data']
+          this.abnormalOption.series[0].data[0].value=data['bin_data_percentage']
+          this.abnormalOption.series[0].data[1].value=data['a_data_percentage']
+          this.abnormalOption.series[0].data[2].value=data['b_data_percentage']
+          this.missingOption.series[0].data[0].value=data['not_missing_percentage']
+          this.missingOption.series[0].data[1].value=data['missing_percentage']
           //这里对数据进行操作
         })
     },

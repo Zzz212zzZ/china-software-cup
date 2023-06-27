@@ -72,12 +72,15 @@ def bin_data():
 
     bin:BinProcessor=data_src.bin
     dict = {}
-    normal_data=bin.getNormalData()
-    dict['bin_data'] = normal_data.sample(frac=0.1).values.tolist()
+    normal_data=bin.getNormalData().drop_duplicates()
+    if normal_data.shape[0]<=10000:
+        dict['bin_data'] =normal_data.values.tolist()
+    else:
+        dict['bin_data'] = normal_data.sample(n=10000).values.tolist()
     a_data=bin.getAData()
     dict['a_data']=a_data.drop_duplicates().values.tolist()
     b_data=bin.getBData()
-    dict['b_data']=b_data.drop_duplicates().values.tolist()
+    dict['b_data']=b_data.drop_duplicates().sample(frac=0.6).values.tolist()
 
     dict['missing_percentage']=bin.getMissingData().shape[0]
     dict['a_data_percentage']=bin.getAData().shape[0]

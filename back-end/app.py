@@ -1,3 +1,4 @@
+import pandas as pd
 from flask import Flask,request
 from flask_cors import CORS
 from flask_restful import Api
@@ -40,12 +41,12 @@ def correlation():
     table_name = request.args['number']
     y = request.args['y']
     x = request.args['x']
-    step = 1 / float(request.args['percentage'])
+    percentage = float(request.args['percentage'])
     data = data_src.get_data(table_name, [x, y]).dropna()
 
     dict = {}
     dict['data_all'] = data.values.tolist()
-    dict['data_mini'] = data[np.floor(data.index % step) == 0].values.tolist()
+    dict['data_mini'] = data.sample(frac=percentage).values.tolist()
     return json.dumps(dict, ensure_ascii=False)
 
 
@@ -72,7 +73,7 @@ def bin_data():
     bin:BinProcessor=data_src.bin
     dict = {}
     normal_data=bin.getNormalData()
-    dict['bin_data'] = normal_data[np.floor(normal_data.index % 10) == 0].values.tolist()
+    dict['bin_data'] = normal_data.sample(frac=0.2).values.tolist()
     a_data=bin.getAData()
     dict['a_data']=a_data.drop_duplicates().values.tolist()
     b_data=bin.getBData()

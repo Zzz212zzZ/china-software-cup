@@ -6,7 +6,7 @@
         <div class="col-md-7 col-12 d-flex flex-column">
           <!-- 数据图 -->
           <div class="flex-grow-1">
-            <EchartsCard ref="preprocessMain" title="数据散点图" sub-title="subtitle">
+            <EchartsCard ref="preprocessMain" title="数据散点图" sub-title="subtitle" :chart-options="windPowerOption">
 
             </EchartsCard>
           </div>
@@ -15,7 +15,7 @@
 
           <Card ref="control" title="参数调整" subTitle="我是介绍信息">
             <div class="container">
-              <div class="row align-items-center">
+              <div class="row align-items-center col-12">
 
                 <div class="row col-12">
                   <div class="row col-7">
@@ -47,11 +47,11 @@
                 </div>
 
 
-                <div class="row col-12" style="margin-top: 5px;">
+                <div class="row col-12" style="margin-top: 10px;">
                   <div class="row col-7">
                     <!--死值进度条-->
                     <div class="col-9 align-self-center">
-                      <vue-slider v-model="deadCount" :lazy="true" :min="2" :max="5" :interval="1" :hide-label="true"
+                      <vue-slider v-model="deadCount" :lazy="true" :min="3" :max="20" :interval="1" :hide-label="true"
                         :height="5">
                         <template v-slot:step="{ active }">
                           <div :class="['custom-step', { active }]"></div>
@@ -74,7 +74,7 @@
                   </div>
                 </div>
 
-                <div class="row col-12" style="margin-top: 5px;">
+                <div class="row col-12" style="margin-top: 10px;">
                   <div class="row col-7">
                     <!--步长进度条-->
                     <div class="col-9 align-self-center">
@@ -102,7 +102,7 @@
                 </div>
               </div>
 
-              <div style="margin-top: 5px;">
+              <div style="margin-top: 10px;" class="col-12">
                 <button type="button" class="btn btn-primary  btn-lg btn-block">进行模型训练</button>
               </div>
             </div>
@@ -112,7 +112,7 @@
 
         <div class="col-md-5 col-12 d-flex flex-column">
           <div class="flex-grow-1">
-            <EchartsCard ref="abnormalPie" title="异常值比例" sub-title="subtitle" chartHeight="300px">
+            <EchartsCard ref="abnormalPie" title="异常值比例" sub-title="subtitle" chartHeight="300px" :chart-options="abnormalOption">
 
             </EchartsCard>
           </div>
@@ -146,12 +146,81 @@ export default {
     return {
       sigma: 2,
       // sigmaMarks: [1, 2, 3],
-      deadCount: 3,
+      deadCount: 8,
       step: 0.2,
 
       missingValueOption: 'delete',
       aValueOption: 'delete',
-      bValueOption: 'delete'
+      bValueOption: 'delete',
+
+
+      windPowerOption: {
+        xAxis: {},
+        yAxis: {},
+        legend: {
+          data: ['正常数据', '甲类异常数据','乙类异常数据'] // 设置图例名称
+        },
+        series: [
+          {
+              name: '甲类异常数据',
+              type: 'scatter',
+              data: [],
+              symbolSize: 7,
+              itemStyle: {
+                  color: '#ffcc00'
+              }
+          },
+          {
+              name: '乙类异常数据',  
+              type: 'scatter',
+              data: [],
+              symbolSize: 7,
+              itemStyle: {
+                  color: '#ff3333'
+              }
+          },
+          {
+            name: '正常数据',
+            type: 'scatter',
+            data: [],
+            symbolSize: 7,
+            itemStyle: {
+                color: '#0066ff'
+            }
+          },
+        ],
+      },
+
+      abnormalOption: {
+      tooltip: {
+        trigger: 'item'
+      },
+      legend: {
+        orient: 'vertical',
+        left: 'left'
+      },
+      series: [
+        {
+          name: '各类数据点数量',
+          type: 'pie',
+          radius: '50%',
+          data: [
+            { value: 1048, name: '正常数据' },
+            { value: 735, name: '甲类异常数据' },
+            { value: 580, name: '乙类异常数据' },
+          ],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
+          }
+        }
+      ]
+    },
+
+
     };
   },
 
@@ -191,6 +260,16 @@ export default {
     },
     '$store.state.selectedWindTurbine': function () {
       this.getBinProcessedData()
+    },
+    //风速功率曲线重渲染
+    'windPowerOption':{
+      handler(){
+        const preprocessMain = this.$refs.preprocessMain;
+        if (preprocessMain && preprocessMain.setOption) {
+          preprocessMain.setOption(this.windPowerOption); //更新风速功率曲线图
+        }
+      },
+      deep: true
     }
   },
 
@@ -204,6 +283,9 @@ export default {
         .then(response => response.json())
         .then(data => {
           console.log(data)
+          this.windPowerOption.series[2].data = data['bin_data'];
+          this.windPowerOption.series[0].data = data['a_data'];
+          this.windPowerOption.series[1].data = data['b_data']
           //这里对数据进行操作
         })
     },

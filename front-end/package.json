@@ -23,6 +23,7 @@
     "vue-echarts": "^6.6.0",
     "vue-notifyjs": "0.3.0",
     "vue-router": "3.0.1",
+    "vue-slider-component": "^3.2.24",
     "vuex": "^3.6.2"
   },
   "devDependencies": {

@@ -147,13 +147,11 @@ export default {
     this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
   },
   mounted() {
-    echarts.registerTransform(ecStat.transform.histogram); //目前这里有问题，ecStat导入不进去
+    echarts.registerTransform(ecStat.transform.histogram); 
     this.correlationOption.xAxis.name = this.dropdownTitle2;
     this.correlationOption.yAxis.name = this.dropdownTitle1;
     //初始化相关性散点图的数据，因为数据本身只有靠变化才能调用，这里直接手动调用changeTitle
     this.changeTitle1(this.dropdownTitle1);
-
-
   },
 
 
@@ -236,7 +234,7 @@ export default {
       fetch('http://127.0.0.1:5000/basic_info?number=' + windTurbineName)
         .then(response => response.json())
         .then(data => {
-          console.log(data);
+          // console.log(data);
           this.statsCards = this.statsCards.map(card => {
             return {
               ...card,

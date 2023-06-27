@@ -90,7 +90,7 @@
               <span class="icon-name"> ti-arrow-circle-up</span>
             </div>
             <div class="icon-container">
-              <span class="ti-arrow-circle-right"></span>
+              
               <span class="icon-name"> ti-arrow-circle-right</span>
             </div>
             <div class="icon-container">

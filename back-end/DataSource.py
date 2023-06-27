@@ -2,10 +2,12 @@ import pandas as pd
 
 from DatabaseConnector import DatabaseConnector
 from process_with_bin import process_with_bin
+from BinProcessor import BinProcessor
 
 class DataSource(object):
     def __init__(self,dbcon:DatabaseConnector):
         self.dbcon=dbcon
+        self.bin=None
         self.data=None
         self.synchronization=True
         self.table_name=None
@@ -67,6 +69,7 @@ class DataSource(object):
         # 返回数据
         return {dimension: data}
 
-    def data_bin_process(self,table_name,r):
+    def set_bin(self,table_name,r,step,deadValue):
         self.update(table_name)
-        return process_with_bin(self.data,range_x=r)
+        self.bin=BinProcessor(self.data)
+        self.bin.bin(r,step,deadValue)

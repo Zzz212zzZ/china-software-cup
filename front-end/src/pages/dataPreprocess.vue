@@ -14,56 +14,96 @@
           <!-- 参数控制 -->
 
           <Card ref="control" title="参数调整" subTitle="我是介绍信息">
-            <div class="col-12">
-              <div class="row">
-                <!--sigma值进度条-->
-                <div class="col-10">
-                  <vue-slider v-model="sigma" :lazy="true" :min="0.5" :max="3" :interval="0.01" :marks="sigmaMarks" />
-                </div>
-                <div class="col-2">
-                  <p>sigma</p>
+            <div class="container">
+              <div class="row align-items-center">
+
+                <div class="row col-12">
+                  <div class="row col-7">
+                    <!--sigma值进度条-->
+                    <div class="col-9 align-self-center">
+                      <vue-slider v-model="sigma" :lazy="true" :min="0.5" :max="3" :interval="0.01" :hide-label="true"
+                        :height="5">
+                        <template v-slot:step="{ active }">
+                          <div :class="['custom-step', { active }]"></div>
+                        </template>
+                      </vue-slider>
+                    </div>
+                    <div class="col-3 align-self-center">
+                      <label>sigma</label>
+                    </div>
+                  </div>
+
+                  <div class="btn-group btn-group-toggle col-5" data-toggle="buttons">
+                    <label class="btn btn-outline-primary active btn-sm">
+                      <input type="radio" name="missingValue" value="delete" v-model="missingValueOption"
+                        autocomplete="off" checked> 删除缺失值
+                    </label>
+                    <label class="btn btn-outline-primary btn-sm">
+                      <input type="radio" name="missingValue" value="fill" v-model="missingValueOption"
+                        autocomplete="off">
+                      填充缺失值
+                    </label>
+                  </div>
                 </div>
 
-                <!--死值进度条-->
-                <div class="col-10">
-                  <vue-slider v-model="deadCount" :lazy="true" :min="2" :max="10" :interval="1" :marks="true" />
-                </div>
-                <div class="col-2">
-                  <p>死值</p>
+
+                <div class="row col-12" style="margin-top: 5px;">
+                  <div class="row col-7">
+                    <!--死值进度条-->
+                    <div class="col-9 align-self-center">
+                      <vue-slider v-model="deadCount" :lazy="true" :min="2" :max="5" :interval="1" :hide-label="true"
+                        :height="5">
+                        <template v-slot:step="{ active }">
+                          <div :class="['custom-step', { active }]"></div>
+                        </template>
+                      </vue-slider>
+                    </div>
+                    <div class="col-3 align-self-center">
+                      <label>死值</label>
+                    </div>
+                  </div>
+
+                  <div class="btn-group btn-group-toggle col-5" data-toggle="buttons">
+                    <label class="btn btn-outline-primary active btn-sm">
+                      <input type="radio" name="aValue" value="delete" v-model="aValueOption" autocomplete="off" checked>
+                      删除A类值
+                    </label>
+                    <label class="btn btn-outline-primary btn-sm">
+                      <input type="radio" name="aValue" value="fill" v-model="aValueOption" autocomplete="off"> 填充A类值
+                    </label>
+                  </div>
                 </div>
 
-                <!--步长进度条-->
-                <div class="col-10">
-                  <vue-slider v-model="step" :lazy="true" :min="0.1" :max="2" :interval="0.1" :marks="true" />
-                </div>
-                <div class="col-2">
-                  <p>步长</p>
-                </div>
+                <div class="row col-12" style="margin-top: 5px;">
+                  <div class="row col-7">
+                    <!--步长进度条-->
+                    <div class="col-9 align-self-center">
+                      <vue-slider v-model="step" :lazy="true" :min="0.1" :max="1" :interval="0.1" :hide-label="true"
+                        :height="5">
+                        <template v-slot:step="{ active }">
+                          <div :class="['custom-step', { active }]"></div>
+                        </template>
+                      </vue-slider>
+                    </div>
+                    <div class="col-3 align-self-center">
+                      <label>步长</label>
+                    </div>
+                  </div>
 
-                <!-- 缺失值处理 -->
-                <div class="col-12">
-                  <label>缺失值处理</label>
-                  <input type="radio" name="missingValue" value="delete" v-model="missingValueOption">删除
-                  <input type="radio" name="missingValue" value="fill" v-model="missingValueOption">填充
-                </div>
-
-                <!-- 缺失值处理 -->
-                <div class="col-12">
-                  <label>A类异常点处理</label>
-                  <input type="radio" name="aValue" value="delete" v-model="aValueOption">删除
-                  <input type="radio" name="aValue" value="fill" v-model="aValueOption">填充
-                </div>
-
-                <!-- 缺失值处理 -->
-                <div class="col-12">
-                  <label>B类异常点处理</label>
-                  <input type="radio" name="bValue" value="delete" v-model="bValueOption">删除
-                  <input type="radio" name="bValue" value="fill" v-model="bValueOption">填充
+                  <div class="btn-group btn-group-toggle col-5" data-toggle="buttons">
+                    <label class="btn btn-outline-primary active btn-sm">
+                      <input type="radio" name="bValue" value="delete" v-model="bValueOption" autocomplete="off" checked>
+                      删除B类值
+                    </label>
+                    <label class="btn btn-outline-primary btn-sm">
+                      <input type="radio" name="bValue" value="fill" v-model="bValueOption" autocomplete="off"> 填充B类值
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div>
-                <button type="button" class="btn btn-primary float-right">进行模型训练</button>
+              <div style="margin-top: 5px;">
+                <button type="button" class="btn btn-primary  btn-lg btn-block">进行模型训练</button>
               </div>
             </div>
           </Card>
@@ -105,7 +145,7 @@ export default {
   data() {
     return {
       sigma: 2,
-      sigmaMarks: [1, 2, 3],
+      // sigmaMarks: [1, 2, 3],
       deadCount: 3,
       step: 0.2,
 
@@ -114,6 +154,83 @@ export default {
       bValueOption: 'delete'
     };
   },
+
+  created() {
+    this.getBinProcessedData()
+  },
+  watch: {
+    sigma: {
+      handler() {
+        this.getBinProcessedData()
+      }
+    },
+    deadCount: {
+      handler() {
+        this.getBinProcessedData()
+      }
+    },
+    step: {
+      handler() {
+        this.getBinProcessedData()
+      }
+    },
+    missingValueOption: {
+      handler() {
+        // this.getBinProcessedData()
+      }
+    },
+    aValueOption: {
+      handler() {
+        // this.getBinProcessedData()
+      }
+    },
+    bValueOption: {
+      handler() {
+        // this.getBinProcessedData()
+      }
+    },
+    '$store.state.selectedWindTurbine': function () {
+      this.getBinProcessedData()
+    }
+  },
+
+  methods: {
+    //获取bin算法处理结果
+    getBinProcessedData() {
+      this.fetchBinProcessedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine), this.sigma, this.deadCount, this.step, this.missingValueOption, this.aValueOption, this.bValueOption)
+    },
+    fetchBinProcessedData(number, sigma, deadCount, step, missingValueOption, aValueOption, bValueOption) {
+      fetch(`http://127.0.0.1:5000/bin_data?number=${number}&sigma=${sigma}&deadCount=${deadCount}&step=${step}&missingValueOption=${missingValueOption}&aValueOption=${aValueOption}&bValueOption=${bValueOption}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data)
+          //这里对数据进行操作
+        })
+    },
+    //获取风机名称封装函数
+    getWindTurbineName(windTurbineName) {
+      windTurbineName = windTurbineName.slice(3);
+      //如果windTurbineNumber编号为单个数字，前面加0
+      if (windTurbineName.length == 1) {
+        windTurbineName = '0' + windTurbineName;
+      }
+      return windTurbineName
+    },
+  },
 };
 </script>
-<style></style>
+
+<style>
+.custom-step {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px #ccc;
+  background-color: #fff;
+}
+
+.custom-step.active {
+  box-shadow: 0 0 0 3px #3498db;
+  background-color: #3498db;
+}
+</style>

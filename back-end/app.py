@@ -4,6 +4,7 @@ from flask_restful import Api
 from flask_restful import Resource
 import json
 import numpy as np
+from BinProcessor import BinProcessor
 
 from DatabaseConnector import DatabaseConnector
 from DataSource import DataSource
@@ -62,10 +63,17 @@ def dimension_data():
 @app.route('/bin_data', methods=['GET'])
 def bin_data():
     table_name = request.args['number']
-    r = request.args['r']
+    r = float(request.args['sigma'])
+    step = float(request.args['step'])
+    deadValue = float(request.args['deadCount'])
 
+    data_src.set_bin(table_name,r,step,deadValue)
+
+    bin:BinProcessor=data_src.bin
     dict = {}
-    dict['bin_data'] = data_src.data_bin_process(table_name, r).values.tolist()
+    dict['bin_data'] = bin.getNormalData().values.tolist()
+    dict['a_data']=bin.getAData().values.tolist()
+    dict['b_data']=bin.getBData().values.tolist()
     return json.dumps(dict, ensure_ascii=False)
 
 

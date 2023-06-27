@@ -82,6 +82,7 @@ def bin_data():
     b_data=bin.getBData()
     dict['b_data']=b_data.drop_duplicates().sample(frac=0.6).values.tolist()
 
+    dict['not_missing_percentage'] = bin.data.shape[0]-bin.getMissingData().shape[0]
     dict['missing_percentage']=bin.getMissingData().shape[0]
     dict['a_data_percentage']=bin.getAData().shape[0]
     dict['b_data_percentage']=bin.getBData().shape[0]

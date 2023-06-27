@@ -71,9 +71,15 @@ def bin_data():
 
     bin:BinProcessor=data_src.bin
     dict = {}
-    dict['bin_data'] = bin.getNormalData().values.tolist()
-    dict['a_data']=bin.getAData().values.tolist()
-    dict['b_data']=bin.getBData().values.tolist()
+    dict['bin_data'] = bin.getNormalData().drop_duplicates().values.tolist()
+    dict['a_data']=bin.getAData().drop_duplicates().values.tolist()
+    dict['b_data']=bin.getBData().drop_duplicates().values.tolist()
+
+    dict['missing_percentage']=bin.getMissingData().shape[0]/data_src.data.shape[0]
+    total=data_src.data.shape[0]-bin.getMissingData().shape[0]
+    dict['a_data_percentage']=bin.getAData().shape[0]/total
+    dict['b_data_percentage']=bin.getBData().shape[0]/total
+    dict['bin_data_percentage']=bin.getNormalData().shape[0]/total
     return json.dumps(dict, ensure_ascii=False)
 
 

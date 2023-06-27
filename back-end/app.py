@@ -72,11 +72,11 @@ def bin_data():
     bin:BinProcessor=data_src.bin
     dict = {}
     normal_data=bin.getNormalData()
-    dict['bin_data'] = normal_data[np.floor(normal_data.index % 5) == 0].values.tolist()
+    dict['bin_data'] = normal_data[np.floor(normal_data.index % 10) == 0].values.tolist()
     a_data=bin.getAData()
-    dict['a_data']=a_data[np.floor(a_data.index % 5) == 0].values.tolist()
+    dict['a_data']=a_data.drop_duplicates().values.tolist()
     b_data=bin.getBData()
-    dict['b_data']=b_data[np.floor(b_data.index % 5) == 0].values.tolist()
+    dict['b_data']=b_data.drop_duplicates().values.tolist()
 
     dict['missing_percentage']=bin.getMissingData().shape[0]/data_src.data.shape[0]
     total=data_src.data.shape[0]-bin.getMissingData().shape[0]

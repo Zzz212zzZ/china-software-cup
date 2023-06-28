@@ -15,7 +15,7 @@
         <div>
             <div ref="echarts" class="echarts-chart" :style="{height: chartHeight}"></div>
             <div class="footer">
-                <div class="chart-legend">
+                <div class="chart-legend" v-if="$slots.legend">
                     <slot name="legend"></slot>
                 </div>
                 <hr />

@@ -57,7 +57,7 @@ class DataSource(object):
         :return: 包含指定维度数据的字典
         """
         # 从表中读取数据
-        self.update()
+        self.update(table_name)
 
         # 检查维度是否存在
         if dimension not in self.data.columns:
@@ -65,6 +65,10 @@ class DataSource(object):
 
         # 获取指定维度的数据
         data = self.data[dimension].tolist()
+
+        # 将Timestamp对象转换为字符串
+        if isinstance(data[0], pd.Timestamp):
+            data = [d.strftime("%Y-%m-%d %H:%M:%S") for d in data]
 
         # 返回数据
         return {dimension: data}

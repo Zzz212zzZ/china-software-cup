@@ -94,28 +94,28 @@
 
     </div>
 
-    <div class="row">
-      <div class="col-12">
-        <div class="cards">
-          <div class="btnRow row mt-3 mb-5">
-            <!-- Btn -->
 
-            <button class="dropBtn">
-              <span style="font-size: large;">属性可视化</span>
-              <span class="ti-arrow-circle-right rippleIcons"></span>
 
-              <ul class="customDropdown">
-              <li 
-                v-for="(value, item) in attritems" 
-                :key="item"
-                :class="{ active: value }">
-                <a href="#" @click.prevent="toggleActive(item)">{{ item }}</a>
-              </li>
-            </ul>
 
-            </button>
+    <div class="cards">
+      <div class="btnRow row mt-3 mb-5">
+        <!-- Btn -->
+        <button class="dropBtn">
+          <span style="font-size: large;">属性可视化</span>
+          <span class="ti-arrow-circle-right rippleIcons"></span>
+          <ul class="customDropdown">
+            <li v-for="(value, item) in attritems" :key="item" :class="{ active: value }">
+              <a href="#" @click.prevent="toggleActive(item)">{{ item }}</a>
+            </li>
+          </ul>
+        </button>
+      </div>
 
-            <!-- 剩下是添加图片的组件 -->
+
+      <div v-for="(value, item) in attritems" :key="item">
+        <div class="row">
+          <div class="col-12">
+            <DecoratedEchart v-if="value" :title="item" :chartOptions="options[item]" :ref="() => `echartRef-${item}`" />
           </div>
         </div>
       </div>
@@ -126,17 +126,21 @@
 
 
 
+
+
   </div>
 </template>
 <script>
-import { StatsCard, EchartsCard } from "@/components/index";
+import { StatsCard, EchartsCard, DecoratedEchart } from "@/components/index";
 import Chartist from "chartist";
 import * as echarts from "echarts";
-import ecStat from "echarts-stat"
+import ecStat from "echarts-stat";
+
 export default {
   components: {
     StatsCard,
     EchartsCard,
+    DecoratedEchart,
   },
   /**
    * Chart data used to render stats, charts. Should be replaced with server data
@@ -145,13 +149,72 @@ export default {
 
   created() {
     this.fetchStatsCardsData(this.$store.state.selectedWindTurbine);
+
+    //-----------------------定义options，是每一个折线面积图的配置-----------------------
+
   },
+
   mounted() {
-    echarts.registerTransform(ecStat.transform.histogram); 
+    echarts.registerTransform(ecStat.transform.histogram);
     this.correlationOption.xAxis.name = this.dropdownTitle2;
     this.correlationOption.yAxis.name = this.dropdownTitle1;
     //初始化相关性散点图的数据，因为数据本身只有靠变化才能调用，这里直接手动调用changeTitle
     this.changeTitle1(this.dropdownTitle1);
+
+    for (let attrName in this.attritems) {
+      console.log(attrName);
+      this.options[attrName] = {
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+            label: {
+              backgroundColor: '#6a7985'
+            }
+          }
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
+        },
+        grid: {
+          top: '5%',
+          left: '3%',
+          right: '4%',
+          bottom: '10%',
+          containLabel: true
+        },
+        xAxis: [
+          {
+            type: 'category',
+            boundaryGap: false,
+            data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100],
+            axisLabel: {
+              interval: 'auto'  // 'auto' 或者一个固定的数字
+            }
+          }
+        ],
+        yAxis: [
+          {
+            type: 'value'
+          }
+        ],
+        series: [
+          {
+            name: attrName,
+            type: 'line',
+            stack: 'Total',
+            areaStyle: {},
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0.46047747600517397, 0.21607694057754334, 0.24257963740200394, 0.8025874813305929, 0.9564591682084751, 0.46801213100006533, 0.3128338842662304, 0.5322566850148831, 0.5379962110572074, 0.9516893561704958, 0.348912136297288, 0.8851548770516071, 0.2681822774102822, 0.7392631897202784, 0.08127819614506948, 0.9620397536902456, 0.9223619767453926, 0.8892879458135514, 0.415595817299268, 0.47942852390352275, 0.45404343534681546, 0.8580416241592974, 0.985784569654429, 0.6783363271162972, 0.595089648699179, 0.008073832784263768, 0.47981689897256596, 0.2126219638926108, 0.1510975854859129, 0.12294126289120455, 0.48968568655862055, 0.2310134586998427, 0.40729357965028123, 0.468830128845632, 0.6566587352934139, 0.6119329094513233, 0.6914028545192437, 0.1689468655247992, 0.6434397990959202, 0.889896562396469, 0.26252865994511243, 0.7578527195867397, 0.9572498147493074, 0.49630764499840296, 0.26250467132845, 0.8396543165691728, 0.8542073142835565, 0.6238701860341531, 0.7027355317705921, 0.4579042612652815, 0.8302637423967536, 0.7757375720610802, 0.7279631682928631, 0.8936863653469294, 0.9633622952054299, 0.7405093534694356, 0.16899161055290346, 0.4353884428944286, 0.3618708963424879, 0.7570737535598073, 0.43476163695004777, 0.4217843736865121, 0.22487321363552093, 0.7471808107444606, 0.06528408377245243, 0.32792305760788265, 0.12077776979980004, 0.5687478615452224, 0.6872323903299875, 0.43870524234421593, 0.9323435058158043, 0.44924317946648107, 0.4075531912869834, 0.8324645526164864, 0.017698255277562414, 0.5437729780958773, 0.909920740530175, 0.9450867856887761, 0.07255971970686836, 0.9974100721088257, 0.42560821827258577, 0.8139013368517172, 0.1517837766813046, 0.31846483378838064, 0.7260374792386439, 0.07410895574826615, 0.972620407047837, 0.2566890324001265, 0.4526762713961916, 0.8175324067071599, 0.754693077689097, 0.9535276761165985, 0.509149636837327, 0.734758113665309, 0.25085931944878603, 0.7524177118889885, 0.04448170017944575, 0.8325187111672865, 0.408344950042997, 0.08567221857170759]
+          }
+        ]
+      };
+
+    }
   },
 
 
@@ -250,8 +313,28 @@ export default {
 
     //----------------------------------属性可视化的方法----------------------
     toggleActive(value) {
-      this.attritems[value] = !this.attritems[value];
+      let windTurbineName = this.getWindTurbineName(this.$store.state.selectedWindTurbine) //截取'风机 ',取后面的数字
+      const fetchXAxisData = fetch(`http://127.0.0.1:5000/dimension_data?number=${windTurbineName}&dimension=DATATIME`)
+        .then(response => response.json())
+        .then(data => {
+          this.options[value].xAxis[0].data = data['DATATIME'];
+        });
+
+      const fetchYAxisData = fetch(`http://127.0.0.1:5000/dimension_data?number=${windTurbineName}&dimension=${value}`) //修改为你的实际URL
+        .then(response => response.json())
+        .then(data => {
+          this.options[value].series[0].data = data[value];
+        });
+
+      Promise.all([fetchXAxisData, fetchYAxisData]).then(() => {
+        this.attritems[value] = !this.attritems[value];
+        this.$nextTick(() => {
+          console.log(this.$refs['echartRef-' + value])
+          this.$refs['echartRef-' + value].setOption(this.options[value]);
+        });
+      });
     },
+
 
 
   },
@@ -619,9 +702,14 @@ export default {
         'YD15': false
       },
 
+      options: {},
+
     };
   },
 };
+
+
+
 
 </script>
 <style lang="scss">
@@ -698,10 +786,10 @@ $accent: #5380F7;
 
 .cards {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  // display: flex;
+  // flex-direction: column;
+  // justify-content: center;
+  // align-items: center;
 }
 
 
@@ -770,7 +858,7 @@ $accent: #5380F7;
     opacity: 0;
     visibility: hidden;
     transition: 0.3s ease;
-    padding-left: 0 ;
+    padding-left: 0;
     z-index: 9999;
 
     // &:before {

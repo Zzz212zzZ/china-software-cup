@@ -8,6 +8,7 @@ import Card from "./Cards/Card.vue";
 import ChartCard from "./Cards/ChartCard.vue";
 import StatsCard from "./Cards/StatsCard.vue";
 import EchartsCard from "./Cards/EchartsCard.vue";
+import DecoratedEchart from "./Cards/DecoratedEchart.vue";
 
 import SidebarPlugin from "./SidebarPlugin/index";
 
@@ -19,7 +20,8 @@ let components = {
   PaperTable,
   DropDown,
   SidebarPlugin,
-  EchartsCard
+  EchartsCard,
+  DecoratedEchart,
 };
 
 export default components;
@@ -32,6 +34,6 @@ export {
   PaperTable,
   DropDown,
   Button,
-  SidebarPlugin,
-  EchartsCard
+  EchartsCard,
+  DecoratedEchart,
 };

@@ -25,42 +25,54 @@
         <echarts-card ref="correlation" title="相关性图" sub-title="不同维度数据相关性的散点展示，左侧为纵坐标，右侧为横坐标"
           :chart-options="correlationOption" chart-height="800px">
           <span slot="footer">
-            <div class="twoBtnRow">
-              <div class="col-md-6 col-12">
-                <div class="btn-group dropup dropdownAtr">
-                  <button type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false">
-                    {{ dropdownTitle1 }}
-                  </button>
-                  <div class="dropdown-menu">
-                    <a v-for="item in dropdownOptions" :key="item + 'a'"
-                      @click.prevent="item !== dropdownTitle2 ? changeTitle1(item) : undefined"
-                      :class="{ 'dropdown-item': true, disabled: item === dropdownTitle2 || item === dropdownTitle1, selected: item === dropdownTitle1 }"
-                      href="#">
-                      {{ item }}
-                    </a>
-                  </div>
+            <div class="flex-column col-12">
+              <div class="row col-12 justify-content-center align-items-center">
+                <div class="col-4">
+                  <vue-slider v-model="percentage" :lazy="true" :min="0.1" :max="1" :interval="0.01" :hide-label="true"
+                    :height="5">
+                  </vue-slider>
                 </div>
+                <label class="col-auto">显示点百分比</label>
               </div>
 
-              <div class="col-md-6 col-12 ">
-                <div class="btn-group dropup dropdownAtr">
-                  <button type="button" class="btn btn-info dropdown-toggle btn-block" data-toggle="dropdown"
-                    aria-haspopup="true" aria-expanded="false">
-                    {{ dropdownTitle2 }}
-                  </button>
-                  <div class="dropdown-menu">
-                    <a v-for="item in dropdownOptions" :key="item + 'a'"
-                      @click.prevent="item !== dropdownTitle1 ? changeTitle2(item) : undefined"
-                      :class="{ 'dropdown-item': true, disabled: item === dropdownTitle1 || item === dropdownTitle2, selected: item === dropdownTitle2 }"
-                      href="#">
-                      {{ item }}
-                    </a>
+              <div class="col-12">
+                <div class="twoBtnRow">
+                  <div class="col-md-6 col-12">
+                    <div class="btn-group dropup dropdownAtr">
+                      <button type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        {{ dropdownTitle1 }}
+                      </button>
+                      <div class="dropdown-menu">
+                        <a v-for="item in dropdownOptions" :key="item + 'a'"
+                          @click.prevent="item !== dropdownTitle2 ? changeTitle1(item) : undefined"
+                          :class="{ 'dropdown-item': true, disabled: item === dropdownTitle2 || item === dropdownTitle1, selected: item === dropdownTitle1 }"
+                          href="#">
+                          {{ item }}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 col-12 ">
+                    <div class="btn-group dropup dropdownAtr">
+                      <button type="button" class="btn btn-info dropdown-toggle btn-block" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        {{ dropdownTitle2 }}
+                      </button>
+                      <div class="dropdown-menu">
+                        <a v-for="item in dropdownOptions" :key="item + 'a'"
+                          @click.prevent="item !== dropdownTitle1 ? changeTitle2(item) : undefined"
+                          :class="{ 'dropdown-item': true, disabled: item === dropdownTitle1 || item === dropdownTitle2, selected: item === dropdownTitle2 }"
+                          href="#">
+                          {{ item }}
+                        </a>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-
           </span>
           <!-- <div slot="legend">
             <i class="fa fa-circle text-success"></i> Profit
@@ -132,6 +144,7 @@
 </template>
 <script>
 import { StatsCard, EchartsCard, DecoratedEchart } from "@/components/index";
+import VueSlider from 'vue-slider-component'
 import Chartist from "chartist";
 import * as echarts from "echarts";
 import ecStat from "echarts-stat";
@@ -141,6 +154,7 @@ export default {
     StatsCard,
     EchartsCard,
     DecoratedEchart,
+    VueSlider,
   },
   /**
    * Chart data used to render stats, charts. Should be replaced with server data
@@ -243,6 +257,17 @@ export default {
       const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
       this.getCorrlationData(Number, y_name, x_name, percentage);
     },
+
+    'percentage': {
+      handler() {
+        const x_name = this.correlationOption.xAxis.name;
+        const y_name = this.correlationOption.yAxis.name;
+        const percentage = this.percentage;  //显示指定(默认20%)的散点
+        const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
+        // 以下是前后端交接功能，这里是接受相关性数据，两个list
+        this.getCorrlationData(Number, y_name, x_name, percentage);
+      }
+    }
   },
 
 
@@ -255,7 +280,7 @@ export default {
       this.correlationOption.yAxis.name = item;
       const x_name = this.correlationOption.xAxis.name;
       const y_name = this.correlationOption.yAxis.name;
-      const percentage = 0.2;  //显示20%的散点
+      const percentage = this.percentage;  //显示指定(默认20%)的散点
       const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
       this.getCorrlationData(Number, y_name, x_name, percentage);
@@ -265,7 +290,7 @@ export default {
       this.correlationOption.xAxis.name = item;
       const x_name = this.correlationOption.xAxis.name;
       const y_name = this.correlationOption.yAxis.name;
-      const percentage = 0.2;  //显示20%的散点
+      const percentage = this.percentage;  //显示指定(默认20%)的散点
       const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
       // 以下是前后端交接功能，这里是接受相关性数据，两个list
       this.getCorrlationData(Number, y_name, x_name, percentage);
@@ -349,6 +374,8 @@ export default {
       //----------------------------------相关性图的变量----------------------
       dropdownTitle1: 'YD15',
       dropdownTitle2: 'ROUND(A.POWER,0)',
+
+      percentage: 0.2,
 
       dropdownOptions: [
         'WINDSPEED',

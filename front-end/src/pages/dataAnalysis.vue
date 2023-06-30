@@ -26,14 +26,14 @@
           :chart-options="correlationOption" chart-height="800px">
           <span slot="footer">
             <div class="flex-column col-12">
-              <div class="row col-12 justify-content-center align-items-center">
+              <!-- <div class="row col-12 justify-content-center">
                 <div class="col-4">
                   <vue-slider v-model="percentage" :lazy="true" :min="0.1" :max="1" :interval="0.01" :hide-label="true"
                     :height="5">
                   </vue-slider>
                 </div>
                 <label class="col-auto">显示点百分比</label>
-              </div>
+              </div> -->
 
               <div class="col-12">
                 <div class="twoBtnRow">
@@ -107,8 +107,6 @@
     </div>
 
 
-
-
     <div class="cards">
       <div class="btnRow row mt-3 mb-5">
         <!-- Btn -->
@@ -132,13 +130,6 @@
         </div>
       </div>
     </div>
-
-
-
-
-
-
-
 
   </div>
 </template>
@@ -301,7 +292,7 @@ export default {
         .then(response => response.json())
         .then(data => {
           console.log(data);
-          this.correlationOption.series[0].data = data['data_mini'];
+          this.correlationOption.series[0].data = data['data_all'];
           this.histogramxOption.dataset[0].source = data['data_all'];
           this.histogramyOption.dataset[0].source = data['data_all'];
         })
@@ -961,6 +952,10 @@ $accent: #5380F7;
       0 0 0 80px rgba($white, 0);
   }
 }
+
+// .card .footer div{
+//   display: initial;
+// }
 
 // .container button.dropBtn {
 //   transition: background-color 0.5s ease;

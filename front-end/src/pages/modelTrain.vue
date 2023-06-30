@@ -1,206 +1,276 @@
 <template>
   <div>
-    <!--Stats cards-->
+
     <div class="row">
-      <div
-        class="col-md-6 col-xl-3"
-        v-for="stats in statsCards"
-        :key="stats.title"
-      >
-        <stats-card>
-          <div
-            class="icon-big text-center"
-            :class="`icon-${stats.type}`"
-            slot="header"
-          >
-            <i :class="stats.icon"></i>
+      <div class="col-8">
+        <!-- 参数控制 -->
+        <card title="任务" subTitle="大家好啊，我是模型训练控制台" style="z-index: auto;">
+          <div>
+            <!-- 主变量 -->
+            <div class="col-12 row">
+              <label class="col-auto">主变量：</label>
+              <div class="col-11 row">
+                <div class="col-auto" v-for="variable in variables">
+                  <input type="checkbox" v-model="primaryVars" name="primary" :value="variable"
+                    :disabled="secondaryVars.includes(variable)">{{ variable }}
+                </div>
+              </div>
+
+            </div>
+
+            <!-- 副变量 -->
+            <div class="col-12 row">
+              <label class="col-auto">副变量：</label>
+              <div class="col-11 row">
+                <div class="col-auto" v-for="variable in variables">
+                  <input type="checkbox" v-model="secondaryVars" name="secondary" :value="variable"
+                    :disabled="primaryVars.includes(variable)">{{ variable }}
+                </div>
+              </div>
+            </div>
+
+            <div class="col-12 row">
+              <div class="col-4" v-for="para in parameters">
+                <label>{{ para.parameterName }}</label>
+                <button class="dropdown-toggle underline" type="button" :id="para.parameterName" data-toggle="dropdown">
+                  {{ para.default }}
+                </button>
+                <div class="dropdown-menu" :aria-labelledby="para.parameterName">
+                  <div class="dropdown-item"
+                    v-if="typeof para.values[0] === 'number' && typeof para.values[1] === 'number'">
+                    <vue-slider v-model="para.default" :lazy="true" :min="para.values[0]" :max="para.values[1]"
+                      :interval="para.interval"></vue-slider>
+                  </div>
+                  <div v-else>
+                    <a class="dropdown-item" v-for="v in para.values" @click="para.default = v">{{ v }}</a>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
           </div>
-          <div class="numbers" slot="content">
-            <p>{{ stats.title }}</p>
-            {{ stats.value }}
+
+          <!-- 分数 -->
+          <!-- <div slot="footer">
+            <h4>分数</h4>
+            <h3 style="color: grey;">{{ score }}</h3>
+          </div> -->
+        </card>
+
+        <echarts-card ref="mainChart" title="模型训练" sub-title="副标题" chartHeight="600px">
+          <div slot="footer" class="row">
+            <div class="col-10">
+              <vue-slider v-model="samples" :lazy="true" :max="dataLength" :process="dataProcess" :height="10"
+                :data="data" :marks="marks"></vue-slider>
+            </div>
+            <div class="col-2">
+                <button class="btn btn-primary btn-lg w-100">开始训练</button>
+            </div>
+
           </div>
-          <div class="stats" slot="footer">
-            <i :class="stats.footerIcon"></i> {{ stats.footerText }}
-          </div>
-        </stats-card>
+        </echarts-card>
+      </div>
+
+      <div class="col-4">
+        <echarts-card ref="verifyChart" title="验证集比较" sub-title="副标题" chartHeight="400px">
+
+        </echarts-card>
+
+        <echarts-card ref="predictionChart" title="预测结果" sub-title="副标题" chartHeight="400px">
+
+        </echarts-card>
       </div>
     </div>
 
-    <!--Charts-->
-    <div class="row">
-      <div class="col-12">
-        <chart-card
-          title="Users behavior"
-          sub-title="24 Hours performance"
-          :chart-data="usersChart.data"
-          :chart-options="usersChart.options"
-        >
-          <span slot="footer">
-            <i class="ti-reload"></i> Updated 3 minutes ago
-          </span>
-          <div slot="legend">
-            <i class="fa fa-circle text-info"></i> Open
-            <i class="fa fa-circle text-danger"></i> Click
-            <i class="fa fa-circle text-warning"></i> Click Second Time
-          </div>
-        </chart-card>
-      </div>
-
-      <div class="col-md-6 col-12">
-        <chart-card
-          title="Email Statistics"
-          sub-title="Last campaign performance"
-          :chart-data="preferencesChart.data"
-          chart-type="Pie"
-        >
-          <span slot="footer">
-            <i class="ti-timer"></i> Campaign set 2 days ago</span
-          >
-          <div slot="legend">
-            <i class="fa fa-circle text-info"></i> Open
-            <i class="fa fa-circle text-danger"></i> Bounce
-            <i class="fa fa-circle text-warning"></i> Unsubscribe
-          </div>
-        </chart-card>
-      </div>
-
-      <div class="col-md-6 col-12">
-        <chart-card
-          title="2015 Sales"
-          sub-title="All products including Taxes"
-          :chart-data="activityChart.data"
-          :chart-options="activityChart.options"
-        >
-          <span slot="footer">
-            <i class="ti-check"></i> Data information certified
-          </span>
-          <div slot="legend">
-            <i class="fa fa-circle text-info"></i> Tesla Model S
-            <i class="fa fa-circle text-warning"></i> BMW 5 Series
-          </div>
-        </chart-card>
-      </div>
-    </div>
   </div>
 </template>
 <script>
-import { StatsCard, ChartCard } from "@/components/index";
+import { ModelCard, EchartsCard, Card } from "@/components/index";
+import VueSlider from 'vue-slider-component'
 import Chartist from "chartist";
 export default {
   components: {
-    StatsCard,
-    ChartCard,
+    ModelCard,
+    EchartsCard,
+    Card,
+    VueSlider,
   },
-  /**
-   * Chart data used to render stats, charts. Should be replaced with server data
-   */
+
+
   data() {
     return {
-      statsCards: [
+      variables: [
+        'WINDSPEED',
+        'WINDDIRECTION',
+        'TEMPERATURE',
+        'HUMIDITY',
+        'PRESSURE',
+      ],
+
+      parameters: [
         {
-          type: "warning",
-          icon: "ti-server",
-          title: "Capacity",
-          value: "105GB",
-          footerText: "Updated now",
-          footerIcon: "ti-reload",
+          parameterName: "Aggregation function",
+          values: ["sum", "concat", "attention_sum"],
+          default: "sum",
         },
         {
-          type: "success",
-          icon: "ti-wallet",
-          title: "Revenue",
-          value: "$1,345",
-          footerText: "Last day",
-          footerIcon: "ti-calendar",
+          parameterName: "embedding size",
+          values: [0, 1],
+          default: 0.5,
+          interval: 0.01,
         },
         {
-          type: "danger",
-          icon: "ti-pulse",
-          title: "Errors",
-          value: "23",
-          footerText: "In the last hour",
-          footerIcon: "ti-timer",
+          parameterName: "GRU layers",
+          values: [0, 1],
+          default: 0.5,
+          interval: 0.01,
         },
         {
-          type: "info",
-          icon: "ti-twitter-alt",
-          title: "Followers",
-          value: "+45",
-          footerText: "Updated now",
-          footerIcon: "ti-reload",
+          parameterName: "epoch",
+          values: [0, 1],
+          default: 0.5,
+          interval: 0.01,
+        },
+        {
+          parameterName: "batchsize",
+          values: [0, 1],
+          default: 0.5,
+          interval: 0.01,
+        },
+        {
+          parameterName: "learning rate",
+          values: [0, 1],
+          default: 0.5,
+          interval: 0.01,
         },
       ],
-      usersChart: {
-        data: {
-          labels: [
-            "9:00AM",
-            "12:00AM",
-            "3:00PM",
-            "6:00PM",
-            "9:00PM",
-            "12:00PM",
-            "3:00AM",
-            "6:00AM",
-          ],
-          series: [
-            [287, 385, 490, 562, 594, 626, 698, 895, 952],
-            [67, 152, 193, 240, 387, 435, 535, 642, 744],
-            [23, 113, 67, 108, 190, 239, 307, 410, 410],
-          ],
+
+      score: 1,
+      primaryVars: [],
+      secondaryVars: [],
+
+      //进度条属性
+      samples: [0, 9000, 9800, 9900],
+      dataLength: 10000,
+      dataProcess: dotPos => [
+        [dotPos[0], dotPos[1]],
+        [dotPos[2], dotPos[3], { backgroundColor: 'yellow' }],
+        [dotPos[3], 100, { backgroundColor: 'lightgreen' }],
+      ]
+    }
+  },
+
+  computed: {
+    points: function () {
+      return [
+        {
+          value: 0,
+          step: 10,
         },
-        options: {
-          low: 0,
-          high: 1000,
-          showArea: true,
-          height: "245px",
-          axisX: {
-            showGrid: false,
-          },
-          lineSmooth: Chartist.Interpolation.simple({
-            divisor: 3,
-          }),
-          showLine: true,
-          showPoint: false,
+        {
+          value: this.dataLength - 200,
+          step: 1,
         },
-      },
-      activityChart: {
-        data: {
-          labels: [
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "Mai",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-          ],
-          series: [
-            [542, 543, 520, 680, 653, 753, 326, 434, 568, 610, 756, 895],
-            [230, 293, 380, 480, 503, 553, 600, 664, 698, 710, 736, 795],
-          ],
+        {
+          value: this.dataLength,
+          step: 1,
         },
-        options: {
-          seriesBarDistance: 10,
-          axisX: {
-            showGrid: false,
-          },
-          height: "245px",
-        },
-      },
-      preferencesChart: {
-        data: {
-          labels: ["62%", "32%", "6%"],
-          series: [62, 32, 6],
-        },
-        options: {},
-      },
-    };
+      ];
+    },
+
+    data: function () {
+      let result = [];
+
+      this.points.forEach((point, idx) => {
+        const lastPointValue = this.points[this.points.length - 1].value;
+
+        if (point.value === lastPointValue) {
+          return;
+        } else {
+          const nextPoint = this.points[idx + 1];
+
+          for (let i = point.value; i <= nextPoint.value; i += point.step) {
+            result.push(i);
+          }
+        }
+      });
+
+      const uniqueValues = new Set(result);
+      return [...uniqueValues];
+    },
+    marks: function () {
+      return this.points.map(point => point.value);
+    },
+  },
+
+  methods:{
+    //获取模型未训练的数据
+    getUnprocessedData(Number){
+      fetch(`http://127.0.0.1:5000/unprocessedData?number=${Number}`)
+        .then(response => response.json())
+        .then(data => {
+          //处理数据
+        })
+        .catch(error => console.error(error));
+    },
+    train(){
+      fetch(`http://127.0.0.1:5000/train`,{
+        method:'post',
+        body:JSON.stringify({
+          number: this.getWindTurbineName(),
+          primaryVars: this.primaryVars,
+          secondaryVars: this.secondaryVars,
+
+          Aggregation_function:this.parameters[0].default,
+          embedding_size:this.parameters[1].default,
+          GRU_layers:this.parameters[2].default,
+          epoch:this.parameters[3].default,
+          batchsize:this.parameters[4].default,
+          learning_rate:this.parameters[5].default,
+
+          samples:this.samples
+        })
+      }).then(response => response.json())
+      .then(data => {
+          console.log(data)
+          //输出处理成功/失败
+        })
+    },
+    getTrainedData(Number){
+      fetch(`http://127.0.0.1:5000/trainedData?number=${Number}`)
+        .then(response => response.json())
+        .then(data => {
+          //处理数据
+        })
+        .catch(error => console.error(error));
+    },
+    //获取风机名称封装函数
+    getWindTurbineName(windTurbineName) {
+      windTurbineName = windTurbineName.slice(3);
+      //如果windTurbineNumber编号为单个数字，前面加0
+      if (windTurbineName.length == 1) {
+        windTurbineName = '0' + windTurbineName;
+      }
+      return windTurbineName
+    },
   },
 };
 </script>
-<style></style>
+<style>
+.underline {
+  background: transparent;
+  border-bottom: 2px grey solid;
+  border-top: 0px;
+  border-left: 0px;
+  border-right: 0px;
+  width: 100%;
+  display: flex;
+}
+
+.underline::after {
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-left: auto !important;
+}
+</style>

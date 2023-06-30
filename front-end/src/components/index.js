@@ -9,6 +9,7 @@ import ChartCard from "./Cards/ChartCard.vue";
 import StatsCard from "./Cards/StatsCard.vue";
 import EchartsCard from "./Cards/EchartsCard.vue";
 import DecoratedEchart from "./Cards/DecoratedEchart.vue";
+import ModelCard from "./Cards/ModelCard.vue"
 
 import SidebarPlugin from "./SidebarPlugin/index";
 
@@ -22,6 +23,7 @@ let components = {
   SidebarPlugin,
   EchartsCard,
   DecoratedEchart,
+  ModelCard,
 };
 
 export default components;
@@ -36,4 +38,5 @@ export {
   Button,
   EchartsCard,
   DecoratedEchart,
+  ModelCard,
 };

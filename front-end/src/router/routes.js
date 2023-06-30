@@ -35,41 +35,41 @@ const routes = [
         name:"模型训练",
         component:modelTrain,
       },
-      {
-        path: "dashboard",
-        name: "dashboard",
-        component: Dashboard,
-      },
-      {
-        path: "stats",
-        name: "stats",
-        component: UserProfile,
-      },
-      {
-        path: "notifications",
-        name: "notifications",
-        component: Notifications,
-      },
-      {
-        path: "icons",
-        name: "icons",
-        component: Icons,
-      },
-      {
-        path: "maps",
-        name: "maps",
-        component: Maps,
-      },
-      {
-        path: "typography",
-        name: "typography",
-        component: Typography,
-      },
-      {
-        path: "table-list",
-        name: "table-list",
-        component: TableList,
-      },
+      // {
+      //   path: "dashboard",
+      //   name: "dashboard",
+      //   component: Dashboard,
+      // },
+      // {
+      //   path: "stats",
+      //   name: "stats",
+      //   component: UserProfile,
+      // },
+      // {
+      //   path: "notifications",
+      //   name: "notifications",
+      //   component: Notifications,
+      // },
+      // {
+      //   path: "icons",
+      //   name: "icons",
+      //   component: Icons,
+      // },
+      // {
+      //   path: "maps",
+      //   name: "maps",
+      //   component: Maps,
+      // },
+      // {
+      //   path: "typography",
+      //   name: "typography",
+      //   component: Typography,
+      // },
+      // {
+      //   path: "table-list",
+      //   name: "table-list",
+      //   component: TableList,
+      // },
     ],
   },
   { path: "*", component: NotFound },

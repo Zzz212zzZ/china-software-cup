@@ -14,7 +14,7 @@
         </template>
         <div>
             <div ref="echarts" class="echarts-chart" :style="{height: chartHeight}"></div>
-            <div class="footer">
+            <div> <!-- 这里用footer类会导致进度条显示错误 -->
                 <div class="chart-legend" v-if="$slots.legend">
                     <slot name="legend"></slot>
                 </div>

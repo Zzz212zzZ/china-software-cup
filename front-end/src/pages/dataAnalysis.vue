@@ -416,7 +416,9 @@ export default {
           {
             symbolSize: 10,
             data: [],
-            type: 'scatter'
+            type: 'scatter',
+            large: true,
+            largeThreshold: 500
           }
         ]
       },

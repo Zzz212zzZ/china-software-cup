@@ -181,6 +181,8 @@ export default {
             itemStyle: {
               color: '#F3BB45'
             },
+            large: true,
+            largeThreshold: 500
           },
           {
             name: '乙类异常数据',
@@ -189,7 +191,9 @@ export default {
             symbolSize: 7,
             itemStyle: {
               color: '#EB5E28'
-            }
+            },
+            large: true,
+            largeThreshold: 500
           },
           {
             name: '正常数据',
@@ -198,7 +202,9 @@ export default {
             symbolSize: 7,
             itemStyle: {
               color: '#68B3C8'
-            }
+            },
+            large: true,
+            largeThreshold: 500
           },
         ],
       },

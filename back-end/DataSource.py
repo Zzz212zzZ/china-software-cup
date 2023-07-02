@@ -65,7 +65,6 @@ class DataSource(object):
 
         # 获取指定维度的数据
         data = self.data[dimension].tolist()
-
         # 将Timestamp对象转换为字符串
         if isinstance(data[0], pd.Timestamp):
             data = [d.strftime("%Y-%m-%d %H:%M:%S") for d in data]

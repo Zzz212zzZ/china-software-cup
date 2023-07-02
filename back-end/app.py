@@ -6,7 +6,7 @@ from flask_restful import Resource
 import json
 import numpy as np
 from BinProcessor import BinProcessor
-
+from train_predict import train,predict
 from DatabaseConnector import DatabaseConnector
 from DataSource import DataSource
 
@@ -41,12 +41,10 @@ def correlation():
     table_name = request.args['number']
     y = request.args['y']
     x = request.args['x']
-    percentage = float(request.args['percentage'])
     data = data_src.get_data(table_name, [x, y]).dropna()
 
     dict = {}
     dict['data_all'] = data.values.tolist()
-    dict['data_mini'] = data.sample(frac=percentage).values.tolist()
     return json.dumps(dict, ensure_ascii=False)
 
 
@@ -73,14 +71,12 @@ def bin_data():
     bin:BinProcessor=data_src.bin
     dict = {}
     normal_data=bin.getNormalData().drop_duplicates()
-    if normal_data.shape[0]<=10000:
-        dict['bin_data'] =normal_data.values.tolist()
-    else:
-        dict['bin_data'] = normal_data.sample(n=10000).values.tolist()
-    a_data=bin.getAData()
-    dict['a_data']=a_data.drop_duplicates().values.tolist()
-    b_data=bin.getBData()
-    dict['b_data']=b_data.drop_duplicates().sample(frac=0.6).values.tolist()
+
+    dict['bin_data'] = normal_data.values.tolist()
+    a_data=bin.getAData().drop_duplicates()
+    dict['a_data']=a_data.values.tolist()
+    b_data=bin.getBData().drop_duplicates()
+    dict['b_data']=b_data.values.tolist()
 
     dict['not_missing_percentage'] = bin.data.shape[0]-bin.getMissingData().shape[0]
     dict['missing_percentage']=bin.getMissingData().shape[0]

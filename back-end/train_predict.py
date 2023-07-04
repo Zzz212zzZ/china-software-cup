@@ -34,7 +34,7 @@ class args():
     """
 
     """
-    def __init__(self, epoch_num=10, batch_size=512, learning_rate=0.0002, pri_use_cols=[0,1], sec_use_cols=[2,3,4], embedding_size=256, GRU_layers=3, agg_method='sum', turbine_id = 11, train_start=0, train_end=20000, val_start=20000, val_end=22000):
+    def __init__(self, epoch_num=30, batch_size=256, learning_rate=0.002, pri_use_cols=[0,1], sec_use_cols=[2,3,4], embedding_size=256, GRU_layers=3, agg_method='sum', turbine_id = 11, train_start=0, train_end=20000, val_start=20000, val_end=22000):
         self.epoch_num = epoch_num
         self.batch_size = batch_size
         self.learning_rate = learning_rate
@@ -48,6 +48,25 @@ class args():
         self.embedding_size = embedding_size
         self.GRU_layers = GRU_layers
         self.agg_method = agg_method
+
+    def save(self,path):
+        dict={}
+        for name, value in vars(self).items():
+            dict[name]=value
+        if not os.path.exists(path):
+            os.makedirs(path)
+        f_save = open(path+'/args.pkl', 'wb')
+        pickle.dump(dict, f_save)
+        f_save.close()
+
+    def load(self,path):
+        f_read = open(path+'/args.pkl', 'rb')
+        dict = pickle.load(f_read)
+        f_read.close()
+
+        for name, value in vars(self).items():
+            setattr(self,name,dict[name])
+
 
 def data_preprocess(df):
     # ===========读取数据===========
@@ -146,7 +165,7 @@ class pre_model(paddle.nn.Layer):
         return output
 
 class TSDataset(paddle.io.Dataset):
-    def __init__(self, data, args,
+    def __init__(self, data, args,save_path,
                  ts_col='DATATIME',
                  labels=['YD15'],
                  data_type='train',):
@@ -161,9 +180,9 @@ class TSDataset(paddle.io.Dataset):
         assert data_type in ['train', 'val']  # 确保data_type输入符合要求
         type_map = {'train': 0, 'val': 1}
         self.set_type = type_map[self.data_type]
-        self.transform(data)
+        self.transform(data,save_path)
 
-    def transform(self, df):
+    def transform(self, df,save_path):
         # 获取unix时间戳、输入特征和预测标签
         x_values, y_values = df[self.use_cols].values, df[self.labels].values
         # 划分数据集
@@ -182,8 +201,8 @@ class TSDataset(paddle.io.Dataset):
             x_values = self.scaler1.transform(x_values)
             y_values = self.scaler2.transform(y_values)
             # 保存scaler
-            pickle.dump(self.scaler1, open('model/scaler{}_x.pkl'.format(self.turbine_id), 'wb'))
-            pickle.dump(self.scaler2, open('model/scaler{}_y.pkl'.format(self.turbine_id), 'wb'))
+            pickle.dump(self.scaler1, open('{}/scaler_x.pkl'.format(save_path), 'wb'))
+            pickle.dump(self.scaler2, open('{}/scaler_y.pkl'.format(save_path), 'wb'))
         else:
             pass
         # array to paddle tensor
@@ -215,7 +234,7 @@ class MSELoss(paddle.nn.Layer):
         mse_loss = paddle.nn.loss.MSELoss()
         mse = mse_loss(inputs, labels)
         return mse
-def train(df, args):
+def train(df, args, save_path):
     """
     :param df: 输入的dataframe格式数据
     :param args:  arg参数类实例
@@ -223,8 +242,8 @@ def train(df, args):
     """
     df = data_preprocess(df)
     # 设置数据集
-    train_dataset = TSDataset(df, args, data_type='train')
-    val_dataset = TSDataset(df, args, data_type='val')
+    train_dataset = TSDataset(df, args,save_path=save_path, data_type='train')
+    val_dataset = TSDataset(df, args,save_path=save_path, data_type='val')
     print(f'LEN | train_dataset:{len(train_dataset)}, val_dataset:{len(val_dataset)}')
 
     # 设置数据读取器
@@ -247,7 +266,7 @@ def train(df, args):
     train_epochs_loss = []
     valid_epochs_loss = []
     early_stopping = EarlyStopping(patience=10, verbose=True,
-                                   ckp_save_path=f'model/model_checkpoint_windid_{args.turbine_id}.pdparams')
+                                   ckp_save_path=f'{save_path}/model_checkpoint.pdparams')
 
     for epoch in tqdm(range(args.epoch_num)):
         # =====================train============================
@@ -292,21 +311,27 @@ def train(df, args):
             break
     return valid_epochs_loss
 
-def predict(df, args):
+def predict(df, args_html, read_path):
     """
     :param df: 输入的dataframe格式数据
-    :param args:  arg参数类实例
+    :param args_html:  页面的arg参数类实例，所有用户均可以调整
     :return: 返回tru_val（真实的验证集数据，list）, pre_val（预测的验证集数据，list）, pre_test（预测的测试集数据，list）, score（分数）
     """
+
+    """
+    模型初始化使用的参数用存储的args进行初始化，而非用前端传入的args进行初始化
+    """
+    args_db=args()
+    args_db.load(read_path)
     df = data_preprocess(df)
-    df_pre = df[args.val_start:]
-    model = pre_model(args.pri_use_cols, args.sec_use_cols, args.embedding_size, args.GRU_layers, args.agg_method)
+    df_pre = df[args_html.val_start:]
+    model = pre_model(args_db.pri_use_cols, args_db.sec_use_cols, args_db.embedding_size, args_db.GRU_layers, args_db.agg_method)
     # 导入模型权重文件
-    model.set_state_dict(paddle.load(f'model/model_checkpoint_windid_{args.turbine_id}.pdparams'))
+    model.set_state_dict(paddle.load(f'{read_path}/model_checkpoint.pdparams'))
     model.eval()  # 开启预测
 
-    scaler_y = pickle.load(open('model/scaler{}_y.pkl'.format(args.turbine_id), 'rb'))
-    scaler_x = pickle.load(open('model/scaler{}_x.pkl'.format(args.turbine_id), 'rb'))
+    scaler_y = pickle.load(open('{}/scaler_y.pkl'.format(read_path), 'rb'))
+    scaler_x = pickle.load(open('{}/scaler_x.pkl'.format(read_path), 'rb'))
 
     input = np.array(df_pre[['WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']])
     input = scaler_x.transform(input)
@@ -316,10 +341,10 @@ def predict(df, args):
     output = scaler_y.inverse_transform(output)
 
     pre = [x for x in output.squeeze()]
-    pre_val = pre[:(args.val_end-args.val_start)]
-    pre_test = pre[(args.val_end-args.val_start):]
+    pre_val = pre[:(args_html.val_end-args_html.val_start)]
+    pre_test = pre[(args_html.val_end-args_html.val_start):]
 
-    tru_val = df_pre['YD15'].tolist()[:(args.val_end-args.val_start)]
+    tru_val = df_pre['YD15'].tolist()[:(args_html.val_end-args_html.val_start)]
 
     sum = 0
     for pre_i, tru_i in zip(pre_val, tru_val):
@@ -332,12 +357,12 @@ def predict(df, args):
 
 
 if __name__ == '__main__':
-    args = args()
-    df = pd.read_csv('数据/12.csv',
+    arg = args(turbine_id=11)
+    df = pd.read_csv('数据/11.csv',
                      parse_dates=['DATATIME'],
                      infer_datetime_format=True,
                      dayfirst=True)
 
-    # train(df, args)
-    predict(df,args)
-
+    arg.save('model/rich/temp/11.csv')
+    train(df, arg,'model/rich/temp/11.csv')
+    # tru_val, pre_val, pre_test, score=predict(df,args,'model/rich/temp/12.csv')

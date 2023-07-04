@@ -3,6 +3,9 @@
 
     <div class="row">
       <div class="col-8">
+        <div class="alert alert-warning" role="alert" v-if="stage === 'nodata'">
+          尚未完成数据预处理，请先完成数据预处理
+        </div>
         <!-- 参数控制 -->
         <card title="任务" subTitle="大家好啊，我是模型训练控制台" style="z-index: auto;">
           <div>
@@ -59,13 +62,37 @@
         </card>
 
         <echarts-card ref="mainChart" title="模型训练" sub-title="副标题" chartHeight="600px">
-          <div slot="footer" class="row">
-            <div class="col-10">
-              <vue-slider v-model="samples" :lazy="true" :max="dataLength" :process="dataProcess" :height="10"
-                :data="data" :marks="marks"></vue-slider>
+          <!-- <div  slot=""></div> -->
+
+          <div slot="footer" class="row" style="padding-bottom: 10px;">
+            <div class="col-10" style="padding-top: 20px;">
+              <vue-slider ref="slider" v-model="samples" :max="dataLength" :process="dataProcess" :height="10" :data="data"
+                :marks="marks" :enable-cross="false">
+                <template v-slot:process="{ start, end, style, index }">
+                  <div class="vue-slider-process" :style="style">
+                    <div v-if="index !== 1 && index !== 3" :class="[
+                      'merge-tooltip',
+                      'vue-slider-dot-tooltip-inner',
+                      'vue-slider-dot-tooltip-inner-top'
+                    ]">
+                      {{ samples[index + 1] - samples[index] }}
+                    </div>
+                    <div v-else-if="index === 3" :class="[
+                      'merge-tooltip',
+                      'vue-slider-dot-tooltip-inner',
+                      'vue-slider-dot-tooltip-inner-top'
+                    ]">
+                      {{ dataLength - samples[index] }}
+                    </div>
+                  </div>
+                </template>
+              </vue-slider>
             </div>
             <div class="col-2">
-                <button class="btn btn-primary btn-lg w-100">开始训练</button>
+              <button class="btn btn-primary btn-lg w-100" v-if="stage === 'trained'" @click="retrain()">重新训练</button>
+              <button class="btn btn-primary btn-lg w-100" :disabled="stage === 'nodata' || stage==='training'" v-else @click="onTrain()"
+              >开始训练
+              </button>
             </div>
 
           </div>
@@ -83,12 +110,15 @@
       </div>
     </div>
 
+
   </div>
 </template>
 <script>
-import { ModelCard, EchartsCard, Card } from "@/components/index";
+import { ModelCard, EchartsCard, Card} from "@/components/index";
 import VueSlider from 'vue-slider-component'
 import Chartist from "chartist";
+import {ElButton} from 'element-ui'
+
 export default {
   components: {
     ModelCard,
@@ -151,13 +181,16 @@ export default {
       secondaryVars: [],
 
       //进度条属性
-      samples: [0, 9000, 9800, 9900],
+      samples: [0, 7500, 8000, 9900],
       dataLength: 10000,
       dataProcess: dotPos => [
         [dotPos[0], dotPos[1]],
+        [dotPos[1], dotPos[2], { backgroundColor: '#ccc' }],
         [dotPos[2], dotPos[3], { backgroundColor: 'yellow' }],
         [dotPos[3], 100, { backgroundColor: 'lightgreen' }],
-      ]
+      ],
+      //状态
+      stage: 'nodata' //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
     }
   },
 
@@ -169,7 +202,7 @@ export default {
           step: 10,
         },
         {
-          value: this.dataLength - 200,
+          value: this.dataLength - 100,
           step: 1,
         },
         {
@@ -202,48 +235,149 @@ export default {
     marks: function () {
       return this.points.map(point => point.value);
     },
+
+    hasError: function () {
+      return !(typeof this.errorinfo === "undefined" || this.errorinfo === null || this.errorinfo.trim() === "")
+    }
   },
 
-  methods:{
+  created() {
+    this.initalize()
+  },
+
+  methods: {
+    async initalize(){
+      await this.getUnprocessedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine))
+      setTimeout(() => {
+          this.getTrainedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine));
+        }, 500);
+      
+      // if(this.stage!=='trained'){
+      // }
+    },
     //获取模型未训练的数据
-    getUnprocessedData(Number){
-      fetch(`http://127.0.0.1:5000/unprocessedData?number=${Number}`)
+    getUnprocessedData(Number) {
+      fetch(`http://127.0.0.1:5000/unprocessed_data?number=${Number}`)
         .then(response => response.json())
         .then(data => {
+          if (data.hasOwnProperty('error')) {
+            console.log(data['error'])
+            this.stage = 'nodata'
+            return
+          }
+          this.dataLength=data['length']
+
+          this.stage = 'untrain'
           //处理数据
+
         })
         .catch(error => console.error(error));
     },
-    train(){
-      fetch(`http://127.0.0.1:5000/train`,{
-        method:'post',
-        body:JSON.stringify({
-          number: this.getWindTurbineName(),
+    onTrain() {
+      if (this.primaryVars.length == 0) {
+        this.$message({
+          message: '主变量不能为空',
+          type: 'warning'
+        })
+        return;
+      }
+      if (this.secondaryVars.length == 0) {
+        this.$message({
+          message: '副变量不能为空',
+          type: 'warning'
+        })
+        return;
+      }
+      if (this.samples[1] - this.samples[0] < 1000) {
+        this.$message({
+          message: '训练集过小',
+          type: 'warning'
+        })
+        return;
+      }
+      if (this.samples[3] - this.samples[2] < 1000) {
+        this.$message({
+          message: '验证集过小',
+          type: 'warning'
+        })
+        return;
+      }
+      this.errorinfo = '';
+      this.train()
+    },
+    //训练函数
+    async train() {
+      this.stage='training'
+      const loading=this.$loading({
+          lock: true,
+          text: '正在训练模型，请勿退出',
+        });
+      await fetch(`http://127.0.0.1:5000/train`, {
+        method: 'post',
+        body: JSON.stringify({
+          number: this.getWindTurbineName(this.$store.state.selectedWindTurbine),
           primaryVars: this.primaryVars,
           secondaryVars: this.secondaryVars,
 
-          Aggregation_function:this.parameters[0].default,
-          embedding_size:this.parameters[1].default,
-          GRU_layers:this.parameters[2].default,
-          epoch:this.parameters[3].default,
-          batchsize:this.parameters[4].default,
-          learning_rate:this.parameters[5].default,
+          Aggregation_function: this.parameters[0].default,
+          embedding_size: this.parameters[1].default,
+          GRU_layers: this.parameters[2].default,
+          epoch: this.parameters[3].default,
+          batchsize: this.parameters[4].default,
+          learning_rate: this.parameters[5].default,
 
-          samples:this.samples
+          samples: this.samples,
+
+          analyst:'rich'
         })
       }).then(response => response.json())
-      .then(data => {
+        .then(data => {
           console.log(data)
-          //输出处理成功/失败
+          this.$message({
+            message: '训练完成',
+            type: 'success'
+          })
+
         })
+      
+      await this.getTrainedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine))
+      loading.close()
+      this.stage='trained'
     },
-    getTrainedData(Number){
-      fetch(`http://127.0.0.1:5000/trainedData?number=${Number}`)
+    getTrainedData(Number) {
+      fetch(`http://127.0.0.1:5000/trained_data`, {
+        method: 'post',
+        body: JSON.stringify({
+          number: Number,
+          samples: this.samples,
+          analyst:'rich'
+        })
+      })
         .then(response => response.json())
         .then(data => {
+          console.log(data)
+          if (data.hasOwnProperty('error')) {
+            console.log(data['error'])
+            return
+          }
+
+          this.stage = 'trained'
           //处理数据
         })
         .catch(error => console.error(error));
+    },
+    //重新训练
+    retrain(){
+      const analyst='rich'
+      fetch(`http://127.0.0.1:5000/retrain?analyst=${analyst}`)
+        .then(response => response.json())
+        .then(data => {
+          this.$message({
+            message: '重新训练',
+            type: 'success'
+          })
+          this.stage='untrain'
+        })
     },
     //获取风机名称封装函数
     getWindTurbineName(windTurbineName) {
@@ -255,6 +389,15 @@ export default {
       return windTurbineName
     },
   },
+
+  watch: {
+    'dataLength': {
+      handler(newDatalength) {
+        this.samples=[0,(this.dataLength- 2500)-((this.dataLength- 2500)%10),this.dataLength-2000-((this.dataLength- 2000)%10),this.dataLength-100]
+        this.$refs.slider.control.setDotsValue(this.samples,true)
+      }
+    }
+  }
 };
 </script>
 <style>
@@ -272,5 +415,34 @@ export default {
   margin-top: auto;
   margin-bottom: auto;
   margin-left: auto !important;
+}
+
+.merge-tooltip {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translate(-50%, -10px);
+}
+
+.button-tooltip {
+  position: absolute !important;
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  width: fit-content;
+  /* transform: translate(0%, -20px); */
+}
+
+.button-tooltip::after {
+  bottom: 100%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  height: 0;
+  width: 0;
+  border-color: transparent;
+  border-bottom-color: transparent;
+  border-style: solid;
+  border-width: 5px;
+  border-bottom-color: inherit;
 }
 </style>

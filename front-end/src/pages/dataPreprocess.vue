@@ -111,7 +111,7 @@
                   </div>
 
                   <div style="margin-top: 10px;" class="col-12">
-                    <button type="button" class="btn btn-primary btn-block">进行模型训练</button>
+                    <button type="button" class="btn btn-primary btn-block" @click="doDataProcess()">进行模型训练</button>
                   </div>
                 </div>
               </Card>
@@ -287,21 +287,6 @@ export default {
         this.getBinProcessedData()
       }
     },
-    missingValueOption: {
-      handler() {
-        // this.getBinProcessedData()
-      }
-    },
-    aValueOption: {
-      handler() {
-        // this.getBinProcessedData()
-      }
-    },
-    bValueOption: {
-      handler() {
-        // this.getBinProcessedData()
-      }
-    },
     '$store.state.selectedWindTurbine': function () {
       this.getBinProcessedData()
     },
@@ -311,9 +296,9 @@ export default {
         const preprocessMain = this.$refs.preprocessMain;
         const abnormalPie = this.$refs.abnormalPie;
         const missingPie = this.$refs.missingPie;
-        if (preprocessMain && preprocessMain.setOption) {
-          preprocessMain.setOption(this.windPowerOption); //更新风速功率曲线图
-        }
+        // if (preprocessMain && preprocessMain.setOption) {
+        //   preprocessMain.setOption(this.windPowerOption); //更新风速功率曲线图
+        // }
         if (abnormalPie && abnormalPie.setOption) {
           abnormalPie.setOption(this.abnormalOption); //更新风速功率曲线图
         }
@@ -331,7 +316,7 @@ export default {
       this.fetchBinProcessedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine), this.sigma, this.deadCount, this.step, this.missingValueOption, this.aValueOption, this.bValueOption)
     },
     fetchBinProcessedData(number, sigma, deadCount, step, missingValueOption, aValueOption, bValueOption) {
-      fetch(`http://127.0.0.1:5000/bin_data?number=${number}&sigma=${sigma}&deadCount=${deadCount}&step=${step}&missingValueOption=${missingValueOption}&aValueOption=${aValueOption}&bValueOption=${bValueOption}`)
+      fetch(`http://127.0.0.1:5000/bin_data?number=${number}&sigma=${sigma}&deadCount=${deadCount}&step=${step}`)
         .then(response => response.json())
         .then(data => {
           console.log(data)
@@ -345,6 +330,21 @@ export default {
           this.missingOption.series[0].data[1].value = data['missing_percentage']
           //这里对数据进行操作
         })
+    },
+    //完成数据预处理，进入模型训练
+    doDataProcess() {
+      const missingValueOption = this.missingValueOption
+      const aValueOption = this.aValueOption
+      const bValueOption = this.bValueOption
+
+      fetch(`http://127.0.0.1:5000/do_data_process?missingValueOption=${missingValueOption}&aValueOption=${aValueOption}&bValueOption=${bValueOption}`)
+        .then(response => response.json())
+        .then(data => {
+          console.log(data)
+          console.log('进入模型训练')
+          this.$router.push('/modelTrain')
+        })
+        
     },
     //获取风机名称封装函数
     getWindTurbineName(windTurbineName) {

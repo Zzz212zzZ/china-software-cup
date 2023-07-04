@@ -24,12 +24,19 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import 'popper.js/dist/popper.js';
 
+import {Message,Loading} from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
+
 
 Vue.use(PaperDashboard);
+Vue.component(Message)
+Vue.use(Loading)
+Vue.prototype.$message = Message
 
 /* eslint-disable no-new */
 new Vue({
   store,
   router,
+  el: '#app',
   render: (h) => h(App),
 }).$mount("#app");

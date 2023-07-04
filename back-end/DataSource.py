@@ -9,6 +9,7 @@ class DataSource(object):
         self.dbcon=dbcon
         self.bin=None
         self.data=None
+        self.processedData=None
         self.synchronization=True
         self.table_name=None
 
@@ -76,3 +77,8 @@ class DataSource(object):
         self.update(table_name)
         self.bin=BinProcessor(self.data)
         self.bin.bin(r,step,deadValue)
+
+    def set_processed_data(self,missingValueOption,aValueOption,bValueOption):
+        data=self.bin.getProcessedData(missingValueOption,aValueOption,bValueOption)
+        self.processedData=self.data.loc[data.index]
+        self.processedData[['ROUND(A.WS,1)','YD15']]=data

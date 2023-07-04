@@ -4,11 +4,14 @@ from flask_cors import CORS
 from flask_restful import Api
 from flask_restful import Resource
 import json
-import numpy as np
+import shutil
+import os
+
 from BinProcessor import BinProcessor
-from train_predict import train,predict
 from DatabaseConnector import DatabaseConnector
 from DataSource import DataSource
+from DateEncoder import DateEncoder
+from train_predict import train,predict,args
 
 app = Flask(__name__)
 CORS(app)
@@ -41,10 +44,12 @@ def correlation():
     table_name = request.args['number']
     y = request.args['y']
     x = request.args['x']
+    # percentage = float(request.args['percentage'])
     data = data_src.get_data(table_name, [x, y]).dropna()
 
     dict = {}
     dict['data_all'] = data.values.tolist()
+    # dict['data_mini'] = data.sample(frac=percentage).values.tolist()
     return json.dumps(dict, ensure_ascii=False)
 
 
@@ -73,10 +78,10 @@ def bin_data():
     normal_data=bin.getNormalData().drop_duplicates()
 
     dict['bin_data'] = normal_data.values.tolist()
-    a_data=bin.getAData().drop_duplicates()
-    dict['a_data']=a_data.values.tolist()
-    b_data=bin.getBData().drop_duplicates()
-    dict['b_data']=b_data.values.tolist()
+    a_data=bin.getAData()
+    dict['a_data']=a_data.drop_duplicates().values.tolist()
+    b_data=bin.getBData()
+    dict['b_data']=b_data.drop_duplicates().values.tolist()
 
     dict['not_missing_percentage'] = bin.data.shape[0]-bin.getMissingData().shape[0]
     dict['missing_percentage']=bin.getMissingData().shape[0]
@@ -84,6 +89,92 @@ def bin_data():
     dict['b_data_percentage']=bin.getBData().shape[0]
     dict['bin_data_percentage']=bin.getNormalData().shape[0]
     return json.dumps(dict, ensure_ascii=False)
+
+@app.route('/do_data_process', methods=['GET'])
+def do_data_process():
+    missingValueOption = request.args['missingValueOption']
+    aValueOption = request.args['aValueOption']
+    bValueOption = request.args['bValueOption']
+    print(f'{missingValueOption}+{aValueOption}+{bValueOption}')
+    data_src.set_processed_data(missingValueOption,aValueOption,bValueOption)
+    return json.dumps({'result':'success'}, ensure_ascii=False)
+
+@app.route('/unprocessed_data', methods=['GET'])
+def unprocessed_data():
+    table_name = request.args['number']
+    if data_src.table_name!=table_name: return json.dumps({'error':'数据不存在，请先完成数据预处理'}, ensure_ascii=False)
+    if data_src.processedData is None: return json.dumps({'error':'数据不存在，请先完成数据预处理'}, ensure_ascii=False)
+
+    dict = {}
+    dict['data']=data_src.processedData['YD15'].values.tolist()
+    dict['length']=data_src.processedData.shape[0]
+    return json.dumps(dict, ensure_ascii=False)
+
+@app.route('/train', methods=['POST'])
+def train_data():
+    data = json.loads(request.data)
+    cols=['WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']
+    pri_use_cols=[]
+    for c in data['primaryVars']:
+        pri_use_cols.append(cols.index(c))
+    sec_use_cols=[]
+    for c in data['secondaryVars']:
+        sec_use_cols.append(cols.index(c))
+    arg=args(
+        # epoch_num=data['epoch'],
+        # batch_size=data['batchsize'],
+        # learning_rate=data['learning_rate'],
+        pri_use_cols=pri_use_cols,
+        sec_use_cols=sec_use_cols,
+        # embedding_size=data['embedding_size'],
+        # GRU_layers=data['GRU_layers'],
+        # agg_method=data['Aggregation_function'],
+        turbine_id=data['number'],
+        train_start=int(data['samples'][0]),
+        train_end=int(data['samples'][1]),
+        val_start=int(data['samples'][2]),
+        val_end=int(data['samples'][3]),
+    )
+    path=f'model/{data["analyst"]}/temp/{data["number"]}'
+    arg.save(path)
+    train(data_src.processedData,arg,path)
+    return json.dumps({'result':'success'}, ensure_ascii=False)
+
+@app.route('/trained_data', methods=['POST'])
+def trained_data():
+    data = json.loads(request.data)
+    print(data['samples'][2])
+    print(data['samples'][3])
+    path = f'model/{data["analyst"]}/temp'
+    if data_src.processedData is None:
+        return json.dumps({'error':'no data'}, ensure_ascii=False)
+    if not os.path.exists(path+'/'+str(data['number'])):
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        return json.dumps({'error':'no modal'}, ensure_ascii=False)
+
+    tru_val, pre_val, pre_test, score=predict(data_src.processedData,args(
+        turbine_id=data['number'],
+        train_start=int(data['samples'][0]),
+        train_end=int(data['samples'][1]),
+        val_start=int(data['samples'][2]),
+        val_end=int(data['samples'][3]),
+    ),path+'/'+str(data['number']))
+
+    dict = {}
+    dict['tru_val']=tru_val
+    dict['pre_val']=pre_val
+    dict['pre_test']=pre_test
+    dict['score']=score
+    return json.dumps(dict, ensure_ascii=False)
+
+@app.route('/retrain', methods=['GET'])
+def retrain():
+    analyst = request.args['analyst']
+    path = f'model/{analyst}/temp'
+    if(os.path.exists(path)):
+        shutil.rmtree(path)
+    return json.dumps({'result':'成功删除'}, ensure_ascii=False)
 
 
 if __name__ == '__main__':

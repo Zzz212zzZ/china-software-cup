@@ -13,6 +13,8 @@ import ModelCard from "./Cards/ModelCard.vue"
 
 import SidebarPlugin from "./SidebarPlugin/index";
 
+import Modal from "./Modals/Modal.vue";
+
 let components = {
   FormGroupInput,
   Card,
@@ -24,6 +26,7 @@ let components = {
   EchartsCard,
   DecoratedEchart,
   ModelCard,
+  Modal,
 };
 
 export default components;
@@ -39,4 +42,5 @@ export {
   EchartsCard,
   DecoratedEchart,
   ModelCard,
+  Modal,
 };

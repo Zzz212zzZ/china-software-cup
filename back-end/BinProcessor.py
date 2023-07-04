@@ -23,6 +23,10 @@ class BinProcessor(object):
 
     def bin(self,r,step,deadValue):
         if self.r==r and self.step==step and self.deadValue==deadValue : return
+        self.r=r
+        self.step=step
+        self.deadValue=deadValue
+
         data=self.data.dropna()
         self.AIndex=data.apply(lambda x: x.groupby((x.shift() != x).cumsum()).filter(lambda x: len(x) >= deadValue)).index
         data=data.drop(self.AIndex)
@@ -65,12 +69,18 @@ class BinProcessor(object):
         return self.data.loc[self.NormalIndex]
 
     def fillMethod(self,index):
-        data=self.data[index]
+        data=self.data.loc[index]
+        data['YD15']=data['ROUND(A.WS,1)'].dropna().map(lambda x:self.y_Mean[int(x//self.step)])
+        return data
 
 
     def getProcessedData(self,missingValueOption,aValueOption,bValueOption):
         data=self.getNormalData()
-        return data
+        # data=self.fillMethod(self.MissingIndex)
+        if missingValueOption=='fill': data=pd.concat([data,self.fillMethod(self.MissingIndex)])
+        if aValueOption=='fill': data=pd.concat([data,self.fillMethod(self.AIndex)])
+        if bValueOption=='fill': data=pd.concat([data,self.fillMethod(self.BIndex)])
+        return data.dropna()
 
 
 

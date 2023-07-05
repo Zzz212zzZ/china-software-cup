@@ -10,7 +10,8 @@ from sklearn.preprocessing import StandardScaler
 import paddle.nn.functional as F
 from util import *
 import matplotlib.pyplot as plt
-
+from sklearn.ensemble import RandomForestRegressor
+import joblib
 # 随机种子，保证实验能复现
 import random
 seed = 142
@@ -31,10 +32,9 @@ learning_rate = 0.0002  # 学习率
 
 # turbine_id, use_cols, train_start, train_end, val_start, val_end
 class args():
-    """
-
-    """
-    def __init__(self, epoch_num=30, batch_size=256, learning_rate=0.002, pri_use_cols=[0,1], sec_use_cols=[2,3,4], embedding_size=256, GRU_layers=3, agg_method='sum', turbine_id = 11, train_start=0, train_end=20000, val_start=20000, val_end=22000):
+    def __init__(self, epoch_num=30, batch_size=256, learning_rate=0.002, pri_use_cols=[0,1], sec_use_cols=[2,3,4],
+                 embedding_size=256, GRU_layers=3, agg_method='sum', turbine_id = 11, train_start=0, train_end=20000,
+                 val_start=20000, val_end=22000, random_use_cols = [0,1,2,3,4],max_depth=12, n_estimators=50):
         self.epoch_num = epoch_num
         self.batch_size = batch_size
         self.learning_rate = learning_rate
@@ -48,6 +48,9 @@ class args():
         self.embedding_size = embedding_size
         self.GRU_layers = GRU_layers
         self.agg_method = agg_method
+        self.max_depth = max_depth
+        self.n_estimators = n_estimators
+        self.random_use_cols = random_use_cols
 
     def save(self,path):
         dict={}
@@ -241,6 +244,21 @@ def train(df, args, save_path):
     :return: 可以不返回结果
     """
     df = data_preprocess(df)
+
+    """随机森林部分"""
+    """=========================================================================================================="""
+    all_columns=['WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']
+    columns = []
+    for index in args.random_use_cols:
+        columns.append(all_columns[index])
+    regressor = RandomForestRegressor(max_depth=args.max_depth, n_estimators=args.n_estimators)
+    regressor.fit(df[columns], df['YD15'])
+    joblib.dump(regressor, f'{save_path}/model_random.pkl')
+    """=========================================================================================================="""
+
+
+    """神经网络部分"""
+    """=========================================================================================================="""
     # 设置数据集
     train_dataset = TSDataset(df, args,save_path=save_path, data_type='train')
     val_dataset = TSDataset(df, args,save_path=save_path, data_type='val')
@@ -266,7 +284,7 @@ def train(df, args, save_path):
     train_epochs_loss = []
     valid_epochs_loss = []
     early_stopping = EarlyStopping(patience=10, verbose=True,
-                                   ckp_save_path=f'{save_path}/model_checkpoint.pdparams')
+                                   ckp_save_path=f'{save_path}/model_nn.pdparams')
 
     for epoch in tqdm(range(args.epoch_num)):
         # =====================train============================
@@ -310,11 +328,10 @@ def train(df, args, save_path):
             print(f"Early stopping at Epoch {epoch - patience}")
             break
     return valid_epochs_loss
-
-def predict(df, args_html, read_path):
+    """=========================================================================================================="""
+def predict_valid(df, read_path):
     """
     :param df: 输入的dataframe格式数据
-    :param args_html:  页面的arg参数类实例，所有用户均可以调整
     :return: 返回tru_val（真实的验证集数据，list）, pre_val（预测的验证集数据，list）, pre_test（预测的测试集数据，list）, score（分数）
     """
 
@@ -324,10 +341,14 @@ def predict(df, args_html, read_path):
     args_db=args()
     args_db.load(read_path)
     df = data_preprocess(df)
-    df_pre = df[args_html.val_start:]
-    model = pre_model(args_db.pri_use_cols, args_db.sec_use_cols, args_db.embedding_size, args_db.GRU_layers, args_db.agg_method)
+    df_pre = df[args_db.val_start:]
+
+    """神经网络预测验证集"""
+    """============================================================================================================"""
+    model = pre_model(args_db.pri_use_cols, args_db.sec_use_cols, args_db.embedding_size,
+                      args_db.GRU_layers, args_db.agg_method)
     # 导入模型权重文件
-    model.set_state_dict(paddle.load(f'{read_path}/model_checkpoint.pdparams'))
+    model.set_state_dict(paddle.load(f'{read_path}/model_nn.pdparams'))
     model.eval()  # 开启预测
 
     scaler_y = pickle.load(open('{}/scaler_y.pkl'.format(read_path), 'rb'))
@@ -341,18 +362,34 @@ def predict(df, args_html, read_path):
     output = scaler_y.inverse_transform(output)
 
     pre = [x for x in output.squeeze()]
-    pre_val = pre[:(args_html.val_end-args_html.val_start)]
-    pre_test = pre[(args_html.val_end-args_html.val_start):]
+    nn_pre_val = pre[:(args_db.val_end-args_db.val_start)]
+    tru_val = df_pre['YD15'].tolist()[:(args_db.val_end-args_db.val_start)]
+    """============================================================================================================"""
 
-    tru_val = df_pre['YD15'].tolist()[:(args_html.val_end-args_html.val_start)]
+    """随机森林预测验证集"""
+    """============================================================================================================"""
+    regressor = joblib.load(f'{read_path}/model_random.pkl')
+    all_columns=['WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']
+    columns = []
+    for index in args_db.random_use_cols:
+        columns.append(all_columns[index])
+    random_pre_val = regressor.predict(df_pre[columns]).tolist()[:(args_db.val_end-args_db.val_start)]
 
-    sum = 0
-    for pre_i, tru_i in zip(pre_val, tru_val):
-        sum += (pre_i-tru_i)**2
-    avg = math.sqrt(sum/len(pre_val))/201000
-    score = 1-avg
 
-    return tru_val, pre_val, pre_test, score
+    """============================================================================================================"""
+    nn_sum = 0
+    for nn_pre_i, tru_i in zip(nn_pre_val, tru_val):
+        nn_sum += (nn_pre_i-tru_i)**2
+    avg = math.sqrt(nn_sum/len(tru_val))/201000
+    nn_score = 1-avg
+
+    random_sum = 0
+    for random_pre_i, tru_i in zip(random_pre_val, tru_val):
+        random_sum += (random_pre_i-tru_i)**2
+    avg = math.sqrt(random_sum/len(tru_val))/201000
+    random_score = 1-avg
+
+    return tru_val, nn_pre_val, random_pre_val, nn_score, random_score
 
 
 
@@ -363,6 +400,7 @@ if __name__ == '__main__':
                      infer_datetime_format=True,
                      dayfirst=True)
 
-    arg.save('model/rich/temp/11.csv')
-    train(df, arg,'model/rich/temp/11.csv')
-    # tru_val, pre_val, pre_test, score=predict(df,args,'model/rich/temp/12.csv')
+    arg.save('model/rich/temp/11')
+    # train(df, arg,'model/rich/temp/11')
+    tru_val, nn_pre_val, random_pre_val, nn_score, random_score = predict_valid(df, 'model/rich/temp/11')
+    print(nn_score, random_score)

@@ -11,7 +11,7 @@ from BinProcessor import BinProcessor
 from DatabaseConnector import DatabaseConnector
 from DataSource import DataSource
 from DateEncoder import DateEncoder
-from train_predict import train,predict,args
+from train_predict import train,args,predict_valid
 
 app = Flask(__name__)
 CORS(app)
@@ -153,19 +153,15 @@ def trained_data():
             shutil.rmtree(path)
         return json.dumps({'error':'no modal'}, ensure_ascii=False)
 
-    tru_val, pre_val, pre_test, score=predict(data_src.processedData,args(
-        turbine_id=data['number'],
-        train_start=int(data['samples'][0]),
-        train_end=int(data['samples'][1]),
-        val_start=int(data['samples'][2]),
-        val_end=int(data['samples'][3]),
-    ),path+'/'+str(data['number']))
+    tru_val, nn_pre_val, random_pre_val, nn_score, random_score = predict_valid(data_src.processedData ,path+'/'+str(data['number']))
 
     dict = {}
     dict['tru_val']=tru_val
-    dict['pre_val']=pre_val
-    dict['pre_test']=pre_test
-    dict['score']=score
+    dict['nn_pre_val']=nn_pre_val
+    dict['random_pre_val']=random_pre_val
+    dict['nn_score']=nn_score
+    dict['random_score']=random_score
+    dict['x'] = [i for i in range(len(tru_val))]
     return json.dumps(dict, ensure_ascii=False)
 
 @app.route('/retrain', methods=['GET'])

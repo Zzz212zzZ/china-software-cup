@@ -204,7 +204,7 @@ export default {
               color: '#68B3C8'
             },
             large: true,
-            largeThreshold: 500
+            largeThreshold: 500,
           },
         ],
       },

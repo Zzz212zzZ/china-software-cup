@@ -60,7 +60,7 @@
 
       <div class="col-7">
         <!-- <el-dialog></el-dialog> -->
-        <echarts-card ref="mainChart" title="模型训练" sub-title="副标题" chartHeight="500px">
+        <echarts-card ref="trainChart" title="模型训练" sub-title="展示模型训练的历史数据，模型训练结束后将会可视化模型的预测效果" chartHeight="500px" :chart-options="trainOption">
           <!-- <div  slot=""></div> -->
 
           <div slot="footer" class="row" style="padding-bottom: 10px;">
@@ -202,38 +202,84 @@ export default {
           type: 'value'
         },
         legend: {
-          data: ['神经网络预测值', '随机森林预测值', '真实值'] // 设置图例名称
+          data: ['真实值', '神经网络预测值', '随机森林预测值'] // 设置图例名称
         },
         series: [
           {
+            name: '真实值',
+            type: 'line',
+            data: [0],
+            itemStyle: {
+              color: '#91CC75'
+            },
+          },
+          {
             name: '神经网络预测值',
             type: 'line',
-            stack: 'Total',
-            emphasis: {
-              focus: 'series'
+            data: [0],
+            itemStyle: {
+              color: '#FAC858'
             },
-            data: [0]
           },
           {
             name: '随机森林预测值',
             type: 'line',
-            stack: 'Total',
-            emphasis: {
-              focus: 'series'
+            data: [0],
+            itemStyle: {
+              color: '#EE6666'
             },
-            data: [0]
+          },
+        ]
+      },
+
+
+      trainOption: {
+        xAxis:
+        {
+        },
+        yAxis:
+        {
+          type: 'value'
+        },
+        legend: {
+          data: ['训练集-历史数据', '验证集-历史数据', '神经网络预测值','随机森林预测值'] // 设置图例名称
+        },
+        dataZoom: [
+          {
+            type: 'slider',
+            xAxisIndex: 0,
+            filterMode: 'none'
+          }
+        ],
+        series: [
+          {
+            name: '训练集-历史数据',
+            type: 'line',
+            data: [[0,1]],
+            symbol: 'none',
+            // sampling: 'lttb',
           },
           {
-            name: '真实值',
+            name: '验证集-历史数据',
             type: 'line',
-            stack: 'Total',
-            emphasis: {
-              focus: 'series'
-            },
-            data: [0]
+            symbol: 'none',
+            data: [[0,3]]
+          },
+          {
+            name: '神经网络预测值',
+            type: 'line',
+            symbol: 'none',
+            data: [[0,4]]
+          }
+          ,
+          {
+            name: '随机森林预测值',
+            type: 'line',
+            symbol: 'none',
+            data: [[0,6]]
           }
         ]
-      }
+      }      
 
     }
   },
@@ -311,10 +357,8 @@ export default {
             return
           }
           this.dataLength = data['length']
-
           this.stage = 'untrain'
-          //处理数据
-
+          this.trainOption.series[0].data = data['data']
         })
         .catch(error => console.error(error));
     },
@@ -377,7 +421,6 @@ export default {
         })
       }).then(response => response.json())
         .then(data => {
-          console.log(data)
           this.$message({
             message: '训练完成',
             type: 'success'
@@ -407,10 +450,15 @@ export default {
 
           this.stage = 'trained'
           console.log(data)
-          this.validOption.series[0].data = data['nn_pre_val']
-          this.validOption.series[1].data = data['random_pre_val']
-          this.validOption.series[2].data = data['tru_val']
+          this.validOption.series[1].data = data['nn_pre_val']
+          this.validOption.series[2].data = data['random_pre_val']
+          this.validOption.series[0].data = data['tru_val']
           this.validOption.xAxis.data = data['x']
+
+          this.trainOption.series[0].data = data['data_train']
+          this.trainOption.series[1].data = data['data_valid']
+          this.trainOption.series[2].data = data['nn_pre_valid']
+          this.trainOption.series[3].data = data['random_pre_valid']
           //处理数据
         })
         .catch(error => console.error(error));
@@ -452,6 +500,16 @@ export default {
         const validChart = this.$refs.validChart;
         if (validChart && validChart.setOption) {
           validChart.setOption(this.validOption); //更新风速功率曲线图
+        }
+      },
+      deep: true
+    },
+
+    'trainOption': {
+      handler() {
+        const trainChart = this.$refs.trainChart;
+        if (trainChart && trainChart.setOption) {
+          trainChart.setOption(this.trainOption); //更新风速功率曲线图
         }
       },
       deep: true

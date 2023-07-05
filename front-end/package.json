@@ -15,6 +15,7 @@
     "chartist": "0.11.0",
     "echarts": "^5.4.2",
     "echarts-stat": "^1.2.0",
+    "element-ui": "^2.15.13",
     "es6-promise": "4.2.8",
     "eslint-plugin-vue": "^9.8.0",
     "popper.js": "^1.16.1",
@@ -31,6 +32,7 @@
     "@vue/cli-plugin-eslint": "3.12.1",
     "@vue/cli-service": "3.12.1",
     "@vue/eslint-config-prettier": "5.1.0",
+    "babel-plugin-component": "^1.1.1",
     "sass": "^1.63.6",
     "sass-loader": "^10.2.0",
     "vue-template-compiler": "2.7.14"

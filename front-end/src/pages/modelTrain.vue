@@ -100,7 +100,7 @@
       </div>
 
       <div class="col-4">
-        <echarts-card ref="verifyChart" title="验证集比较" sub-title="副标题" chartHeight="400px">
+        <echarts-card ref="validChart" title="验证集比较" sub-title="副标题" chartHeight="400px" :chart-options="validOption">
 
         </echarts-card>
 
@@ -146,33 +146,31 @@ export default {
         },
         {
           parameterName: "embedding size",
-          values: [0, 1],
-          default: 0.5,
-          interval: 0.01,
+          values: [64, 1024],
+          default: 256,
+          interval: 64,
         },
         {
           parameterName: "GRU layers",
-          values: [0, 1],
-          default: 0.5,
-          interval: 0.01,
+          values: [1, 10],
+          default: 3,
+          interval: 1,
         },
         {
           parameterName: "epoch",
-          values: [0, 1],
-          default: 0.5,
-          interval: 0.01,
+          values: [5, 100],
+          default: 20,
+          interval: 5,
         },
         {
           parameterName: "batchsize",
-          values: [0, 1],
-          default: 0.5,
-          interval: 0.01,
+          values: ['32','64','128','256','512','1024'],
+          default: '256',
         },
         {
           parameterName: "learning rate",
-          values: [0, 1],
-          default: 0.5,
-          interval: 0.01,
+          values: ['0.05','0.02','0.005','0.002','0.0005','0.0002'],
+          default: '0.0002',
         },
       ],
 
@@ -190,7 +188,56 @@ export default {
         [dotPos[3], 100, { backgroundColor: 'lightgreen' }],
       ],
       //状态
-      stage: 'nodata' //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
+      stage: 'nodata', //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
+
+      validOption:{
+        xAxis: 
+          {
+            type: 'category',
+            data: [1],
+            boundaryGap: false,
+            axisLabel: {
+              interval: 'auto'  // 'auto' 或者一个固定的数字
+            }
+          },
+        yAxis: 
+          {
+            type: 'value'
+          },
+        legend: {
+          data: ['神经网络预测值', '随机森林预测值', '真实值'] // 设置图例名称
+        },
+        series: [
+          {
+            name: '神经网络预测值',
+            type: 'line',
+            stack: 'Total',
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0]
+          },
+          {
+            name: '随机森林预测值',
+            type: 'line',
+            stack: 'Total',
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0]
+          },
+          {
+            name: '真实值',
+            type: 'line',
+            stack: 'Total',
+            emphasis: {
+              focus: 'series'
+            },
+            data: [0]
+          }
+        ]
+      }
+
     }
   },
 
@@ -244,6 +291,7 @@ export default {
   created() {
     this.initalize()
   },
+
 
   methods: {
     async initalize(){
@@ -355,13 +403,17 @@ export default {
       })
         .then(response => response.json())
         .then(data => {
-          console.log(data)
           if (data.hasOwnProperty('error')) {
             console.log(data['error'])
             return
           }
 
           this.stage = 'trained'
+          console.log(data)
+          this.validOption.series[0].data = data['nn_pre_val']
+          this.validOption.series[1].data = data['random_pre_val']
+          this.validOption.series[2].data = data['tru_val']
+          this.validOption.xAxis.data = data['x']
           //处理数据
         })
         .catch(error => console.error(error));
@@ -396,6 +448,16 @@ export default {
         this.samples=[0,(this.dataLength- 2500)-((this.dataLength- 2500)%10),this.dataLength-2000-((this.dataLength- 2000)%10),this.dataLength-100]
         this.$refs.slider.control.setDotsValue(this.samples,true)
       }
+    },
+
+    'validOption': {
+      handler() {
+        const validChart = this.$refs.validChart;
+        if (validChart && validChart.setOption) {
+          validChart.setOption(this.validOption); //更新风速功率曲线图
+        }
+      },
+      deep: true
     }
   }
 };

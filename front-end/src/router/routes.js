@@ -2,86 +2,145 @@ import DashboardLayout from "@/layout/dashboard/DashboardLayout.vue";
 // GeneralViews
 import NotFound from "@/pages/NotFoundPage.vue";
 
+//Login page
+import Login from "@/pages/LoginPage/Login.vue";
+
+import MainDashboard from "@/MainDashboard.vue";
+
+// Client pages
+import clientDataAnalysis from "@/pages/ClientPage/dataAnalysis.vue";
+import clientDataPreprocess from "@/pages/ClientPage/dataPreprocess.vue";
+import clientModelTrain from "@/pages/ClientPage/modelTrain.vue";
+
+// Analyst pages
+import analystDataAnalysis from "@/pages/AnalystPage/dataAnalysis.vue";
+import analystDataPreprocess from "@/pages/AnalystPage/dataPreprocess.vue";
+import analystModelTrain from "@/pages/AnalystPage/modelTrain.vue";
+
 // Admin pages
-import dataAnalysis from "@/pages/dataAnalysis.vue";
-import dataPreprocess from "@/pages/dataPreprocess.vue";
-import modelTrain from "@/pages/modelTrain.vue";
-import Dashboard from "@/pages/Dashboard.vue";
-import UserProfile from "@/pages/UserProfile.vue";
-import Notifications from "@/pages/Notifications.vue";
-import Icons from "@/pages/Icons.vue";
-import Maps from "@/pages/Maps.vue";
-import Typography from "@/pages/Typography.vue";
-import TableList from "@/pages/TableList.vue";
+import adminDataAnalysis from "@/pages/AdminPage/dataAnalysis.vue";
+import adminDataPreprocess from "@/pages/AdminPage/dataPreprocess.vue";
+import adminModelTrain from "@/pages/AdminPage/modelTrain.vue";
+
+
+// const routes = [
+//   {
+//     path: "/login",
+//     component: Login,
+//   },
+//   {
+//     path: "/dashboard",
+//     component: DashboardLayout,
+    
+//         children: [
+//           {
+//             path: "client/dataAnalysis",
+//             name: "用户数据特征分析",
+//             component: clientDataAnalysis,
+//           },
+//           {
+//             path: "client/dataPreprocess",
+//             name: "用户数据预处理",
+//             component: clientDataPreprocess,
+//           },
+//           {
+//             path: "client/modelTrain",
+//             name: "用户模型训练",
+//             component: clientModelTrain,
+//           },
+//         ],
+
+//   },
+//   { path: "*", component: NotFound },
+// ];
+
 
 const routes = [
   {
+    path: "/login",
+    component: Login,
+  },
+  {
     path: "/",
-    component: DashboardLayout,
-    redirect: "/dataAnalysis",
+    component: MainDashboard,
+    redirect: "/dashboard/client/dataAnalysis",
     children: [
       {
-        path:"dataAnalysis",
-        name:"数据特征分析",
-        component:dataAnalysis,
+        path: "dashboard",
+        component: DashboardLayout,
+        children: [
+          {
+            path: "client",
+            redirect: "/dashboard/client/dataAnalysis",
+            component: { render: h => h("router-view") },  
+            children: [
+              {
+                path: "dataAnalysis",
+                name: "用户数据特征分析",
+                component: clientDataAnalysis,
+              },
+              {
+                path: "dataPreprocess",
+                name: "用户数据预处理",
+                component: clientDataPreprocess,
+              },
+              {
+                path: "modelTrain",
+                name: "用户模型训练",
+                component: clientModelTrain,
+              },
+            ],
+          },
+          {
+            path: "analyst",
+            redirect: "/dashboard/analyst/dataAnalysis",
+            component: { render: h => h("router-view") },
+            children: [
+              {
+                path: "dataAnalysis",
+                name: "分析员数据特征分析",
+                component: analystDataAnalysis,
+              },
+              {
+                path: "dataPreprocess",
+                name: "分析员数据预处理",
+                component: analystDataPreprocess,
+              },
+              {
+                path: "modelTrain",
+                name: "分析员模型训练",
+                component: analystModelTrain,
+              },
+            ],
+          },
+          {
+            path: "admin",
+            redirect: "/dashboard/admin/dataAnalysis",
+            component: { render: h => h("router-view") },
+            children: [
+              {
+                path: "dataAnalysis",
+                name: "管理员数据特征分析",
+                component: adminDataAnalysis,
+              },
+              {
+                path: "dataPreprocess",
+                name: "管理员数据预处理",
+                component: adminDataPreprocess,
+              },
+              {
+                path: "modelTrain",
+                name: "管理员模型训练",
+                component: adminModelTrain,
+              },
+            ],
+          },
+        ],
       },
-      {
-        path:"dataPreprocess",
-        name:"数据预处理",
-        component:dataPreprocess,
-      },
-      {
-        path:"modelTrain",
-        name:"模型训练",
-        component:modelTrain,
-      },
-      // {
-      //   path: "dashboard",
-      //   name: "dashboard",
-      //   component: Dashboard,
-      // },
-      // {
-      //   path: "stats",
-      //   name: "stats",
-      //   component: UserProfile,
-      // },
-      // {
-      //   path: "notifications",
-      //   name: "notifications",
-      //   component: Notifications,
-      // },
-      // {
-      //   path: "icons",
-      //   name: "icons",
-      //   component: Icons,
-      // },
-      // {
-      //   path: "maps",
-      //   name: "maps",
-      //   component: Maps,
-      // },
-      // {
-      //   path: "typography",
-      //   name: "typography",
-      //   component: Typography,
-      // },
-      // {
-      //   path: "table-list",
-      //   name: "table-list",
-      //   component: TableList,
-      // },
     ],
   },
   { path: "*", component: NotFound },
 ];
 
-/**
- * Asynchronously load view (Webpack Lazy loading compatible)
- * The specified component must be inside the Views folder
- * @param  {string} name  the filename (basename) of the view to load.
-function view(name) {
-   var res= require('../components/Dashboard/Views/' + name + '.vue');
-   return res;
-};**/
 
 export default routes;

@@ -391,6 +391,42 @@ def predict_valid(df, read_path):
 
     return tru_val, nn_pre_val, random_pre_val, nn_score, random_score
 
+def predict(df, read_path, model_type, pre_len):
+    args_db=args()
+    args_db.load(read_path)
+    df = data_preprocess(df)
+
+    if model_type == 'model_nn':
+        model = pre_model(args_db.pri_use_cols, args_db.sec_use_cols, args_db.embedding_size,
+                          args_db.GRU_layers, args_db.agg_method)
+        # 导入模型权重文件
+        model.set_state_dict(paddle.load(f'{read_path}/model_nn.pdparams'))
+        model.eval()  # 开启预测
+
+        scaler_y = pickle.load(open('{}/scaler_y.pkl'.format(read_path), 'rb'))
+        scaler_x = pickle.load(open('{}/scaler_x.pkl'.format(read_path), 'rb'))
+
+        input = np.array(df[['WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']])
+        input = scaler_x.transform(input)
+        input = paddle.to_tensor(input, dtype='float32')
+
+        output = model(input)
+        output = scaler_y.inverse_transform(output)
+
+        pre = [x for x in output.squeeze()]
+        pre_val = pre[:pre_len]
+
+    elif model_type == 'model_random':
+        regressor = joblib.load(f'{read_path}/model_random.pkl')
+        all_columns = ['WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']
+        columns = []
+        for index in args_db.random_use_cols:
+            columns.append(all_columns[index])
+        pre_val = regressor.predict(df[columns]).tolist()[:pre_len]
+
+    time_list = df['DATATIME'].tolist()[:pre_len]
+
+    return time_list, pre_val
 
 
 if __name__ == '__main__':

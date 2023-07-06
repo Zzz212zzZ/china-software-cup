@@ -24,7 +24,19 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import 'popper.js/dist/popper.js';
 
-import {Message,Loading,Dialog,Divider} from 'element-ui';
+import {
+  Message,
+  Loading,
+  Dialog,
+  Divider,
+  Dropdown,
+  DropdownMenu,
+  DropdownItem,
+  Input,
+  Slider,
+  Button,
+  ButtonGroup,
+} from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css';
 
 
@@ -33,6 +45,13 @@ Vue.component(Message)
 Vue.use(Loading)
 Vue.use(Dialog)
 Vue.use(Divider)
+Vue.use(Dropdown)
+Vue.use(DropdownMenu)
+Vue.use(DropdownItem)
+Vue.use(Input)
+Vue.use(Slider)
+Vue.use(Button)
+Vue.use(ButtonGroup)
 Vue.prototype.$message = Message
 
 /* eslint-disable no-new */

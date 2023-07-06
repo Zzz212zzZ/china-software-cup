@@ -65,7 +65,7 @@ class DataSource(object):
             raise ValueError(f"Dimension {dimension} does not exist in table {table_name}.")
 
         # 获取指定维度的数据
-        data = self.data[dimension].tolist()
+        data = self.data[dimension].fillna(value=0).tolist()
         # 将Timestamp对象转换为字符串
         if isinstance(data[0], pd.Timestamp):
             data = [d.strftime("%Y-%m-%d %H:%M:%S") for d in data]

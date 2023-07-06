@@ -3,70 +3,134 @@
     <div class="alert alert-warning" role="alert" v-if="stage === 'nodata'">
       尚未完成数据预处理，请先完成数据预处理
     </div>
-     <!-- 参数控制 -->
-    <card title="任务" subTitle="大家好啊，我是模型训练控制台" style="z-index: auto;">
-      <div>
-        <!-- 主变量 -->
-        <div class="col-12 row">
-          <label class="col-auto">主变量：</label>
-          <div class="col-11 row">
-            <div class="col-auto" v-for="variable in variables">
-              <input type="checkbox" v-model="primaryVars" name="primary" :value="variable"
-                :disabled="secondaryVars.includes(variable)">{{ variable }}
-            </div>
-          </div>
-
-        </div>
-
-        <!-- 副变量 -->
-        <div class="col-12 row">
-          <label class="col-auto">副变量：</label>
-          <div class="col-11 row">
-            <div class="col-auto" v-for="variable in variables">
-              <input type="checkbox" v-model="secondaryVars" name="secondary" :value="variable"
-                :disabled="primaryVars.includes(variable)">{{ variable }}
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 row">
-          <div class="col-4" v-for="para in parameters">
-            <label>{{ para.parameterName }}</label>
-            <button class="dropdown-toggle underline" type="button" :id="para.parameterName" data-toggle="dropdown">
-              {{ para.default }}
-            </button>
-            <div class="dropdown-menu" :aria-labelledby="para.parameterName">
-              <div class="dropdown-item" v-if="typeof para.values[0] === 'number' && typeof para.values[1] === 'number'">
-                <vue-slider v-model="para.default" :lazy="true" :min="para.values[0]" :max="para.values[1]"
-                  :interval="para.interval"></vue-slider>
+    <div class="row">
+      <div class="col">
+        <!-- 参数控制 -->
+        <double-card title_1="神经网络参数调整" subTitle_1="大家好啊，我是模型训练控制台" title_2="随机森林参数调整" subTitle_2="大家好啊，我也是模型训练控制台"
+          style="z-index: auto;">
+          <div>
+            <!-- 主变量 -->
+            <div class="col-12 row">
+              <label class="col-auto">主变量：</label>
+              <div class="col-11 row">
+                <div class="col-auto" v-for="variable in variables">
+                  <input type="checkbox" v-model="primaryVars" name="primary" :value="variable"
+                    :disabled="secondaryVars.includes(variable) || stage === 'trained'">{{ variable }}
+                </div>
               </div>
-              <div v-else>
-                <a class="dropdown-item" v-for="v in para.values" @click="para.default = v">{{ v }}</a>
+
+            </div>
+
+            <!-- 副变量 -->
+            <div class="col-12 row">
+              <label class="col-auto">副变量：</label>
+              <div class="col-11 row">
+                <div class="col-auto" v-for="variable in variables">
+                  <input type="checkbox" v-model="secondaryVars" name="secondary" :value="variable"
+                    :disabled="primaryVars.includes(variable) || stage === 'trained'">{{ variable }}
+                </div>
               </div>
             </div>
+            <!-- nn参数 -->
+            <div class="col-12 row">
+              <div class="col-4" v-for="para in parameters">
+                <label>{{ para.parameterName }}</label>
 
+                <el-dropdown class="w-100"
+                  :hide-on-click="!(typeof para.values[0] === 'number' && typeof para.values[1] === 'number')"
+                  trigger="click">
+                  <button class="underline" type="button" :id="para.parameterName" :disabled="stage === 'trained'">
+                    {{ para.default }}<i class="el-icon-arrow-down el-icon--right underline-arrow"></i>
+                  </button>
+                  <el-dropdown-menu slot="dropdown" :aria-labelledby="para.parameterName" style="width: 350px;">
+                    <el-dropdown-item class="row"
+                      v-if="typeof para.values[0] === 'number' && typeof para.values[1] === 'number'">
+                      <div class="col-12">
+                        <el-slider class="ailgn-center" v-model="para.default" :min="para.values[0]" :max="para.values[1]"
+                          :step="para.interval" show-input :show-tooltip="false"></el-slider>
+                      </div>
+                    </el-dropdown-item>
+                    <div v-else>
+                      <el-dropdown-item v-for="v in para.values" @click.native="para.default = v">
+                        {{ v }}
+                      </el-dropdown-item>
+                    </div>
+                  </el-dropdown-menu>
+
+                </el-dropdown>
+              </div>
+
+            </div>
           </div>
 
-        </div>
+          <div slot="body_2">
+            <!-- 随机森林变量 -->
+            <div class="col-12 row">
+              <label class="col-auto">变量：</label>
+              <div class="col-11 row">
+                <div class="col-auto" v-for="variable in variables">
+                  <input type="checkbox" v-model="RandomForestVars" name="random" :value="variable"
+                    :disabled="stage === 'trained'">{{ variable }}
+                </div>
+              </div>
+            </div>
+
+            <!-- rf参数 -->
+            <div class="col-12 row">
+              <div class="col-6" v-for="para in parameters_rf">
+                <label>{{ para.parameterName }}</label>
+
+                <el-dropdown class="w-100"
+                  :hide-on-click="!(typeof para.values[0] === 'number' && typeof para.values[1] === 'number')"
+                  trigger="click">
+                  <button class="underline" type="button" :id="para.parameterName" :disabled="stage === 'trained'">
+                    {{ para.default }}<i class="el-icon-arrow-down el-icon--right underline-arrow"></i>
+                  </button>
+                  <el-dropdown-menu slot="dropdown" :aria-labelledby="para.parameterName" style="width: 350px;">
+                    <el-dropdown-item class="row"
+                      v-if="typeof para.values[0] === 'number' && typeof para.values[1] === 'number'">
+                      <div class="col-12">
+                        <el-slider class="ailgn-center" v-model="para.default" :min="para.values[0]" :max="para.values[1]"
+                          :step="para.interval" show-input :show-tooltip="false"></el-slider>
+                      </div>
+                    </el-dropdown-item>
+                    <div v-else>
+                      <el-dropdown-item v-for="v in para.values" @click.native="para.default = v">
+                        {{ v }}
+                      </el-dropdown-item>
+                    </div>
+                  </el-dropdown-menu>
+
+                </el-dropdown>
+              </div>
+            </div>
+
+          </div>
+        </double-card>
       </div>
+      <div class="col-auto">
+        <card title="分数">
+          <p style="font-size: 3em;">1.035</p>
+          <p style="font-size: 3em;">1.035</p>
+        </card>
+      </div>
+    </div>
 
-      <!-- 分数 -->
-      <!-- <div slot="footer">
-            <h4>分数</h4>
-            <h3 style="color: grey;">{{ score }}</h3>
-          </div> -->
-    </card>
     <div class="row">
 
-      <div class="col-7">
+      <div class="col-12 col-lg-7">
         <!-- <el-dialog></el-dialog> -->
-        <echarts-card ref="trainChart" title="模型训练" sub-title="展示模型训练的历史数据，模型训练结束后将会可视化模型的预测效果" chartHeight="500px" :chart-options="trainOption">
+        <echarts-card ref="trainChart" title="模型训练" sub-title="展示模型训练的历史数据，模型训练结束后将会可视化模型的预测效果" chartHeight="500px"
+          :chart-options="trainOption">
           <!-- <div  slot=""></div> -->
 
           <div slot="footer" class="row" style="padding-bottom: 10px;">
-            <div class="col-10" style="padding-top: 20px;">
-              <vue-slider ref="slider" v-model="samples" :max="dataLength" :process="dataProcess" :height="10"
-                :data="data" :marks="marks" :enable-cross="false">
+            <div class="col-lg col-sm-12" style="padding-top: 20px;padding-left: 25px;">
+              <vue-slider ref="slider" v-model="samples" :max="dataLength" :process="dataProcess" :height="20"
+                :enable-cross="false">
+                <template v-slot:dot>
+                  <div class="custom-dot"></div>
+                </template>
                 <template v-slot:process="{ start, end, style, index }">
                   <div class="vue-slider-process" :style="style">
                     <div v-if="index !== 1 && index !== 3" :class="[
@@ -87,18 +151,22 @@
                 </template>
               </vue-slider>
             </div>
-            <div class="col-2">
-              <button class="btn btn-primary btn-lg w-100" v-if="stage === 'trained'" @click="retrain()">重新训练</button>
-              <button class="btn btn-primary btn-lg w-100" :disabled="stage === 'nodata' || stage === 'training'" v-else
+            <div class="col-lg-auto col-sm-12" style="display: flex;padding-top: 15px;">
+              <el-button-group style="margin: auto;" v-if="stage === 'trained'">
+                <el-button type="primary" @click="retrain()" icon="el-icon-refresh-left">重新训练</el-button>
+                <el-button type="success" @click="retrain()" icon="el-icon-upload2">上传模型</el-button>
+              </el-button-group>
+
+              <el-button class=" w-100" type="primary" :disabled="stage === 'nodata' || stage === 'training'" v-else
                 @click="onTrain()">开始训练
-              </button>
+              </el-button>
             </div>
 
           </div>
         </echarts-card>
       </div>
 
-      <div class="col-5">
+      <div class="col-12 col-lg-5">
         <echarts-card ref="validChart" title="验证集比较" sub-title="副标题" chartHeight="530px" :chart-options="validOption">
 
         </echarts-card>
@@ -109,19 +177,25 @@
   </div>
 </template>
 <script>
-import { ModelCard, EchartsCard, Card } from "@/components/index";
+import { ModelCard, EchartsCard, Card, DoubleCard } from "@/components/index";
 import VueSlider from 'vue-slider-component'
 import Chartist from "chartist";
-import { Dialog, Divider } from 'element-ui'
+import { Dialog, Dropdown, DropdownMenu, DropdownItem, Slider, Button, ButtonGroup, } from 'element-ui'
 
 export default {
   components: {
     ModelCard,
     EchartsCard,
     Card,
+    DoubleCard,
     VueSlider,
     Dialog,
-    Divider,
+    Dropdown,
+    DropdownMenu,
+    DropdownItem,
+    Slider,
+    Button,
+    ButtonGroup,
   },
 
 
@@ -171,21 +245,36 @@ export default {
         },
       ],
 
+      parameters_rf: [
+        {
+          parameterName: "max_depth",
+          values: [0, 20],
+          default: 12,
+          interval: 1,
+        },
+        {
+          parameterName: "n_estimators",
+          values: [0, 100],
+          default: 50,
+          interval: 1,
+        },
+      ],
+
       score: 1,
       primaryVars: [],
       secondaryVars: [],
+      RandomForestVars: [],
 
       //进度条属性
-      samples: [0, 7500, 8000, 9900],
+      samples: [0, 7500, 8000, 10000],
       dataLength: 10000,
       dataProcess: dotPos => [
-        [dotPos[0], dotPos[1]],
+        [dotPos[0], dotPos[1], { backgroundColor: '#5470C6' }],
         [dotPos[1], dotPos[2], { backgroundColor: '#ccc' }],
-        [dotPos[2], dotPos[3], { backgroundColor: 'yellow' }],
-        [dotPos[3], 100, { backgroundColor: 'lightgreen' }],
+        [dotPos[2], dotPos[3], { backgroundColor: '#91CC75' }],
       ],
       //状态
-      stage: 'nodata', //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
+      stage: 'trained', //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
 
       validOption: {
         xAxis:
@@ -242,7 +331,7 @@ export default {
           type: 'value'
         },
         legend: {
-          data: ['训练集-历史数据', '验证集-历史数据', '神经网络预测值','随机森林预测值'] // 设置图例名称
+          data: ['训练集-历史数据', '验证集-历史数据', '神经网络预测值', '随机森林预测值'] // 设置图例名称
         },
         dataZoom: [
           {
@@ -255,7 +344,7 @@ export default {
           {
             name: '训练集-历史数据',
             type: 'line',
-            data: [[0,1]],
+            data: [[0, 1]],
             symbol: 'none',
             // sampling: 'lttb',
           },
@@ -263,71 +352,24 @@ export default {
             name: '验证集-历史数据',
             type: 'line',
             symbol: 'none',
-            data: [[0,3]]
+            data: [[0, 3]]
           },
           {
             name: '神经网络预测值',
             type: 'line',
             symbol: 'none',
-            data: [[0,4]]
+            data: [[0, 4]]
           }
           ,
           {
             name: '随机森林预测值',
             type: 'line',
             symbol: 'none',
-            data: [[0,6]]
+            data: [[0, 6]]
           }
         ]
-      }      
+      }
 
-    }
-  },
-
-  computed: {
-    points: function () {
-      return [
-        {
-          value: 0,
-          step: 10,
-        },
-        {
-          value: this.dataLength - 100,
-          step: 1,
-        },
-        {
-          value: this.dataLength,
-          step: 1,
-        },
-      ];
-    },
-
-    data: function () {
-      let result = [];
-
-      this.points.forEach((point, idx) => {
-        const lastPointValue = this.points[this.points.length - 1].value;
-
-        if (point.value === lastPointValue) {
-          return;
-        } else {
-          const nextPoint = this.points[idx + 1];
-
-          for (let i = point.value; i <= nextPoint.value; i += point.step) {
-            result.push(i);
-          }
-        }
-      });
-
-      const uniqueValues = new Set(result);
-      return [...uniqueValues];
-    },
-    marks: function () {
-      return this.points.map(point => point.value);
-    },
-
-    hasError: function () {
-      return !(typeof this.errorinfo === "undefined" || this.errorinfo === null || this.errorinfo.trim() === "")
     }
   },
 
@@ -337,6 +379,7 @@ export default {
 
 
   methods: {
+    //初始化
     async initalize() {
       await this.getUnprocessedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine))
       setTimeout(() => {
@@ -432,6 +475,7 @@ export default {
       loading.close()
       this.stage = 'trained'
     },
+    //获取验证集数据
     getTrainedData(Number) {
       fetch(`http://127.0.0.1:5000/trained_data`, {
         method: 'post',
@@ -490,7 +534,7 @@ export default {
   watch: {
     'dataLength': {
       handler(newDatalength) {
-        this.samples = [0, (this.dataLength - 2500) - ((this.dataLength - 2500) % 10), this.dataLength - 2000 - ((this.dataLength - 2000) % 10), this.dataLength - 100]
+        this.samples = [0, (this.dataLength - 2500) - ((this.dataLength - 2500) % 10), this.dataLength - 2000 - ((this.dataLength - 2000) % 10), this.dataLength]
         this.$refs.slider.control.setDotsValue(this.samples, true)
       }
     },
@@ -528,7 +572,7 @@ export default {
   display: flex;
 }
 
-.underline::after {
+.underline-arrow {
   margin-top: auto;
   margin-bottom: auto;
   margin-left: auto !important;
@@ -561,5 +605,19 @@ export default {
   border-style: solid;
   border-width: 5px;
   border-bottom-color: inherit;
+}
+
+.ailgn-center {
+  top: calc(50% - 8px);
+}
+
+.custom-dot {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background-color: rgb(239, 240, 244);
+  margin-top: -7px;
+  margin-left: -7px;
+  box-shadow: .5px .5px 2px 1px rgba(0, 0, 0, .32);
 }
 </style>

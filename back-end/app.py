@@ -123,15 +123,17 @@ def train_data():
     sec_use_cols=[]
     for c in data['secondaryVars']:
         sec_use_cols.append(cols.index(c))
+
+
     arg=args(
-        # epoch_num=data['epoch'],
-        # batch_size=data['batchsize'],
-        # learning_rate=data['learning_rate'],
+        epoch_num=data['epoch'],
+        batch_size=eval(data['batchsize']),
+        learning_rate=eval(data['learning_rate']),
         pri_use_cols=pri_use_cols,
         sec_use_cols=sec_use_cols,
-        # embedding_size=data['embedding_size'],
-        # GRU_layers=data['GRU_layers'],
-        # agg_method=data['Aggregation_function'],
+        embedding_size=data['embedding_size'],
+        GRU_layers=data['GRU_layers'],
+        agg_method=data['Aggregation_function'],
         turbine_id=data['number'],
         train_start=int(data['samples'][0]),
         train_end=int(data['samples'][1]),
@@ -157,6 +159,8 @@ def trained_data():
         return json.dumps({'error':'no modal'}, ensure_ascii=False)
 
     tru_val, nn_pre_val, random_pre_val, nn_score, random_score = predict_valid(data_src.processedData ,path+'/'+str(data['number']))
+    nn_score = round(nn_score, 3)
+    random_score = round(random_score, 3)
 
     dict = {}
     dict['tru_val']=tru_val

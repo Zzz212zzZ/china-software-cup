@@ -106,8 +106,11 @@ def unprocessed_data():
     if data_src.processedData is None: return json.dumps({'error':'数据不存在，请先完成数据预处理'}, ensure_ascii=False)
 
     dict = {}
-    dict['data']=data_src.processedData['YD15'].values.tolist()
-    dict['length']=data_src.processedData.shape[0]
+    dict['length'] = data_src.processedData.shape[0]
+
+    data=data_src.processedData.sort_values(by='DATATIME')['YD15'].values.tolist()
+    x = [i for i in range(dict['length'])]
+    dict['data'] = [[i, j] for i,j in zip(x,data)]
     return json.dumps(dict, ensure_ascii=False)
 
 @app.route('/train', methods=['POST'])
@@ -162,6 +165,16 @@ def trained_data():
     dict['nn_score']=nn_score
     dict['random_score']=random_score
     dict['x'] = [i for i in range(len(tru_val))]
+
+    x_train = [i for i in range(data['samples'][1])]
+    x_valid = [i for i in range(data['samples'][2],data['samples'][3])]
+
+    yd_train = data_src.processedData.sort_values(by='DATATIME')['YD15'].values.tolist()[:data['samples'][1]]
+    dict['data_train'] = [[i,j] for i,j in zip(x_train,yd_train)]
+
+    dict['data_valid'] = [[i,j] for i,j in zip(x_valid,tru_val)]
+    dict['nn_pre_valid'] = [[i,j] for i,j in zip(x_valid,nn_pre_val)]
+    dict['random_pre_valid'] = [[i,j] for i,j in zip(x_valid,random_pre_val)]
     return json.dumps(dict, ensure_ascii=False)
 
 @app.route('/retrain', methods=['GET'])

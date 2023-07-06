@@ -12,7 +12,7 @@
             <!-- 主变量 -->
             <div class="col-12 row">
               <label class="col-auto">主变量：</label>
-              <div class="col-11 row">
+              <div class="col row">
                 <div class="col-auto" v-for="variable in variables">
                   <input type="checkbox" v-model="primaryVars" name="primary" :value="variable"
                     :disabled="secondaryVars.includes(variable) || stage === 'trained'">{{ variable }}
@@ -24,7 +24,7 @@
             <!-- 副变量 -->
             <div class="col-12 row">
               <label class="col-auto">副变量：</label>
-              <div class="col-11 row">
+              <div class="col row">
                 <div class="col-auto" v-for="variable in variables">
                   <input type="checkbox" v-model="secondaryVars" name="secondary" :value="variable"
                     :disabled="primaryVars.includes(variable) || stage === 'trained'">{{ variable }}
@@ -67,7 +67,7 @@
             <!-- 随机森林变量 -->
             <div class="col-12 row">
               <label class="col-auto">变量：</label>
-              <div class="col-11 row">
+              <div class="col row">
                 <div class="col-auto" v-for="variable in variables">
                   <input type="checkbox" v-model="RandomForestVars" name="random" :value="variable"
                     :disabled="stage === 'trained'">{{ variable }}
@@ -77,7 +77,7 @@
 
             <!-- rf参数 -->
             <div class="col-12 row">
-              <div class="col-6" v-for="para in parameters_rf">
+              <div class="col-12" v-for="para in parameters_rf">
                 <label>{{ para.parameterName }}</label>
 
                 <el-dropdown class="w-100"
@@ -109,9 +109,12 @@
         </double-card>
       </div>
       <div class="col-auto">
-        <card title="分数">
-          <p style="font-size: 3em;">1.035</p>
-          <p style="font-size: 3em;">1.035</p>
+        <card>
+          <p style="font-size: 1em;text-align: center;">神经网络得分</p>
+          <p style="font-size: 3em;">{{ nn_score }}</p>
+          <el-divider></el-divider>
+          <p style="font-size: 1em;text-align: center;">随机森林得分</p>
+          <p style="font-size: 3em;">{{ rf_score }}</p>
         </card>
       </div>
     </div>
@@ -180,7 +183,7 @@
 import { ModelCard, EchartsCard, Card, DoubleCard } from "@/components/index";
 import VueSlider from 'vue-slider-component'
 import Chartist from "chartist";
-import { Dialog, Dropdown, DropdownMenu, DropdownItem, Slider, Button, ButtonGroup, } from 'element-ui'
+import { Dialog, Dropdown, DropdownMenu, DropdownItem, Slider, Button, ButtonGroup, Divider } from 'element-ui'
 
 export default {
   components: {
@@ -196,6 +199,7 @@ export default {
     Slider,
     Button,
     ButtonGroup,
+    Divider
   },
 
 
@@ -247,20 +251,21 @@ export default {
 
       parameters_rf: [
         {
-          parameterName: "max_depth",
+          parameterName: "max depth",
           values: [0, 20],
           default: 12,
           interval: 1,
         },
         {
-          parameterName: "n_estimators",
+          parameterName: "n estimators",
           values: [0, 100],
           default: 50,
           interval: 1,
         },
       ],
 
-      score: 1,
+      nn_score: 0.999,
+      rf_score: 0.999,
       primaryVars: [],
       secondaryVars: [],
       RandomForestVars: [],
@@ -382,9 +387,9 @@ export default {
     //初始化
     async initalize() {
       await this.getUnprocessedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine))
-      setTimeout(() => {
-        this.getTrainedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine));
-      }, 500);
+      // setTimeout(() => {
+      //   this.getTrainedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine));
+      // }, 500);
 
       // if(this.stage!=='trained'){
       // }
@@ -420,6 +425,13 @@ export default {
         })
         return;
       }
+      if (this.RandomForestVars.length == 0) {
+        this.$message({
+          message: '随机森林变量不能为空',
+          type: 'warning'
+        })
+        return;
+      }
       if (this.samples[1] - this.samples[0] < 1000) {
         this.$message({
           message: '训练集过小',
@@ -450,6 +462,7 @@ export default {
           number: this.getWindTurbineName(this.$store.state.selectedWindTurbine),
           primaryVars: this.primaryVars,
           secondaryVars: this.secondaryVars,
+          RandomForestVars: this.RandomForestVars,
 
           Aggregation_function: this.parameters[0].default,
           embedding_size: this.parameters[1].default,
@@ -457,6 +470,9 @@ export default {
           epoch: this.parameters[3].default,
           batchsize: this.parameters[4].default,
           learning_rate: this.parameters[5].default,
+
+          max_depth:this.parameters_rf[0].default,
+          n_estimators:this.parameters_rf[1].default,
 
           samples: this.samples,
 
@@ -503,6 +519,9 @@ export default {
           this.trainOption.series[1].data = data['data_valid']
           this.trainOption.series[2].data = data['nn_pre_valid']
           this.trainOption.series[3].data = data['random_pre_valid']
+
+          this.nn_score=data['nn_score']
+          this.rf_score=data['random_score']
           //处理数据
         })
         .catch(error => console.error(error));
@@ -558,7 +577,20 @@ export default {
       },
       deep: true
     }
-  }
+  },
+
+  beforeRouteLeave(to, from, next) {
+    if(this.stage!=='trained'){ 
+      next();
+      return;
+    }
+    const answer = window.confirm('你的模型尚未保存，确定要退出吗')
+    if (answer) {
+      next()
+    } else {
+      next(false)
+    }
+  },
 };
 </script>
 <style>

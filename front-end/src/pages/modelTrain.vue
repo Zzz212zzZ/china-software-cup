@@ -157,7 +157,7 @@
             <div class="col-lg-auto col-sm-12" style="display: flex;padding-top: 15px;">
               <el-button-group style="margin: auto;" v-if="stage === 'trained'">
                 <el-button type="primary" @click="retrain()" icon="el-icon-refresh-left">重新训练</el-button>
-                <el-button type="success" @click="retrain()" icon="el-icon-upload2">上传模型</el-button>
+                <el-button type="success" @click="uploadDialog = true" icon="el-icon-upload2">上传模型</el-button>
               </el-button-group>
 
               <el-button class=" w-100" type="primary" :disabled="stage === 'nodata' || stage === 'training'" v-else
@@ -176,15 +176,33 @@
       </div>
     </div>
 
-
+    <!-- 模型上传对话框 -->
+    <el-dialog title="提示" :visible.sync="uploadDialog" width="30%"
+      :append-to-body="true">
+      <el-form ref="upload" :rules="rules" :model="form">
+        <el-form-item label="分析师名称">rich</el-form-item>
+        <el-form-item label="数据集">{{ this.$store.state.selectedWindTurbin }}</el-form-item>
+        <el-form-item label="神经网络得分">{{ nn_score }}</el-form-item>
+        <el-form-item label="随机森林得分">{{ rf_score }}</el-form-item>
+        <el-form-item label="选择" prop="model">
+          <el-checkbox-group v-model="form.model">
+            <el-checkbox label="上传神经网络模型" name="model"></el-checkbox>
+            <el-checkbox label="上传随机森林模型" name="model"></el-checkbox>
+          </el-checkbox-group>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="uploadDialog = false">取 消</el-button>
+        <el-button type="primary" @click="submitForm('upload');uploadDialog = false">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 <script>
 import { ModelCard, EchartsCard, Card, DoubleCard } from "@/components/index";
 import VueSlider from 'vue-slider-component'
 import Chartist from "chartist";
-import { Dialog, Dropdown, DropdownMenu, DropdownItem, Slider, Button, ButtonGroup, Divider } from 'element-ui'
-
+import { Dialog, Dropdown, DropdownMenu, DropdownItem, Slider, Button, ButtonGroup, Divider, Form, FormItem, Checkbox, CheckboxGroup } from 'element-ui'
 export default {
   components: {
     ModelCard,
@@ -199,7 +217,11 @@ export default {
     Slider,
     Button,
     ButtonGroup,
-    Divider
+    Divider,
+    Form,
+    FormItem,
+    Checkbox,
+    CheckboxGroup
   },
 
 
@@ -264,8 +286,8 @@ export default {
         },
       ],
 
-      nn_score: 0.999,
-      rf_score: 0.999,
+      nn_score: '未训练',
+      rf_score: '未训练',
       primaryVars: [],
       secondaryVars: [],
       RandomForestVars: [],
@@ -373,8 +395,19 @@ export default {
             data: [[0, 6]]
           }
         ]
-      }
+      },
 
+      uploadDialog: false,
+
+      form: {
+        model: []
+      },
+
+      rules: {
+        model: [
+          { type: 'array', required: true, message: '至少选择一个模型', trigger: 'change' }
+        ]
+      }
     }
   },
 
@@ -471,8 +504,8 @@ export default {
           batchsize: this.parameters[4].default,
           learning_rate: this.parameters[5].default,
 
-          max_depth:this.parameters_rf[0].default,
-          n_estimators:this.parameters_rf[1].default,
+          max_depth: this.parameters_rf[0].default,
+          n_estimators: this.parameters_rf[1].default,
 
           samples: this.samples,
 
@@ -520,8 +553,8 @@ export default {
           this.trainOption.series[2].data = data['nn_pre_valid']
           this.trainOption.series[3].data = data['random_pre_valid']
 
-          this.nn_score=data['nn_score']
-          this.rf_score=data['random_score']
+          this.nn_score = data['nn_score']
+          this.rf_score = data['random_score']
           //处理数据
         })
         .catch(error => console.error(error));
@@ -538,6 +571,20 @@ export default {
           })
           this.stage = 'untrain'
         })
+    },
+    //提交表格
+    submitForm(formName) {
+      console.log(this.$refs)
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          this.$message({
+            message: '上传成功',
+            type: 'success'
+          })
+        } else {
+          return false;
+        }
+      });
     },
     //获取风机名称封装函数
     getWindTurbineName(windTurbineName) {
@@ -580,16 +627,17 @@ export default {
   },
 
   beforeRouteLeave(to, from, next) {
-    if(this.stage!=='trained'){ 
+    if (this.stage !== 'trained') {
       next();
       return;
     }
-    const answer = window.confirm('你的模型尚未保存，确定要退出吗')
-    if (answer) {
-      next()
-    } else {
-      next(false)
-    }
+    this.$confirm('你的模型尚未保存，确定要退出吗')
+      .then(() => {
+        next()
+      })
+      .catch(() => {
+        next(false)
+      })
   },
 };
 </script>

@@ -283,7 +283,7 @@ def train(df, args, save_path):
     valid_loss = []
     train_epochs_loss = []
     valid_epochs_loss = []
-    early_stopping = EarlyStopping(patience=10, verbose=True,
+    early_stopping = EarlyStopping(patience=5, verbose=True,
                                    ckp_save_path=f'{save_path}/model_nn.pdparams')
 
     for epoch in tqdm(range(args.epoch_num)):

@@ -135,7 +135,7 @@
 </template>
 <script>
 import { StatsCard, EchartsCard, DecoratedEchart } from "@/components/index";
-import VueSlider from 'vue-slider-component'
+// import VueSlider from 'vue-slider-component'
 import Chartist from "chartist";
 import * as echarts from "echarts";
 import ecStat from "echarts-stat";
@@ -145,7 +145,7 @@ export default {
     StatsCard,
     EchartsCard,
     DecoratedEchart,
-    VueSlider,
+    // VueSlider,
   },
   /**
    * Chart data used to render stats, charts. Should be replaced with server data

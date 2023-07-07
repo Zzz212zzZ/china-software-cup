@@ -2,21 +2,9 @@
   <div class="wrapper">
     <side-bar>
       <template slot="links">
-        <sidebar-link to="/dataAnalysis" name="数据特征分析" icon="ti-panel" />
-        <sidebar-link to="/dataPreprocess" name="数据预处理" icon="ti-panel" />
-        <sidebar-link to="/modelTrain" name="模型训练" icon="ti-panel" />
-
-        <!-- <sidebar-link to="/dashboard" name="dashboard" icon="ti-panel" />
-        <sidebar-link to="/stats" name="User Profile" icon="ti-user" />
-        <sidebar-link
-          to="/table-list"
-          name="Table List"
-          icon="ti-view-list-alt"
-        />
-        <sidebar-link to="/typography" name="Typography" icon="ti-text" />
-        <sidebar-link to="/icons" name="Icons" icon="ti-pencil-alt2" />
-        <sidebar-link to="/maps" name="Map" icon="ti-map" />
-        <sidebar-link to="/notifications" name="Notifications" icon="ti-bell" /> -->
+        <sidebar-link to="/dashboard/client/dataAnalysis" name="数据特征分析" icon="ti-panel" />
+        <sidebar-link to="/dashboard/client/dataPreprocess" name="数据预处理" icon="ti-panel" />
+        <sidebar-link to="/dashboard/client/modelTrain" name="模型训练" icon="ti-panel" />
       </template>
       <mobile-menu>
         <li class="nav-item">

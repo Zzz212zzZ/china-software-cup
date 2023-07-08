@@ -8,19 +8,17 @@ import Login from "@/pages/LoginPage/Login.vue";
 import MainDashboard from "@/MainDashboard.vue";
 
 // Client pages
-import clientDataAnalysis from "@/pages/ClientPage/dataAnalysis.vue";
-import clientDataPreprocess from "@/pages/ClientPage/dataPreprocess.vue";
-import clientModelTrain from "@/pages/ClientPage/modelTrain.vue";
+import DataAnalysis from "@/pages/ClientPage/dataAnalysis.vue";
+import DataPredict from "@/pages/ClientPage/dataPredict.vue";
 
 // Analyst pages
-import analystDataAnalysis from "@/pages/AnalystPage/dataAnalysis.vue";
-import analystDataPreprocess from "@/pages/AnalystPage/dataPreprocess.vue";
-import analystModelTrain from "@/pages/AnalystPage/modelTrain.vue";
+import DataPreprocess from "@/pages/AnalystPage/dataPreprocess.vue";
+import ModelTrain from "@/pages/AnalystPage/modelTrain.vue";
 
 // Admin pages
-import adminDataAnalysis from "@/pages/AdminPage/dataAnalysis.vue";
-import adminDataPreprocess from "@/pages/AdminPage/dataPreprocess.vue";
-import adminModelTrain from "@/pages/AdminPage/modelTrain.vue";
+// import adminDataAnalysis from "@/pages/AdminPage/dataAnalysis.vue";
+// import adminDataPreprocess from "@/pages/AdminPage/dataPreprocess.vue";
+// import adminModelTrain from "@/pages/AdminPage/modelTrain.vue";
 
 
 // const routes = [
@@ -76,18 +74,13 @@ const routes = [
             children: [
               {
                 path: "dataAnalysis",
-                name: "用户数据特征分析",
-                component: clientDataAnalysis,
+                name: "数据特征分析",
+                component: DataAnalysis,
               },
               {
-                path: "dataPreprocess",
-                name: "用户数据预处理",
-                component: clientDataPreprocess,
-              },
-              {
-                path: "modelTrain",
-                name: "用户模型训练",
-                component: clientModelTrain,
+                path: "dataPredict",
+                name: "数据预测",
+                component: DataPredict,
               },
             ],
           },
@@ -98,18 +91,23 @@ const routes = [
             children: [
               {
                 path: "dataAnalysis",
-                name: "分析员数据特征分析",
-                component: analystDataAnalysis,
+                name: "数据特征分析",
+                component: DataAnalysis,
               },
               {
                 path: "dataPreprocess",
-                name: "分析员数据预处理",
-                component: analystDataPreprocess,
+                name: "数据预处理",
+                component: DataPreprocess,
               },
               {
                 path: "modelTrain",
-                name: "分析员模型训练",
-                component: analystModelTrain,
+                name: "模型训练",
+                component: ModelTrain,
+              },
+              {
+                path: "dataPredict",
+                name: "数据预测",
+                component: DataPredict,
               },
             ],
           },
@@ -120,18 +118,23 @@ const routes = [
             children: [
               {
                 path: "dataAnalysis",
-                name: "管理员数据特征分析",
-                component: adminDataAnalysis,
+                name: "数据特征分析",
+                component: DataAnalysis,
               },
               {
                 path: "dataPreprocess",
-                name: "管理员数据预处理",
-                component: adminDataPreprocess,
+                name: "数据预处理",
+                component: DataPreprocess,
               },
               {
                 path: "modelTrain",
-                name: "管理员模型训练",
-                component: adminModelTrain,
+                name: "模型训练",
+                component: ModelTrain,
+              },
+              {
+                path: "dataPredict",
+                name: "数据预测",
+                component: DataPredict,
               },
             ],
           },

@@ -181,7 +181,7 @@
       :append-to-body="true">
       <el-form ref="upload" :rules="rules" :model="form">
         <el-form-item label="分析师名称">rich</el-form-item>
-        <el-form-item label="数据集">{{ this.$store.state.selectedWindTurbin }}</el-form-item>
+        <el-form-item label="数据集">{{ windTurbineName }}</el-form-item>
         <el-form-item label="神经网络得分">{{ nn_score }}</el-form-item>
         <el-form-item label="随机森林得分">{{ rf_score }}</el-form-item>
         <el-form-item label="选择" prop="model">
@@ -189,6 +189,9 @@
             <el-checkbox label="上传神经网络模型" name="model"></el-checkbox>
             <el-checkbox label="上传随机森林模型" name="model"></el-checkbox>
           </el-checkbox-group>
+        </el-form-item>
+        <el-form-item label="输入备注" prop="comment">
+          <el-input type="textarea" placeholder="请输入备注" v-model="form.comment"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -201,7 +204,6 @@
 <script>
 import { ModelCard, EchartsCard, Card, DoubleCard } from "@/components/index";
 import VueSlider from 'vue-slider-component'
-import Chartist from "chartist";
 import { Dialog, Dropdown, DropdownMenu, DropdownItem, Slider, Button, ButtonGroup, Divider, Form, FormItem, Checkbox, CheckboxGroup } from 'element-ui'
 export default {
   components: {
@@ -301,7 +303,7 @@ export default {
         [dotPos[2], dotPos[3], { backgroundColor: '#91CC75' }],
       ],
       //状态
-      stage: 'trained', //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
+      stage: 'nodata', //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
 
       validOption: {
         xAxis:
@@ -400,7 +402,8 @@ export default {
       uploadDialog: false,
 
       form: {
-        model: []
+        model: [],
+        comment:'',
       },
 
       rules: {
@@ -408,6 +411,12 @@ export default {
           { type: 'array', required: true, message: '至少选择一个模型', trigger: 'change' }
         ]
       }
+    }
+  },
+
+  computed:{
+    windTurbineName(){
+      return this.$store.state.selectedWindTurbine
     }
   },
 
@@ -623,6 +632,12 @@ export default {
         }
       },
       deep: true
+    },
+
+    '$store.state.selectedWindTurbine':{
+      handler(){
+        this.stage='untrain'
+      }
     }
   },
 

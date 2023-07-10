@@ -2,20 +2,55 @@ import os
 import sys
 from flask_sqlalchemy import SQLAlchemy
 import pandas as pd
+from external import db
+
+class User(db.Model):
+    __tablename__ = "user"  # 表名 默认使用类名的小写
+    # 定义类属性 记录字段
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(64))
+    password = db.Column(db.String(64))
+    role = db.Column(db.String(64))
+
+    def __repr__(self):  # 自定义 交互模式 & print() 的对象打印
+        return "(%s, %s, %s, %s)" % (self.id, self.username, self.password, self.role)
+
+    def to_dict(self):
+        return {
+            'id':self.id,
+            'username':self.username,
+            'password':self.password,
+            'role':self.role
+        }
+
+class Model(db.Model):
+    __tablename__ = "model"  # 表名 默认使用类名的小写
+    # 定义类属性 记录字段
+    id = db.Column(db.Integer, primary_key=True)
+    analyst_id=db.Column(db.Integer, db.ForeignKey('user.id'))
+    analyst=db.relationship('User')
+    dataset = db.Column(db.String(64))
+    model_type = db.Column(db.String(64))
+    score = db.Column(db.String(64))
+    comment = db.Column(db.String(64))
+
+    def __repr__(self):  # 自定义 交互模式 & print() 的对象打印
+        return "(%s, %s, %s, %s, %s, %s)" % (self.id, self.analyst.username, self.dataset, self.model_type, self.score, self.comment)
+
+    def to_dict(self):
+        return {
+            'model_id':self.id,
+            'analyst':self.analyst.username,
+            'dataset':self.dataset,
+            'model_type':self.model_type,
+            'score':self.score,
+            'comment':self.comment,
+        }
 
 
 class DatabaseConnector(object):
-    def __init__(self, app):
-        self.db_name = 'data'
-        WIN = sys.platform.startswith('win')
-        if WIN:  # 如果是 Windows 系统，使用三个斜线
-            prefix = 'sqlite:///'
-        else:  # 否则使用四个斜线
-            prefix = 'sqlite:////'
-        app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, self.db_name + '.db')
-        with app.app_context():
-            self.db = SQLAlchemy(app)
-            self.engine = self.db.engine
+    def __init__(self):
+        self.engine = db.engine
 
     def df_to_database(self, data: pd.DataFrame, table_name, if_exists='fail'):
         """
@@ -46,8 +81,3 @@ class DatabaseConnector(object):
         select_sql += " FROM `" + table_name + '`'
         df = pd.read_sql(select_sql, self.engine, parse_dates=['DATATIME'])
         return df
-
-
-
-    
-

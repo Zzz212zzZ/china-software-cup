@@ -8,16 +8,28 @@ import shutil
 import os
 
 from BinProcessor import BinProcessor
-from DatabaseConnector import DatabaseConnector
+from DatabaseConnector import DatabaseConnector,User,Model
 from DataSource import DataSource
 from DateEncoder import DateEncoder
 from train_predict import train,args,predict_valid
 from Predictor import Predictor
+import sys
+from external import db
 
 app = Flask(__name__)
+WIN = sys.platform.startswith('win')
+if WIN:  # 如果是 Windows 系统，使用三个斜线
+    prefix = 'sqlite:///'
+else:  # 否则使用四个斜线
+    prefix = 'sqlite:////'
+app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'data.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
+db.init_app(app)
+
 CORS(app)
 api = Api(app)
-dbcon=DatabaseConnector(app)
+with app.app_context():
+    dbcon=DatabaseConnector()
 
 data_src=DataSource(dbcon)
 predictor=Predictor()
@@ -193,7 +205,7 @@ def retrain():
 @app.route('/save_model',methods=['POST'])
 def save_model():
     data = json.loads(request.data)
-    print(data)
+    # print(data)
     copy_path=f'model/{data["analyst"]}/temp/{data["number"]}'
     if not os.path.exists(copy_path):
         return json.dumps({'error':'没有模型'}, ensure_ascii=False)
@@ -207,6 +219,14 @@ def save_model():
         "上传神经网络模型": f'model/{data["analyst"]}/{data["number"]}/model_nn/{data["nn_score"]}',
         "上传随机森林模型": f'model/{data["analyst"]}/{data["number"]}/model_random/{data["rf_score"]}'
     }
+    models_type = {
+        "上传神经网络模型": '神经网络',
+        "上传随机森林模型": '随机森林'
+    }
+    models_score={
+        "上传神经网络模型": data["nn_score"],
+        "上传随机森林模型": data["rf_score"]
+    }
 
     for m in data['models']:
         if os.path.exists(model_path[m]):
@@ -216,6 +236,14 @@ def save_model():
         for f in common_files:
             shutil.copy(copy_path + '/' + f, model_path[m])
         shutil.copy(copy_path + '/' + models[m], model_path[m])
+        with app.app_context():
+            model=Model(analyst_id=data['analyst_id'],
+                        dataset=data['dataset'],
+                        model_type=models_type[m],
+                        score=models_score[m],
+                        comment=data['comment'])
+            db.session.add(model)
+            db.session.commit()
 
     #操作数据库
     return json.dumps({'result':'上传成功'}, ensure_ascii=False)
@@ -245,10 +273,39 @@ def get_models():
 
     :return: 从数据库获取模型数据
     """
-    number=request.args['number']
+    dataset=request.args['dataset']
 
+    dicts=[]
     #数据库操作
-    return json.dumps({'result': '传输完成'}, ensure_ascii=False)
+    with app.app_context():
+        if dataset == 'None':
+            models=Model.query.all()
+        else:
+            models=Model.query.filter_by(dataset=dataset)
+        for m in models:
+            dicts.append(m.to_dict())
+
+    return json.dumps(dicts, ensure_ascii=False)
+
+@app.route('/delete_model', methods=['POST'])
+def delete_model():
+    """
+
+    :return: 从数据库删除模型
+    """
+    data = json.loads(request.data)
+    mapper={
+        "神经网络":"model_nn",
+        "随机森林":"model_random"
+    }
+    with app.app_context():
+        model=Model.query.filter_by(id=data['model_id']).first()
+        path=f'model/{model.analyst.username}/{data["number"]}/{mapper[model.model_type]}/{model.score}'
+        if os.path.exists(path):
+            shutil.rmtree(path)
+        db.session.delete(model)
+        db.session.commit()
+    return json.dumps({"result":"删除成功"}, ensure_ascii=False)
 
 @app.route('/predict', methods=['GET'])
 def predict():

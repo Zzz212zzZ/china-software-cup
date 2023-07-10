@@ -1,7 +1,6 @@
 import pandas as pd
 
 from DatabaseConnector import DatabaseConnector
-from process_with_bin import process_with_bin
 from BinProcessor import BinProcessor
 
 class DataSource(object):

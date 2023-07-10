@@ -287,8 +287,8 @@ export default {
         },
       ],
 
-      nn_score: '0.9987',
-      rf_score: '0.8996',
+      nn_score: '未训练',
+      rf_score: '未训练',
       primaryVars: [],
       secondaryVars: [],
       RandomForestVars: [],
@@ -591,12 +591,14 @@ export default {
           fetch(`http://127.0.0.1:5000/save_model`, {
             method: 'post',
             body: JSON.stringify({
+              analyst_id: 2,
               analyst: 'rich',
               number: this.getWindTurbineName(this.windTurbineName),
+              dataset: this.windTurbineName.split(/[\t\r\f\n\s]*/g).join(''),
               nn_score: this.nn_score,
               rf_score: this.rf_score,
               models: this.form.model,
-              comment: this.comment
+              comment: this.form.comment
             })
           })
             .then(response => response.json())

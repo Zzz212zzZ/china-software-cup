@@ -108,6 +108,10 @@ export default {
         }
     },
 
+    created() {
+        this.getModels()
+    },
+
     methods: {
         //数据完成上传
         uploadSuccess(response, file, fileList) {
@@ -139,10 +143,11 @@ export default {
         },
         //获取模型
         getModels() {
-            var number = this.getWindTurbineName(this.$store.state.selectedWindTurbine)
-            fetch(`http://127.0.0.1:5000/get_models?number=${number}`)
+            var dataset = this.$store.state.selectedWindTurbine.split(/[\t\r\f\n\s]*/g).join('')
+            fetch(`http://127.0.0.1:5000/get_models?dataset=${dataset}`)
                 .then(response => response.json())
                 .then(data => {
+                    this.models=data
                     console.log(data)
                 })
         },
@@ -161,7 +166,7 @@ export default {
         },
         //获取风机名称封装函数
         getWindTurbineName(windTurbineName) {
-            windTurbineName = windTurbineName.slice(3);
+            windTurbineName = windTurbineName.split(/[\t\r\f\n\s]*/g).join('').slice(2);
             //如果windTurbineNumber编号为单个数字，前面加0
             if (windTurbineName.length == 1) {
                 windTurbineName = '0' + windTurbineName;
@@ -170,6 +175,7 @@ export default {
         },
     }
 
+    
 }
 
 </script>

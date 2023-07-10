@@ -1,11 +1,11 @@
 <template>
     <card title="模型管理">
         <div>
-            <el-button type="primary" round v-if="!isAdmin" @click="onlyMine=!onlyMine">
+            <el-button type="primary" round v-if="!isAdmin" @click="onlyMine = !onlyMine">
                 <template v-if="onlyMine">全部</template>
                 <template v-else>我的</template>
             </el-button>
-            
+
             <el-table :data="showData" style="width: 100%">
                 <el-table-column prop="analyst" label="数据分析师">
                 </el-table-column>
@@ -37,28 +37,7 @@ export default {
 
     data() {
         return {
-            models: [{
-                model_id: 0,
-                analyst: 'rich',
-                dataset: '风机1',
-                model_type: '神经网络',
-                score: 0.999,
-                comment: '你好世界'
-            }, {
-                model_id: 1,
-                analyst: 'rich',
-                dataset: '风机2',
-                model_type: '随机森林',
-                score: 0.988,
-                comment: '你好世界'
-            }, {
-                model_id: 2,
-                analyst: 'poor',
-                dataset: '风机1',
-                model_type: '随机森林',
-                score: 0.888,
-                comment: '机器学习'
-            },],
+            models: [],
 
             analyst: 'rich',
 
@@ -66,14 +45,51 @@ export default {
         }
     },
 
+    created() {
+        this.getModels()
+    },
+
     methods: {
         deleteModel(index, row) {
             this.$confirm('确定删除模型？')
                 .then(() => {
                     //后端操作
-                    this.models.splice(index, 1)
+                    fetch(`http://127.0.0.1:5000/delete_model`, {
+                        method: 'post',
+                        body: JSON.stringify({
+                            model_id: row.model_id,
+                            number: this.getWindTurbineName(row.dataset)
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            this.models.splice(index, 1)
+                            this.$message({
+                                message: data['result'],
+                                type: 'success'
+                            })
+                        })
                 })
-        }
+        },
+        //获取模型
+        getModels() {
+            fetch(`http://127.0.0.1:5000/get_models?dataset=None`)
+                .then(response => response.json())
+                .then(data => {
+                    this.models = data
+                    console.log(data)
+                })
+        },
+
+        //获取风机名称封装函数
+        getWindTurbineName(windTurbineName) {
+            windTurbineName = windTurbineName.split(/[\t\r\f\n\s]*/g).join('').slice(2);
+            //如果windTurbineNumber编号为单个数字，前面加0
+            if (windTurbineName.length == 1) {
+                windTurbineName = '0' + windTurbineName;
+            }
+            return windTurbineName
+        },
     },
 
     computed: {
@@ -82,7 +98,7 @@ export default {
         },
 
         showData() {
-            if (this.onlyMine) 
+            if (this.onlyMine)
                 return this.models.filter(item => item.analyst === this.analyst)
             else
                 return this.models

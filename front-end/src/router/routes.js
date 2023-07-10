@@ -14,6 +14,7 @@ import DataPredict from "@/pages/ClientPage/dataPredict.vue";
 // Analyst pages
 import DataPreprocess from "@/pages/AnalystPage/dataPreprocess.vue";
 import ModelTrain from "@/pages/AnalystPage/modelTrain.vue";
+import ModelManager from "@/pages/AnalystPage/modelManager.vue";
 
 // Admin pages
 // import adminDataAnalysis from "@/pages/AdminPage/dataAnalysis.vue";
@@ -109,6 +110,11 @@ const routes = [
                 name: "数据预测",
                 component: DataPredict,
               },
+              {
+                path: "ModelManager",
+                name: "模型管理",
+                component: ModelManager,
+              },
             ],
           },
           {
@@ -135,6 +141,11 @@ const routes = [
                 path: "dataPredict",
                 name: "数据预测",
                 component: DataPredict,
+              },
+              {
+                path: "ModelManager",
+                name: "模型管理",
+                component: ModelManager,
               },
             ],
           },

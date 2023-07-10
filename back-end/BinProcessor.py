@@ -72,7 +72,8 @@ class BinProcessor(object):
         data=self.data.loc[index]
         # print(len(self.y_Mean))
         # print(data['ROUND(A.WS,1)'].dropna().map(lambda x:int(x//self.step)).max())
-        data['YD15']=data['ROUND(A.WS,1)'].dropna().map(lambda x:self.y_Mean[int(x//self.step)])
+        out_of_range=data['ROUND(A.WS,1)']>(data['ROUND(A.WS,1)'].dropna().map(lambda x:int(x//self.step)).max())
+        data['YD15']=data['ROUND(A.WS,1)'].dropna().drop(out_of_range).map(lambda x:self.y_Mean[int(x//self.step)])
         return data
 
 

@@ -177,8 +177,7 @@
     </div>
 
     <!-- 模型上传对话框 -->
-    <el-dialog title="提示" :visible.sync="uploadDialog" width="30%"
-      :append-to-body="true">
+    <el-dialog title="提示" :visible.sync="uploadDialog" width="30%" :append-to-body="true">
       <el-form ref="upload" :rules="rules" :model="form">
         <el-form-item label="分析师名称">rich</el-form-item>
         <el-form-item label="数据集">{{ windTurbineName }}</el-form-item>
@@ -196,7 +195,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="uploadDialog = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm('upload');uploadDialog = false">确 定</el-button>
+        <el-button type="primary" @click="submitForm('upload'); uploadDialog = false">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -288,8 +287,8 @@ export default {
         },
       ],
 
-      nn_score: '未训练',
-      rf_score: '未训练',
+      nn_score: '0.9987',
+      rf_score: '0.8996',
       primaryVars: [],
       secondaryVars: [],
       RandomForestVars: [],
@@ -304,6 +303,7 @@ export default {
       ],
       //状态
       stage: 'nodata', //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
+      model_saved:false,
 
       validOption: {
         xAxis:
@@ -403,7 +403,7 @@ export default {
 
       form: {
         model: [],
-        comment:'',
+        comment: '',
       },
 
       rules: {
@@ -414,8 +414,8 @@ export default {
     }
   },
 
-  computed:{
-    windTurbineName(){
+  computed: {
+    windTurbineName() {
       return this.$store.state.selectedWindTurbine
     }
   },
@@ -522,6 +522,7 @@ export default {
         })
       }).then(response => response.json())
         .then(data => {
+          this.model_saved=false
           this.$message({
             message: '训练完成',
             type: 'success'
@@ -586,10 +587,35 @@ export default {
       console.log(this.$refs)
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.$message({
-            message: '上传成功',
-            type: 'success'
+          // console.log(this.form)
+          fetch(`http://127.0.0.1:5000/save_model`, {
+            method: 'post',
+            body: JSON.stringify({
+              analyst: 'rich',
+              number: this.getWindTurbineName(this.windTurbineName),
+              nn_score: this.nn_score,
+              rf_score: this.rf_score,
+              models: this.form.model,
+              comment: this.comment
+            })
           })
+            .then(response => response.json())
+            .then(data => {
+              if (data.hasOwnProperty('error')) {
+                this.$message({
+                  message: data['error'],
+                  type: 'warning'
+                })
+                return
+              }
+
+              this.model_saved=true
+              this.$message({
+                message: data['result'],
+                type: 'success'
+              })
+            })
+
         } else {
           return false;
         }
@@ -634,15 +660,15 @@ export default {
       deep: true
     },
 
-    '$store.state.selectedWindTurbine':{
-      handler(){
-        this.stage='untrain'
+    '$store.state.selectedWindTurbine': {
+      handler() {
+        this.stage = 'untrain'
       }
     }
   },
 
   beforeRouteLeave(to, from, next) {
-    if (this.stage !== 'trained') {
+    if (this.stage !== 'trained' || this.model_saved) {
       next();
       return;
     }

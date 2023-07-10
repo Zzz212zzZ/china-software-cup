@@ -12,12 +12,15 @@ from DatabaseConnector import DatabaseConnector
 from DataSource import DataSource
 from DateEncoder import DateEncoder
 from train_predict import train,args,predict_valid
+from Predictor import Predictor
 
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
 dbcon=DatabaseConnector(app)
+
 data_src=DataSource(dbcon)
+predictor=Predictor()
 
 
 @app.route('/hello', methods=['GET'])
@@ -148,8 +151,6 @@ def train_data():
 @app.route('/trained_data', methods=['POST'])
 def trained_data():
     data = json.loads(request.data)
-    print(data['samples'][2])
-    print(data['samples'][3])
     path = f'model/{data["analyst"]}/temp'
     if data_src.processedData is None:
         return json.dumps({'error':'no data'}, ensure_ascii=False)
@@ -188,6 +189,85 @@ def retrain():
     if(os.path.exists(path)):
         shutil.rmtree(path)
     return json.dumps({'result':'成功删除'}, ensure_ascii=False)
+
+@app.route('/save_model',methods=['POST'])
+def save_model():
+    data = json.loads(request.data)
+    print(data)
+    copy_path=f'model/{data["analyst"]}/temp/{data["number"]}'
+    if not os.path.exists(copy_path):
+        return json.dumps({'error':'没有模型'}, ensure_ascii=False)
+
+    common_files=['args.pkl','scaler_x.pkl','scaler_y.pkl']
+    models={
+        "上传神经网络模型":'model_nn.pdparams',
+        "上传随机森林模型":'model_random.pkl'
+    }
+    model_path={
+        "上传神经网络模型": f'model/{data["analyst"]}/{data["number"]}/model_nn/{data["nn_score"]}',
+        "上传随机森林模型": f'model/{data["analyst"]}/{data["number"]}/model_random/{data["rf_score"]}'
+    }
+
+    for m in data['models']:
+        if os.path.exists(model_path[m]):
+            shutil.rmtree(model_path[m])
+        os.makedirs(model_path[m])
+
+        for f in common_files:
+            shutil.copy(copy_path + '/' + f, model_path[m])
+        shutil.copy(copy_path + '/' + models[m], model_path[m])
+
+    #操作数据库
+    return json.dumps({'result':'上传成功'}, ensure_ascii=False)
+
+@app.route('/receive_predict_data', methods=['POST'])
+def receive_predict_data():
+    if request.files is None:
+        return json.dumps({'error': '传输失败'}, ensure_ascii=False)
+    try:
+        csv_data = pd.read_csv(request.files['file'])
+    except:
+        return json.dumps({'error': '无法读取文件'}, ensure_ascii=False)
+    # 判断是否存在关键行
+    cols = ['DATATIME', 'WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']
+    col_exists=True
+    for c in cols:
+        col_exists=col_exists and (c in csv_data.columns)
+    if not col_exists:
+        return json.dumps({'error': '文件格式有误'}, ensure_ascii=False)
+
+    predictor.data=csv_data
+    return json.dumps({'result': '传输完成'}, ensure_ascii=False)
+
+@app.route('/get_models', methods=['GET'])
+def get_models():
+    """
+
+    :return: 从数据库获取模型数据
+    """
+    number=request.args['number']
+
+    #数据库操作
+    return json.dumps({'result': '传输完成'}, ensure_ascii=False)
+
+@app.route('/predict', methods=['GET'])
+def predict():
+    """
+
+    :return: 预测数据
+    """
+    model_types={
+        '神经网络':'model_nn',
+        '随机森林':'model_random'
+    }
+    path=f'model/{request.args["analyst"]}/{request.args["number"]}/{model_types[request.args["model_type"]]}/{request.args["score"]}'
+    time_list, pre_val=predictor.predict(path,model_types[request.args["model_type"]])
+
+    dict = {
+        'time_list':time_list,
+        'pre_val':time_list
+    }
+    return json.dumps(dict, ensure_ascii=False)
 
 
 if __name__ == '__main__':

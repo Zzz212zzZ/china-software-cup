@@ -66,7 +66,6 @@ export default {
       var mainRoute=this.$router.options.routes[1].children[0]
       const roles=["client","analyst","admin"]
       var roleRoute=mainRoute.children[roles.indexOf(this.role)].children
-      console.log(roleRoute)
       return roleRoute
     },
 

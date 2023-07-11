@@ -12,8 +12,10 @@ const router = new VueRouter({
 
 
 router.beforeEach((to, from, next) => {
-  let role = localStorage.getItem('role');
-  let token = localStorage.getItem('token');
+  // let role = localStorage.getItem('role');
+  // let token = localStorage.getItem('token');
+  let role=$cookies.get("role");
+  let token = $cookies.get('user_id');
   
   // 如果有token并且试图进入login，则跳转到自己角色对应的dashboard
   if (token && to.path === '/login') {

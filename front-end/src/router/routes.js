@@ -3,7 +3,7 @@ import DashboardLayout from "@/layout/dashboard/DashboardLayout.vue";
 import NotFound from "@/pages/NotFoundPage.vue";
 
 //Login page
-import Login from "@/pages/LoginPage/Login.vue";
+import Login from "@/pages/LoginPage/Login2.vue";
 
 import MainDashboard from "@/MainDashboard.vue";
 
@@ -17,9 +17,7 @@ import ModelTrain from "@/pages/AnalystPage/modelTrain.vue";
 import ModelManager from "@/pages/AnalystPage/modelManager.vue";
 
 // Admin pages
-// import adminDataAnalysis from "@/pages/AdminPage/dataAnalysis.vue";
-// import adminDataPreprocess from "@/pages/AdminPage/dataPreprocess.vue";
-// import adminModelTrain from "@/pages/AdminPage/modelTrain.vue";
+import UserManager from "@/pages/AdminPage/UserManager.vue";
 
 
 // const routes = [
@@ -128,24 +126,14 @@ const routes = [
                 component: DataAnalysis,
               },
               {
-                path: "dataPreprocess",
-                name: "数据预处理",
-                component: DataPreprocess,
-              },
-              {
-                path: "modelTrain",
-                name: "模型训练",
-                component: ModelTrain,
-              },
-              {
-                path: "dataPredict",
-                name: "数据预测",
-                component: DataPredict,
-              },
-              {
                 path: "ModelManager",
                 name: "模型管理",
                 component: ModelManager,
+              },
+              {
+                path: "UserManager",
+                name: "用户管理",
+                component: UserManager,
               },
             ],
           },

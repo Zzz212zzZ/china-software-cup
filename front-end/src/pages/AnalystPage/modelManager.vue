@@ -39,7 +39,7 @@ export default {
         return {
             models: [],
 
-            analyst: 'rich',
+            analyst: this.$cookies.get("username"),
 
             onlyMine: false,
         }
@@ -94,7 +94,7 @@ export default {
 
     computed: {
         isAdmin() {
-            return localStorage.getItem('role') === 'admin'
+            return this.$cookies.get("role") === 'admin'
         },
 
         showData() {

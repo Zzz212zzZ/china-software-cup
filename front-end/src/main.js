@@ -23,6 +23,7 @@ import store from './store';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import 'popper.js/dist/popper.js';
+import VueCookies from 'vue-cookies'
 
 import {
   Message,
@@ -69,6 +70,8 @@ Vue.use(Table)
 Vue.use(TableColumn)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm;
+
+Vue.use(VueCookies)
 
 /* eslint-disable no-new */
 new Vue({

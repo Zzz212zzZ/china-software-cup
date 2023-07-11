@@ -110,7 +110,7 @@ def do_data_process():
     missingValueOption = request.args['missingValueOption']
     aValueOption = request.args['aValueOption']
     bValueOption = request.args['bValueOption']
-    print(f'{missingValueOption}+{aValueOption}+{bValueOption}')
+    # print(f'{missingValueOption}+{aValueOption}+{bValueOption}')
     data_src.set_processed_data(missingValueOption,aValueOption,bValueOption)
     return json.dumps({'result':'success'}, ensure_ascii=False)
 
@@ -281,7 +281,7 @@ def get_models():
         if dataset == 'None':
             models=Model.query.all()
         else:
-            models=Model.query.filter_by(dataset=dataset)
+            models=Model.query.filter_by(dataset=dataset).all()
         for m in models:
             dicts.append(m.to_dict())
 
@@ -326,6 +326,70 @@ def predict():
     }
     return json.dumps(dict, ensure_ascii=False)
 
+@app.route('/get_users', methods=['GET'])
+def get_users():
+    """
+
+    :return: 从数据库获取用户数据
+    """
+    dicts=[]
+    #数据库操作
+    with app.app_context():
+        users=User.query.all()
+        for u in users:
+            dicts.append(u.to_dict())
+
+    return json.dumps(dicts, ensure_ascii=False)
+
+@app.route('/promote', methods=['POST'])
+def promote():
+    """
+
+    :return: 将普通用户升级为模型训练师
+    """
+    data = json.loads(request.data)
+    with app.app_context():
+        User.query.filter_by(id=data['user_id']).update({'role':'analyst'})
+        db.session.commit()
+    return json.dumps({"result": "提升成功"}, ensure_ascii=False)
+
+@app.route('/demote', methods=['POST'])
+def demote():
+    """
+
+    :return: 将模型训练师降级为普通用户
+    """
+    data = json.loads(request.data)
+    with app.app_context():
+        User.query.filter_by(id=data['user_id']).update({'role':'client'})
+        db.session.commit()
+    return json.dumps({"result": "降级成功"}, ensure_ascii=False)
+
+@app.route('/login', methods=['POST'])
+def login():
+    """
+
+    :return: 登录，并返回用户信息
+    """
+    data = json.loads(request.data)
+    with app.app_context():
+        user=User.query.filter_by(username=data['username'],password=data['password']).one_or_none()
+    if user is None:
+        return json.dumps({'error': '用户名或密码错误'}, ensure_ascii=False)
+    return json.dumps(user.to_dict(), ensure_ascii=False)
+
+@app.route('/sign_up', methods=['POST'])
+def sign_up():
+    """
+
+    :return: 登录，并返回用户信息
+    """
+    data = json.loads(request.data)
+    with app.app_context():
+        user=User(username=data['username'],password=data['password'],role='client')
+        db.session.add(user)
+        db.session.commit()
+    return json.dumps({"result": "注册完毕，请登录"}, ensure_ascii=False)
 
 if __name__ == '__main__':
     app.run()

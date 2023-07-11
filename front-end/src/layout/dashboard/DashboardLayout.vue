@@ -1,8 +1,9 @@
 <template>
   <div class="wrapper">
-    <side-bar>
+    <side-bar :title="this.$cookies.get('username')">
       <template slot="links">
-        <sidebar-link :to="'/dashboard/'+role+'/'+route.path" :name="route.name" icon="ti-panel"  v-for="route in routes"></sidebar-link>
+        <sidebar-link :to="'/dashboard/' + role + '/' + route.path" :name="route.name" icon="ti-panel"
+          v-for="route in routes" v-if="!route.hide_in_nav"></sidebar-link>
         <!-- <sidebar-link to="/dashboard/client/dataAnalysis" name="数据特征分析" icon="ti-panel" />
         <sidebar-link to="/dashboard/client/dataPreprocess" name="数据预处理" icon="ti-panel" />
         <sidebar-link to="/dashboard/client/modelTrain" name="模型训练" icon="ti-panel" /> -->
@@ -63,14 +64,14 @@ export default {
   computed: {
     // 获取当前路由的子路由
     routes() {
-      var mainRoute=this.$router.options.routes[1].children[0]
-      const roles=["client","analyst","admin"]
-      var roleRoute=mainRoute.children[roles.indexOf(this.role)].children
+      var mainRoute = this.$router.options.routes[1].children[0]
+      const roles = ["client", "analyst", "admin"]
+      var roleRoute = mainRoute.children[roles.indexOf(this.role)].children
       return roleRoute
     },
 
-    role(){
-      return localStorage.getItem('role')
+    role() {
+      return this.$cookies.get("role");
     }
   }
 };

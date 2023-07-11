@@ -342,7 +342,7 @@ export default {
         .then(data => {
           console.log(data)
           console.log('进入模型训练')
-          this.$router.push('/modelTrain')
+          this.$router.push('/dashboard/analyst/modelTrain')
         })
         
     },

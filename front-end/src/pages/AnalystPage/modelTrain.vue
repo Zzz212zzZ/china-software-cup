@@ -518,7 +518,7 @@ export default {
 
           samples: this.samples,
 
-          analyst: 'rich'
+          analyst: this.$cookies.get("username")
         })
       }).then(response => response.json())
         .then(data => {
@@ -541,7 +541,7 @@ export default {
         body: JSON.stringify({
           number: Number,
           samples: this.samples,
-          analyst: 'rich'
+          analyst: this.$cookies.get("username")
         })
       })
         .then(response => response.json())
@@ -584,15 +584,14 @@ export default {
     },
     //提交表格
     submitForm(formName) {
-      console.log(this.$refs)
       this.$refs[formName].validate((valid) => {
         if (valid) {
           // console.log(this.form)
           fetch(`http://127.0.0.1:5000/save_model`, {
             method: 'post',
             body: JSON.stringify({
-              analyst_id: 2,
-              analyst: 'rich',
+              analyst_id: this.$cookies.get("user_id"),
+              analyst: this.$cookies.get("username"),
               number: this.getWindTurbineName(this.windTurbineName),
               dataset: this.windTurbineName.split(/[\t\r\f\n\s]*/g).join(''),
               nn_score: this.nn_score,

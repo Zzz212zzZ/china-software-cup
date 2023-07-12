@@ -4,31 +4,22 @@
       <template slot="links">
         <sidebar-link :to="'/dashboard/' + role + '/' + route.path" :name="route.name" icon="ti-panel"
           v-for="route in routes" v-if="!route.hide_in_nav"></sidebar-link>
-        <!-- <sidebar-link to="/dashboard/client/dataAnalysis" name="数据特征分析" icon="ti-panel" />
-        <sidebar-link to="/dashboard/client/dataPreprocess" name="数据预处理" icon="ti-panel" />
-        <sidebar-link to="/dashboard/client/modelTrain" name="模型训练" icon="ti-panel" /> -->
       </template>
-      <!-- <p>{{ routes }}</p> -->
       <mobile-menu>
+        <drop-down class="nav-item" :title="selectedWindTurbineTitle" title-classes="nav-link">
+            <div class="custom-scroll" style="max-height: 240px; overflow-y: auto; background-color: rgb(18, 18, 18);">
+              <a v-for="windTurbineNumber in 20" :key="windTurbineNumber" class="dropdown-item"
+                @click="updateSelectedWindTurbine(`风机 ${windTurbineNumber}`)" href="#">
+                风机 {{ windTurbineNumber }}
+              </a>
+            </div>
+          </drop-down>
         <li class="nav-item">
-          <a class="nav-link">
-            <i class="ti-panel"></i>
-            <p>213</p>
-          </a>
-        </li>
-        <drop-down class="nav-item" title="5 Notifications" title-classes="nav-link" icon="ti-bell">
-          <a class="dropdown-item">Notification 4</a>
-          <a class="dropdown-item">Notification 2</a>
-          <a class="dropdown-item">Notification 3</a>
-          <a class="dropdown-item">Notification 6</a>
-          <a class="dropdown-item">Another notification</a>
-        </drop-down>
-        <li class="nav-item">
-          <a class="nav-link">
-            <i class="ti-settings"></i>
-            <p>Settings</p>
-          </a>
-        </li>
+            <a @click="logout()" class="nav-link">
+              <!-- <i class="ti-settings"></i> -->
+              <p>退出登录</p>
+            </a>
+          </li>
         <li class="divider"></li>
       </mobile-menu>
     </side-bar>
@@ -60,6 +51,14 @@ export default {
         this.$sidebar.displaySidebar(false);
       }
     },
+    logout() {
+      this.$cookies.remove("user_id")
+      this.$cookies.remove("username")
+      this.$cookies.remove("role")
+      this.$cookies.remove("token")
+
+      this.$router.push(`/login`)
+    }
   },
   computed: {
     // 获取当前路由的子路由
@@ -72,6 +71,10 @@ export default {
 
     role() {
       return this.$cookies.get("role");
+    },
+    selectedWindTurbineTitle() {
+      // 如果 Vuex store 中有选中的风机，则使用其作为标题，默认为1
+      return this.$store.state.selectedWindTurbine;
     }
   }
 };

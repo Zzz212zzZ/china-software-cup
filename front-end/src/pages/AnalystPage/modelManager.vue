@@ -59,7 +59,11 @@ export default {
                         body: JSON.stringify({
                             model_id: row.model_id,
                             number: this.getWindTurbineName(row.dataset)
-                        })
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+                            'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+                        }
                     })
                         .then(response => response.json())
                         .then(data => {
@@ -73,7 +77,12 @@ export default {
         },
         //获取模型
         getModels() {
-            fetch(`http://127.0.0.1:5000/get_models?dataset=None`)
+            fetch(`http://127.0.0.1:5000/get_models?dataset=None`, {
+                headers: {
+                    'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+                    'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     this.models = data

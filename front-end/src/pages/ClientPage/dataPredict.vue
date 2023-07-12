@@ -3,7 +3,7 @@
         <div class="col-12 col-lg-6">
             <card title="导入数据">
                 <el-upload class="w-100" drag action="http://127.0.0.1:5000/receive_predict_data" :limit="1"
-                    v-if="!data_submmited" :on-success="uploadSuccess" accept=".csv, .xls, .xlsx">
+                    v-if="!data_submmited" :on-success="uploadSuccess" accept=".csv, .xls, .xlsx" :headers="headerObj">
                     <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
                     <div class="el-upload__tip" slot="tip">
                         只能上传.csv文件，应当包含'DATATIME','WINDSPEED','WINDDIRECTION','TEMPERATURE','HUMIDITY','PRESSURE'信息
@@ -41,7 +41,7 @@
                 <div slot="footer">
                     <div style="display: flex;align-items: center;justify-content: center;">
                         <el-button type="primary" class="w-50"
-                            :disabled="!(data_submmited && model_selected)">开始预测</el-button>
+                            :disabled="!(data_submmited && model_selected)" @click="predict()">开始预测</el-button>
                     </div>
                 </div>
             </echarts-card>
@@ -86,25 +86,15 @@ export default {
             model_selected: false,
             modelSelectDialog: false,
 
-            models: [{
-                model_id:0,
-                analyst: 'rich',
-                dataset: '风机1',
-                model_type: '神经网络',
-                score: 0.999,
-                comment: '你好世界'
-            }, {
-                model_id:1,
-                analyst: 'rich',
-                dataset: '风机2',
-                model_type: '随机森林',
-                score: 0.988,
-                comment: '你好世界'
-            },],
+            models: [],
 
             selected_model: [],
 
-            temp_select_model: null
+            temp_select_model: null,
+
+            headerObj: {
+                'Authorization': `Bearer ${$cookies.get('token')}`, // 设置授权头部信息
+            }
         }
     },
 
@@ -144,20 +134,31 @@ export default {
         //获取模型
         getModels() {
             var dataset = this.$store.state.selectedWindTurbine.split(/[\t\r\f\n\s]*/g).join('')
-            fetch(`http://127.0.0.1:5000/get_models?dataset=${dataset}`)
+            fetch(`http://127.0.0.1:5000/get_models?dataset=${dataset}`, {
+                headers: {
+                    'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+                    'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
-                    this.models=data
+                    this.models = data
                     console.log(data)
                 })
         },
         //进行模型预测
         predict() {
-            var analyst = this.selected_model.analyst
-            var number = this.getWindTurbineName(this.selected_model.dataset)
-            var score = this.selected_model.score
-            var model_type = this.selected_model.model_type
-            fetch(`http://127.0.0.1:5000/predict?analyst=${analyst}&number=${number}&score=${score}&model_type=${model_type}`)
+            // console.log(this.selected_model[0])
+            var analyst = this.selected_model[0].analyst
+            var number = this.getWindTurbineName(this.selected_model[0].dataset)
+            var score = this.selected_model[0].score
+            var model_type = this.selected_model[0].model_type
+            fetch(`http://127.0.0.1:5000/predict?analyst=${analyst}&number=${number}&score=${score}&model_type=${model_type}`, {
+                headers: {
+                    'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+                    'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+                }
+            })
                 .then(response => response.json())
                 .then(data => {
                     console.log(data)
@@ -175,7 +176,7 @@ export default {
         },
     }
 
-    
+
 }
 
 </script>

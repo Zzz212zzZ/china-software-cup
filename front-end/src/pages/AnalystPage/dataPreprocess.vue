@@ -316,7 +316,12 @@ export default {
       this.fetchBinProcessedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine), this.sigma, this.deadCount, this.step, this.missingValueOption, this.aValueOption, this.bValueOption)
     },
     fetchBinProcessedData(number, sigma, deadCount, step, missingValueOption, aValueOption, bValueOption) {
-      fetch(`http://127.0.0.1:5000/bin_data?number=${number}&sigma=${sigma}&deadCount=${deadCount}&step=${step}`)
+      fetch(`http://127.0.0.1:5000/bin_data?number=${number}&sigma=${sigma}&deadCount=${deadCount}&step=${step}`,{
+        headers:{
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      })
         .then(response => response.json())
         .then(data => {
           console.log(data)
@@ -337,7 +342,12 @@ export default {
       const aValueOption = this.aValueOption
       const bValueOption = this.bValueOption
 
-      fetch(`http://127.0.0.1:5000/do_data_process?missingValueOption=${missingValueOption}&aValueOption=${aValueOption}&bValueOption=${bValueOption}`)
+      fetch(`http://127.0.0.1:5000/do_data_process?missingValueOption=${missingValueOption}&aValueOption=${aValueOption}&bValueOption=${bValueOption}`,{
+        headers:{
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      })
         .then(response => response.json())
         .then(data => {
           console.log(data)

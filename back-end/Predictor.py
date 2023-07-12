@@ -6,4 +6,5 @@ class Predictor(object):
         self.data = data
 
     def predict(self, read_path, model_type):
-        return predict(self.data, read_path, model_type, self.data.shape[0])
+        time_list, pre_val=predict(self.data, read_path, model_type, self.data.shape[0])
+        return time_list, pre_val

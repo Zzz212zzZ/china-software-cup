@@ -4,7 +4,7 @@
       尚未完成数据预处理，请先完成数据预处理
     </div>
     <div class="row">
-      <div class="col">
+      <div class="col-md col-12">
         <!-- 参数控制 -->
         <double-card title_1="神经网络参数调整" subTitle_1="大家好啊，我是模型训练控制台" title_2="随机森林参数调整" subTitle_2="大家好啊，我也是模型训练控制台"
           style="z-index: auto;">
@@ -108,13 +108,13 @@
           </div>
         </double-card>
       </div>
-      <div class="col-auto">
+      <div class="col-md-auto col-12">
         <card>
           <p style="font-size: 1em;text-align: center;">神经网络得分</p>
-          <p style="font-size: 3em;">{{ nn_score }}</p>
+          <p style="font-size: 3em;text-align: center;">{{ nn_score }}</p>
           <el-divider></el-divider>
           <p style="font-size: 1em;text-align: center;">随机森林得分</p>
-          <p style="font-size: 3em;">{{ rf_score }}</p>
+          <p style="font-size: 3em;text-align: center;">{{ rf_score }}</p>
         </card>
       </div>
     </div>
@@ -303,7 +303,7 @@ export default {
       ],
       //状态
       stage: 'nodata', //nodata没有数据 untrain尚未训练 trained完成训练 training训练中
-      model_saved:false,
+      model_saved: false,
 
       validOption: {
         xAxis:
@@ -438,7 +438,12 @@ export default {
     },
     //获取模型未训练的数据
     getUnprocessedData(Number) {
-      fetch(`http://127.0.0.1:5000/unprocessed_data?number=${Number}`)
+      fetch(`http://127.0.0.1:5000/unprocessed_data?number=${Number}`, {
+        headers: {
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      })
         .then(response => response.json())
         .then(data => {
           if (data.hasOwnProperty('error')) {
@@ -519,10 +524,14 @@ export default {
           samples: this.samples,
 
           analyst: this.$cookies.get("username")
-        })
+        }),
+        headers: {
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
       }).then(response => response.json())
         .then(data => {
-          this.model_saved=false
+          this.model_saved = false
           this.$message({
             message: '训练完成',
             type: 'success'
@@ -542,7 +551,11 @@ export default {
           number: Number,
           samples: this.samples,
           analyst: this.$cookies.get("username")
-        })
+        }),
+        headers: {
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
       })
         .then(response => response.json())
         .then(data => {
@@ -572,7 +585,12 @@ export default {
     //重新训练
     retrain() {
       const analyst = 'rich'
-      fetch(`http://127.0.0.1:5000/retrain?analyst=${analyst}`)
+      fetch(`http://127.0.0.1:5000/retrain?analyst=${analyst}`, {
+        headers: {
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      })
         .then(response => response.json())
         .then(data => {
           this.$message({
@@ -590,7 +608,7 @@ export default {
           fetch(`http://127.0.0.1:5000/save_model`, {
             method: 'post',
             body: JSON.stringify({
-              analyst_id: this.$cookies.get("user_id"),
+              // analyst_id: this.$cookies.get("user_id"),
               analyst: this.$cookies.get("username"),
               number: this.getWindTurbineName(this.windTurbineName),
               dataset: this.windTurbineName.split(/[\t\r\f\n\s]*/g).join(''),
@@ -598,7 +616,11 @@ export default {
               rf_score: this.rf_score,
               models: this.form.model,
               comment: this.form.comment
-            })
+            }),
+            headers: {
+              'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+              'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+            }
           })
             .then(response => response.json())
             .then(data => {
@@ -610,7 +632,7 @@ export default {
                 return
               }
 
-              this.model_saved=true
+              this.model_saved = true
               this.$message({
                 message: data['result'],
                 type: 'success'

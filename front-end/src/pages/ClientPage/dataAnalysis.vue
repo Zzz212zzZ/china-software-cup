@@ -135,6 +135,7 @@
 </template>
 <script>
 import { StatsCard, EchartsCard, DecoratedEchart } from "@/components/index";
+import axios from "axios";
 // import VueSlider from 'vue-slider-component'
 import Chartist from "chartist";
 import * as echarts from "echarts";
@@ -244,21 +245,10 @@ export default {
       this.fetchStatsCardsData(newVal);
       const x_name = this.correlationOption.xAxis.name;
       const y_name = this.correlationOption.yAxis.name;
-      const percentage = 0.2;  //显示20%的散点
+      // const percentage = 0.2;  //显示20%的散点
       const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
-      this.getCorrlationData(Number, y_name, x_name, percentage);
+      this.getCorrlationData(Number, y_name, x_name);
     },
-
-    'percentage': {
-      handler() {
-        const x_name = this.correlationOption.xAxis.name;
-        const y_name = this.correlationOption.yAxis.name;
-        const percentage = this.percentage;  //显示指定(默认20%)的散点
-        const Number = this.getWindTurbineName(this.$store.state.selectedWindTurbine);
-        // 以下是前后端交接功能，这里是接受相关性数据，两个list
-        this.getCorrlationData(Number, y_name, x_name, percentage);
-      }
-    }
   },
 
 
@@ -287,8 +277,13 @@ export default {
       this.getCorrlationData(Number, y_name, x_name, percentage);
     },
     //把获取相关性数据封装为函数
-    getCorrlationData(Number, y_name, x_name, percentage) {
-      fetch(`http://127.0.0.1:5000/correlation?number=${Number}&y=${y_name}&x=${x_name}&percentage=${percentage}`)
+    getCorrlationData(Number, y_name, x_name) {
+      fetch(`http://127.0.0.1:5000/correlation?number=${Number}&y=${y_name}&x=${x_name}`,{
+        headers:{
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      })
         .then(response => response.json())
         .then(data => {
           console.log(data);
@@ -310,7 +305,12 @@ export default {
     //更新头部四个card内容
     fetchStatsCardsData(windTurbineName) {
       windTurbineName = this.getWindTurbineName(windTurbineName) //截取'风机 ',取后面的数字
-      fetch('http://127.0.0.1:5000/basic_info?number=' + windTurbineName)
+      fetch('http://127.0.0.1:5000/basic_info?number=' + windTurbineName,{
+        headers:{
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      })
         .then(response => response.json())
         .then(data => {
           // console.log(data);
@@ -330,13 +330,23 @@ export default {
     //----------------------------------属性可视化的方法----------------------
     toggleActive(value) {
       let windTurbineName = this.getWindTurbineName(this.$store.state.selectedWindTurbine) //截取'风机 ',取后面的数字
-      const fetchXAxisData = fetch(`http://127.0.0.1:5000/dimension_data?number=${windTurbineName}&dimension=DATATIME`)
+      const fetchXAxisData = fetch(`http://127.0.0.1:5000/dimension_data?number=${windTurbineName}&dimension=DATATIME`,{
+        headers:{
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      })
         .then(response => response.json())
         .then(data => {
           this.options[value].xAxis[0].data = data['DATATIME'];
         });
 
-      const fetchYAxisData = fetch(`http://127.0.0.1:5000/dimension_data?number=${windTurbineName}&dimension=${value}`) //修改为你的实际URL
+      const fetchYAxisData = fetch(`http://127.0.0.1:5000/dimension_data?number=${windTurbineName}&dimension=${value}`,{
+        headers:{
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      }) //修改为你的实际URL
         .then(response => response.json())
         .then(data => {
           this.options[value].series[0].data = data[value];
@@ -365,8 +375,6 @@ export default {
       //----------------------------------相关性图的变量----------------------
       dropdownTitle1: 'YD15',
       dropdownTitle2: 'ROUND(A.POWER,0)',
-
-      percentage: 0.2,
 
       dropdownOptions: [
         'WINDSPEED',

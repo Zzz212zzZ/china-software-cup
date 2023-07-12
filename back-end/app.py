@@ -1,5 +1,5 @@
 import pandas as pd
-from flask import Flask,request
+from flask import Flask,request,jsonify, g,Blueprint
 from flask_cors import CORS
 from flask_restful import Api
 from flask_restful import Resource
@@ -15,6 +15,8 @@ from train_predict import train,args,predict_valid
 from Predictor import Predictor
 import sys
 from external import db
+from jwt_token import encode,decode
+from jwt.exceptions import InvalidTokenError
 
 app = Flask(__name__)
 WIN = sys.platform.startswith('win')
@@ -26,7 +28,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = prefix + os.path.join(app.root_path, 'da
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 db.init_app(app)
 
-CORS(app)
+CORS(app, supports_credentials=True)
 api = Api(app)
 with app.app_context():
     dbcon=DatabaseConnector()
@@ -34,6 +36,31 @@ with app.app_context():
 data_src=DataSource(dbcon)
 predictor=Predictor()
 
+
+@app.before_request
+def before_request():
+    #手动验证一下是否为注册或登录
+    if request.path.split('/')[1]=='login_api':
+        return None
+
+    # 获取请求头中的 Authorization 字段
+    auth_header = request.headers.get('Authorization', None)
+    if request.method=='GET' or request.method=='POST':
+        # print(auth_header)
+
+        # 如果 Authorization 字段不存在，或者格式错误，返回错误
+        if not auth_header or 'Bearer' not in auth_header:
+            return jsonify({'message': 'Invalid token'}), 401
+
+        # 从 Authorization 字段中获取 token
+        token = auth_header.split(' ')[1]
+
+        try:
+            # 解析 token，并将结果存储在全局对象 g 中
+            g.user = decode(token)
+        except InvalidTokenError:
+            # 如果 token 解析失败，返回错误
+            return jsonify({'message': 'Invalid token'}), 401
 
 @app.route('/hello', methods=['GET'])
 def hello():
@@ -237,7 +264,7 @@ def save_model():
             shutil.copy(copy_path + '/' + f, model_path[m])
         shutil.copy(copy_path + '/' + models[m], model_path[m])
         with app.app_context():
-            model=Model(analyst_id=data['analyst_id'],
+            model=Model(analyst_id=g.user.id,
                         dataset=data['dataset'],
                         model_type=models_type[m],
                         score=models_score[m],
@@ -322,7 +349,7 @@ def predict():
 
     dict = {
         'time_list':time_list,
-        'pre_val':time_list
+        'pre_val':pre_val
     }
     return json.dumps(dict, ensure_ascii=False)
 
@@ -365,7 +392,11 @@ def demote():
         db.session.commit()
     return json.dumps({"result": "降级成功"}, ensure_ascii=False)
 
-@app.route('/login', methods=['POST'])
+
+
+login_api = Blueprint('login_api', __name__)
+
+@login_api.route('/login', methods=['POST'])
 def login():
     """
 
@@ -376,9 +407,11 @@ def login():
         user=User.query.filter_by(username=data['username'],password=data['password']).one_or_none()
     if user is None:
         return json.dumps({'error': '用户名或密码错误'}, ensure_ascii=False)
-    return json.dumps(user.to_dict(), ensure_ascii=False)
+    dict=user.to_dict()
+    dict['token']=encode(dict)
+    return json.dumps(dict, ensure_ascii=False)
 
-@app.route('/sign_up', methods=['POST'])
+@login_api.route('/sign_up', methods=['POST'])
 def sign_up():
     """
 
@@ -390,6 +423,8 @@ def sign_up():
         db.session.add(user)
         db.session.commit()
     return json.dumps({"result": "注册完毕，请登录"}, ensure_ascii=False)
+
+app.register_blueprint(login_api, url_prefix='/login_api')
 
 if __name__ == '__main__':
     app.run()

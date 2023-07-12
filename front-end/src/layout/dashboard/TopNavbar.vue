@@ -28,12 +28,12 @@
           </drop-down>
 
 
-          <!-- <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="ti-settings"></i>
-              <p>Settings</p>
+          <li class="nav-item">
+            <a @click="logout()" class="nav-link">
+              <!-- <i class="ti-settings"></i> -->
+              <p>退出登录</p>
             </a>
-          </li> -->
+          </li>
         </ul>
       </div>
     </div>
@@ -46,10 +46,10 @@ export default {
       const { name } = this.$route;
       return this.capitalizeFirstLetter(name);
     },
-     // 从 Vuex store 获取选中的风机
-     selectedWindTurbineTitle() {
-        // 如果 Vuex store 中有选中的风机，则使用其作为标题，默认为1
-        return this.$store.state.selectedWindTurbine ;
+    // 从 Vuex store 获取选中的风机
+    selectedWindTurbineTitle() {
+      // 如果 Vuex store 中有选中的风机，则使用其作为标题，默认为1
+      return this.$store.state.selectedWindTurbine;
     }
   },
   data() {
@@ -77,6 +77,14 @@ export default {
     hideSidebar() {
       this.$sidebar.displaySidebar(false);
     },
+    logout() {
+      this.$cookies.remove("user_id")
+      this.$cookies.remove("username")
+      this.$cookies.remove("role")
+      this.$cookies.remove("token")
+
+      this.$router.push(`/login`)
+    }
   },
 };
 </script>
@@ -110,4 +118,5 @@ export default {
   /* 滚动条宽度 */
   scrollbar-color: #888 #f1f1f1 !important;
   /* 滚动条颜色和滚动条轨道颜色 */
-}</style>
+}
+</style>

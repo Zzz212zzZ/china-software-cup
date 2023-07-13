@@ -179,7 +179,7 @@
     <!-- 模型上传对话框 -->
     <el-dialog title="提示" :visible.sync="uploadDialog" width="30%" :append-to-body="true">
       <el-form ref="upload" :rules="rules" :model="form">
-        <el-form-item label="分析师名称">rich</el-form-item>
+        <el-form-item label="分析师名称">{{ $cookies.get('username') }}</el-form-item>
         <el-form-item label="数据集">{{ windTurbineName }}</el-form-item>
         <el-form-item label="神经网络得分">{{ nn_score }}</el-form-item>
         <el-form-item label="随机森林得分">{{ rf_score }}</el-form-item>
@@ -429,12 +429,12 @@ export default {
     //初始化
     async initalize() {
       await this.getUnprocessedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine))
-      // setTimeout(() => {
-      //   this.getTrainedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine));
-      // }, 500);
+      setTimeout(() => {
+        this.getTrainedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine));
+      }, 500);
 
-      // if(this.stage!=='trained'){
-      // }
+      if(this.stage!=='trained'){
+      }
     },
     //获取模型未训练的数据
     getUnprocessedData(Number) {

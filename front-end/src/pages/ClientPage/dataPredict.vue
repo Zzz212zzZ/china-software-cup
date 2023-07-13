@@ -1,7 +1,7 @@
 <template>
     <div class="row">
         <div class="col-12 col-lg-6">
-            <card title="导入数据" style="height: 90%;">
+            <card title="导入数据">
                 <el-upload class="w-100" drag action="http://127.0.0.1:5000/receive_predict_data" :limit="1"
                     v-if="!data_submmited" :on-success="uploadSuccess" accept=".csv, .xls, .xlsx" :headers="headerObj">
                     <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -9,10 +9,19 @@
                         只能上传.csv文件，应当包含'DATATIME','WINDSPEED','WINDDIRECTION','TEMPERATURE','HUMIDITY','PRESSURE'信息
                     </div>
                 </el-upload>
-                <div v-else class="w-100" style="display: inline-block;height: 3em;">
+                <!-- <div v-else class="w-100" style="display: inline-block;height: 3em;">
                     <label style="font-size: 1.3em;padding-left: 2%;">使用数据集：{{ data_name }}</label>
                     <el-button size="small" style="float: right;" @click="data_submmited = false">重新上传</el-button>
-                </div>
+                </div> -->
+                <el-form v-else>
+                    <el-form-item label="文件名">{{ data_name }}</el-form-item>
+                    <el-form-item label="数据长度">{{ data_length }}</el-form-item>
+                    <el-form-item label="预测时间">{{ data_startTime }}-{{ data_endTime }}</el-form-item>
+                    <!-- <el-form-item label="结束时间"></el-form-item> -->
+                    <el-form-item>
+                        <el-button style="float: right;" @click="data_submmited = false">重新上传</el-button>
+                    </el-form-item>
+                </el-form>
             </card>
         </div>
 
@@ -83,6 +92,9 @@ export default {
         return {
             data_submmited: false,
             data_name: 'default',
+            data_length: 'default',
+            data_startTime: 'default',
+            data_endTime: 'default',
             model_selected: false,
             modelSelectDialog: false,
 
@@ -145,6 +157,9 @@ export default {
             }
 
             this.data_name = file.name
+            this.data_length=data['length']
+            this.data_startTime=data['startTime']
+            this.data_endTime=data['endTime']
             this.data_submmited = true
 
             this.$message({
@@ -230,10 +245,16 @@ export default {
 
 .el-upload .el-upload-dragger {
     width: 100%;
-    height: 6em;
+    height: 7em;
 
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.el-form-item{
+
+margin-bottom: 0px !important;
+
 }
 </style>

@@ -263,14 +263,14 @@ def save_model():
         for f in common_files:
             shutil.copy(copy_path + '/' + f, model_path[m])
         shutil.copy(copy_path + '/' + models[m], model_path[m])
-        with app.app_context():
-            model=Model(analyst_id=g.user.id,
-                        dataset=data['dataset'],
-                        model_type=models_type[m],
-                        score=models_score[m],
-                        comment=data['comment'])
-            db.session.add(model)
-            db.session.commit()
+        # with app.app_context():
+        model=Model(analyst_id=g.user['user_id'],
+                    dataset=data['dataset'],
+                    model_type=models_type[m],
+                    score=models_score[m],
+                    comment=data['comment'])
+        db.session.add(model)
+        db.session.commit()
 
     #操作数据库
     return json.dumps({'result':'上传成功'}, ensure_ascii=False)
@@ -281,6 +281,7 @@ def receive_predict_data():
         return json.dumps({'error': '传输失败'}, ensure_ascii=False)
     try:
         csv_data = pd.read_csv(request.files['file'])
+        csv_data['DATATIME'] = pd.to_datetime(csv_data['DATATIME'])
     except:
         return json.dumps({'error': '无法读取文件'}, ensure_ascii=False)
     # 判断是否存在关键行
@@ -325,6 +326,7 @@ def delete_model():
     """
 
     :return: 从数据库删除模型
+    TODO 添加身份认证，防止其他人删除自己的模型
     """
     data = json.loads(request.data)
     mapper={
@@ -334,6 +336,7 @@ def delete_model():
     with app.app_context():
         model=Model.query.filter_by(id=data['model_id']).first()
         path=f'model/{model.analyst.username}/{data["number"]}/{mapper[model.model_type]}/{model.score}'
+        print(path)
         if os.path.exists(path):
             shutil.rmtree(path)
         db.session.delete(model)

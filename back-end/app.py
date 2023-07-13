@@ -292,7 +292,13 @@ def receive_predict_data():
         return json.dumps({'error': '文件格式有误'}, ensure_ascii=False)
 
     predictor.data=csv_data
-    return json.dumps({'result': '传输完成'}, ensure_ascii=False)
+    dict={
+        'result': '传输完成',
+        'length':csv_data.shape[0],
+        'startTime':csv_data['DATATIME'].min().strftime('%Y/%m/%d %H:%M:%S'),
+        'endTime':csv_data['DATATIME'].max().strftime('%Y/%m/%d %H:%M:%S')
+    }
+    return json.dumps(dict, ensure_ascii=False)
 
 @app.route('/get_models', methods=['GET'])
 def get_models():

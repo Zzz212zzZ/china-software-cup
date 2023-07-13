@@ -232,7 +232,7 @@ export default {
         const histogramy = this.$refs.histogramy;
         // 如果存在 ref = correlation 并且 setOption 存在
         if (correlation && correlation.setOption) {
-          correlation.setOption(this.correlationOption); //更新相关性图
+          // correlation.setOption(this.correlationOption); //更新相关性图
           histogramx.setOption(this.histogramxOption); //更新直方图x
           histogramy.setOption(this.histogramyOption); //更新直方图y
         }

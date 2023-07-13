@@ -13,7 +13,7 @@
       <div class="logo">
         <a href="#" class="simple-text">
           <div class="logo-img">
-            <img src="@/assets/img/vue-logo.png" alt="" />
+            <img src="@/assets/img/defaultAvatar.png" alt="" style="max-width: none;width: 75%;height: 75%;"/>
           </div>
           {{ title }}
         </a>

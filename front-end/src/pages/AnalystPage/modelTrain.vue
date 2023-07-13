@@ -6,7 +6,7 @@
     <div class="row">
       <div class="col-md col-12">
         <!-- 参数控制 -->
-        <double-card title_1="神经网络参数调整" subTitle_1="大家好啊，我是模型训练控制台" title_2="随机森林参数调整" subTitle_2="大家好啊，我也是模型训练控制台"
+        <double-card title_1="神经网络参数调整" subTitle_1="调整神经网络相关模型参数" title_2="随机森林参数调整" subTitle_2="调整神经网络相关模型参数"
           style="z-index: auto;">
           <div>
             <!-- 主变量 -->
@@ -170,7 +170,7 @@
       </div>
 
       <div class="col-12 col-lg-5">
-        <echarts-card ref="validChart" title="验证集比较" sub-title="副标题" chartHeight="530px" :chart-options="validOption">
+        <echarts-card ref="validChart" title="验证集比较" sub-title="对于验证集的神经网络、随机森林以及真实值的比较可视化" chartHeight="530px" :chart-options="validOption">
 
         </echarts-card>
       </div>

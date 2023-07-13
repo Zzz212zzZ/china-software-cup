@@ -1,7 +1,7 @@
 <template>
     <div class="row">
         <div class="col-12 col-lg-6">
-            <card title="导入数据">
+            <card title="导入数据" style="height: 90%;">
                 <el-upload class="w-100" drag action="http://127.0.0.1:5000/receive_predict_data" :limit="1"
                     v-if="!data_submmited" :on-success="uploadSuccess" accept=".csv, .xls, .xlsx" :headers="headerObj">
                     <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -37,7 +37,7 @@
             </card>
         </div>
         <div class="col-12">
-            <echarts-card ref="validChart" title="预测结果" sub-title="副标题">
+            <echarts-card ref="validChart" title="预测结果" sub-title="根据输入文件的预测结果可视化">
                 <div slot="footer">
                     <div style="display: flex;align-items: center;justify-content: center;">
                         <el-button type="primary" class="w-50"
@@ -188,7 +188,7 @@ export default {
 
 .el-upload .el-upload-dragger {
     width: 100%;
-    height: 3em;
+    height: 6em;
 
     display: flex;
     justify-content: center;

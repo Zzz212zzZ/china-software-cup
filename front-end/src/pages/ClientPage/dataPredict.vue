@@ -37,7 +37,7 @@
             </card>
         </div>
         <div class="col-12">
-            <echarts-card ref="validChart" title="预测结果" sub-title="根据输入文件的预测结果可视化">
+            <echarts-card ref="preChart" title="预测结果" sub-title="根据输入文件的预测结果可视化" :chart-options="preOption">
                 <div slot="footer">
                     <div style="display: flex;align-items: center;justify-content: center;">
                         <el-button type="primary" class="w-50"
@@ -94,7 +94,36 @@ export default {
 
             headerObj: {
                 'Authorization': `Bearer ${$cookies.get('token')}`, // 设置授权头部信息
-            }
+            },
+
+            preOption: {
+                xAxis:
+                {
+                type: 'category',
+                data: [1],
+                boundaryGap: false,
+                axisLabel: {
+                    interval: 'auto'  // 'auto' 或者一个固定的数字
+                }
+                },
+                yAxis:
+                {
+                type: 'value'
+                },
+                legend: {
+                data: ['未来YD15功率预测值'] // 设置图例名称
+                },
+                series: [
+                {
+                    name: '未来YD15功率预测值',
+                    type: 'line',
+                    data: [0],
+                    itemStyle: {
+                    // color: '#91CC75'
+                    },
+                },
+                ]
+            },
         }
     },
 
@@ -143,7 +172,7 @@ export default {
                 .then(response => response.json())
                 .then(data => {
                     this.models = data
-                    console.log(data)
+                    // console.log(data)
                 })
         },
         //进行模型预测
@@ -162,6 +191,8 @@ export default {
                 .then(response => response.json())
                 .then(data => {
                     console.log(data)
+                    this.preOption.series[0].data = data['pre_val']
+                    this.preOption.xAxis.data = data['time_list']
                     //数据处理
                 })
         },
@@ -174,8 +205,19 @@ export default {
             }
             return windTurbineName
         },
-    }
+    },
 
+    watch: {
+    'preOption': {
+      handler() {
+        const preChart = this.$refs.preChart;
+        if (preChart && preChart.setOption) {
+            preChart.setOption(this.preOption); //更新风速功率曲线图
+        }
+      },
+      deep: true
+    },
+  }
 
 }
 

@@ -360,7 +360,7 @@ def predict():
         'time_list':time_list,
         'pre_val':pre_val
     }
-    return json.dumps(dict, ensure_ascii=False)
+    return json.dumps(dict, ensure_ascii=False,cls=DateEncoder)
 
 @app.route('/get_users', methods=['GET'])
 def get_users():

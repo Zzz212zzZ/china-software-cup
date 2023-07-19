@@ -146,7 +146,6 @@ export default {
     methods: {
         //数据完成上传
         uploadSuccess(response, file, fileList) {
-            console.log(response)
             var data = response
             if (data.hasOwnProperty('error')) {
                 this.$message({

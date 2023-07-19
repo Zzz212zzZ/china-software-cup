@@ -1,5 +1,7 @@
 import pandas as pd
-from flask import Flask,request,jsonify, g,Blueprint
+import io
+import base64
+from flask import Flask,request,jsonify, g,Blueprint,send_file
 from flask_cors import CORS
 from flask_restful import Api
 from flask_restful import Resource
@@ -401,6 +403,40 @@ def demote():
         db.session.commit()
     return json.dumps({"result": "降级成功"}, ensure_ascii=False)
 
+
+@app.route('/get_userinfo', methods=['GET'])
+def get_userinfo():
+    user=User.query.filter_by(id=g.user['user_id']).one()
+    dict={
+        'username':user.username,
+        'email':user.email,
+        'phone':user.phone,
+        'description':user.description
+    }
+    return json.dumps(dict, ensure_ascii=False)
+
+@app.route('/get_avatar', methods=['GET'])
+def get_avatar():
+    user = User.query.filter_by(id=g.user['user_id']).one()
+    # with open('static/rich.png', 'rb') as f:
+    return send_file(io.BytesIO(user.avatar),mimetype='image/jpg')
+        # return base64.b64encode(f.read())
+
+
+@app.route('/change_userinfo', methods=['POST'])
+def change_userinfo():
+    data = json.loads(request.data)
+    User.query.filter_by(id=g.user['user_id']).update({data['key']: data['value']})
+    db.session.commit()
+    return json.dumps({"result": "修改完毕"}, ensure_ascii=False)
+
+@app.route('/change_avatar', methods=['POST'])
+def change_avatar():
+    if request.files is None:
+        return json.dumps({'error': '传输失败'}, ensure_ascii=False)
+    User.query.filter_by(id=g.user['user_id']).update({'avatar': request.files['file'].read()})
+    db.session.commit()
+    return json.dumps({"result": "修改完毕"}, ensure_ascii=False)
 
 
 login_api = Blueprint('login_api', __name__)

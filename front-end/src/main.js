@@ -45,15 +45,23 @@ import {
   Upload,
   Table,
   TableColumn,
+  Descriptions,
+  DescriptionsItem,
+  Link,
+  Avatar,
+  Popover,
 } from 'element-ui';
+import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
 import 'element-ui/lib/theme-chalk/index.css';
 // import axios from 'axios'
 
 // axios.defaults.withCredentials = true;
 
 
-Vue.use(PaperDashboard);
 Vue.component(Message)
+Vue.component(CollapseTransition.name, CollapseTransition)
+
+Vue.use(PaperDashboard);
 Vue.use(Loading)
 Vue.use(Dialog)
 Vue.use(Divider)
@@ -71,6 +79,11 @@ Vue.use(CheckboxGroup)
 Vue.use(Upload)
 Vue.use(Table)
 Vue.use(TableColumn)
+Vue.use(Descriptions)
+Vue.use(DescriptionsItem)
+Vue.use(Link)
+Vue.use(Avatar)
+Vue.use(Popover)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm;
 

@@ -10,6 +10,7 @@ import MainDashboard from "@/MainDashboard.vue";
 // Client pages
 import DataAnalysis from "@/pages/ClientPage/dataAnalysis.vue";
 import DataPredict from "@/pages/ClientPage/dataPredict.vue";
+import UserCenter from "@/pages/ClientPage/UserCenter.vue";
 
 // Analyst pages
 import DataPreprocess from "@/pages/AnalystPage/dataPreprocess.vue";
@@ -81,6 +82,11 @@ const routes = [
                 name: "数据预测",
                 component: DataPredict,
               },
+              {
+                path: "UserCenter",
+                name: "用户中心",
+                component: UserCenter,
+              },
             ],
           },
           {
@@ -113,6 +119,11 @@ const routes = [
                 name: "模型管理",
                 component: ModelManager,
               },
+              {
+                path: "UserCenter",
+                name: "用户中心",
+                component: UserCenter,
+              },
             ],
           },
           {
@@ -134,6 +145,11 @@ const routes = [
                 path: "UserManager",
                 name: "用户管理",
                 component: UserManager,
+              },
+              {
+                path: "UserCenter",
+                name: "用户中心",
+                component: UserCenter,
               },
             ],
           },

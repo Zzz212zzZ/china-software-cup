@@ -8,12 +8,16 @@ class User(db.Model):
     __tablename__ = "user"  # 表名 默认使用类名的小写
     # 定义类属性 记录字段
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(64))
-    password = db.Column(db.String(64))
-    role = db.Column(db.String(64))
+    username = db.Column(db.Text)
+    password = db.Column(db.Text)
+    role = db.Column(db.Text)
+    avatar = db.Column(db.LargeBinary)
+    email = db.Column(db.Text)
+    phone = db.Column(db.Text)
+    description = db.Column(db.Text)
 
     def __repr__(self):  # 自定义 交互模式 & print() 的对象打印
-        return "(%s, %s, %s, %s)" % (self.id, self.username, self.password, self.role)
+        return "(%s, %s, %s, %s, %s, %s, %s)" % (self.id, self.username, self.password, self.role,self.email,self.phone,self.description)
 
     def to_dict(self):
         return {
@@ -28,10 +32,10 @@ class Model(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     analyst_id=db.Column(db.Integer, db.ForeignKey('user.id'))
     analyst=db.relationship('User')
-    dataset = db.Column(db.String(64))
-    model_type = db.Column(db.String(64))
-    score = db.Column(db.String(64))
-    comment = db.Column(db.String(64))
+    dataset = db.Column(db.Text)
+    model_type = db.Column(db.Text)
+    score = db.Column(db.Text)
+    comment = db.Column(db.Text)
 
     def __repr__(self):  # 自定义 交互模式 & print() 的对象打印
         return "(%s, %s, %s, %s, %s, %s)" % (self.id, self.analyst.username, self.dataset, self.model_type, self.score, self.comment)

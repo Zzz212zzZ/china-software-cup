@@ -429,12 +429,12 @@ export default {
     //初始化
     async initalize() {
       await this.getUnprocessedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine))
-      setTimeout(() => {
-        this.getTrainedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine));
-      }, 500);
+      // setTimeout(() => {
+      //   this.getTrainedData(this.getWindTurbineName(this.$store.state.selectedWindTurbine));
+      // }, 500);
 
-      if(this.stage!=='trained'){
-      }
+      // if(this.stage!=='trained'){
+      // }
     },
     //获取模型未训练的数据
     getUnprocessedData(Number) {

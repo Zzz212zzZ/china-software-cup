@@ -36,7 +36,7 @@
               </div> -->
 
               <div class="col-12">
-                <div class="twoBtnRow">
+                <div class="row">
                   <div class="col-md-6 col-12">
                     <div class="btn-group dropup dropdownAtr">
                       <button type="button" class="btn btn-primary dropdown-toggle btn-block" data-toggle="dropdown"

@@ -113,6 +113,8 @@ export default {
       links: [],
 
       userInfo: {
+        username:'',
+        description:'',
       }
     };
   },

@@ -106,7 +106,7 @@ export default {
                 .then(response => response.blob())
                 .then(blob => {
                     // console.log(blob)
-                    if (blob.length > 0)
+                    if (blob.size > 0)
                         this.userInfo.avatarUrl = window.URL.createObjectURL(blob)
                     // this.userInfo.avatarUrl=window.URL.createObjectURL(response.data)
                 })

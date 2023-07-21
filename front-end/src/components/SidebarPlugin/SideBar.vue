@@ -12,8 +12,11 @@
             <!-- <div class="logo-img">
             <img src="@/assets/img/defaultAvatar.png" alt="" style="max-width: none;width: 75%;height: 75%;"/>
           </div> -->
-            <el-avatar v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" style="height: 40px;width: 40px;vertical-align: middle;"></el-avatar>
-            <el-avatar v-else style="height: 40px;width: 40px;vertical-align: middle;"><p style="font-size: 27px;">{{ userInfo.username.charAt(0).toLocaleUpperCase() }}</p></el-avatar>
+            <el-avatar v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl"
+              style="height: 40px;width: 40px;vertical-align: middle;"></el-avatar>
+            <el-avatar v-else style="height: 40px;width: 40px;vertical-align: middle;">
+              <p style="font-size: 27px;">{{ userInfo.username.charAt(0).toLocaleUpperCase() }}</p>
+            </el-avatar>
             <p style="display: inline;float: none;font: 1em sans-serif;">
               {{ userInfo.username }}
             </p>
@@ -21,8 +24,11 @@
         </div>
 
         <div>
-          <el-avatar v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl" style="height: 40px;width: 40px;vertical-align: middle;"></el-avatar>
-          <el-avatar v-else style="height: 40px;width: 40px;vertical-align: middle;"><p style="font-size: 27px;">{{ userInfo.username.charAt(0).toLocaleUpperCase() }}</p></el-avatar>
+          <el-avatar v-if="userInfo.avatarUrl" :src="userInfo.avatarUrl"
+            style="height: 40px;width: 40px;vertical-align: middle;"></el-avatar>
+          <el-avatar v-else style="height: 40px;width: 40px;vertical-align: middle;">
+            <p style="font-size: 27px;">{{ userInfo.username.charAt(0).toLocaleUpperCase() }}</p>
+          </el-avatar>
           <p style="display: inline;margin-left: 10px;">{{ userInfo.username }}</p>
         </div>
 
@@ -113,8 +119,8 @@ export default {
       links: [],
 
       userInfo: {
-        username:'',
-        description:'',
+        username: '',
+        description: '',
       }
     };
   },
@@ -148,8 +154,9 @@ export default {
         .then(response => response.blob())
         .then(blob => {
           // console.log(blob)
-          if(blob.size >0)
-            this.userInfo.avatarUrl = window.URL.createObjectURL(blob)
+          if (blob.size > 0)
+            // this.userInfo.avatarUrl = window.URL.createObjectURL(blob)
+            this.$set(this.userInfo, 'avatarUrl', window.URL.createObjectURL(blob))
           // this.userInfo.avatarUrl=window.URL.createObjectURL(response.data)
         })
     },

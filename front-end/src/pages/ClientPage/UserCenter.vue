@@ -107,7 +107,9 @@ export default {
                 .then(blob => {
                     // console.log(blob)
                     if (blob.size > 0)
-                        this.userInfo.avatarUrl = window.URL.createObjectURL(blob)
+                        // this.userInfo.avatarUrl = window.URL.createObjectURL(blob)
+                        this.$set(this.userInfo,'avatarUrl',window.URL.createObjectURL(blob))
+                        // console.log(this.userInfo.avatarUrl)
                     // this.userInfo.avatarUrl=window.URL.createObjectURL(response.data)
                 })
         },

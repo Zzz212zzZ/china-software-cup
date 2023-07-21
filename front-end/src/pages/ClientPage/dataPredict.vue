@@ -49,8 +49,11 @@
             <echarts-card ref="preChart" title="预测结果" sub-title="根据输入文件的预测结果可视化" :chart-options="preOption">
                 <div slot="footer">
                     <div style="display: flex;align-items: center;justify-content: center;">
-                        <el-button type="primary" class="w-50"
-                            :disabled="!(data_submmited && model_selected)" @click="predict()">开始预测</el-button>
+                        <el-button type="primary" class="w-50" :disabled="!(data_submmited && model_selected)"
+                            @click="predict()">开始预测</el-button>
+                        <el-button v-if="hasPredicted" type="success" class="w-25" @click="downloadResult()" icon="el-icon-download">
+                            下载预测数据
+                        </el-button>
                     </div>
                 </div>
             </echarts-card>
@@ -111,31 +114,33 @@ export default {
             preOption: {
                 xAxis:
                 {
-                type: 'category',
-                data: [1],
-                boundaryGap: false,
-                axisLabel: {
-                    interval: 'auto'  // 'auto' 或者一个固定的数字
-                }
+                    type: 'category',
+                    data: [1],
+                    boundaryGap: false,
+                    axisLabel: {
+                        interval: 'auto'  // 'auto' 或者一个固定的数字
+                    }
                 },
                 yAxis:
                 {
-                type: 'value'
+                    type: 'value'
                 },
                 legend: {
-                data: ['未来YD15功率预测值'] // 设置图例名称
+                    data: ['未来YD15功率预测值'] // 设置图例名称
                 },
                 series: [
-                {
-                    name: '未来YD15功率预测值',
-                    type: 'line',
-                    data: [0],
-                    itemStyle: {
-                    // color: '#91CC75'
+                    {
+                        name: '未来YD15功率预测值',
+                        type: 'line',
+                        data: [0],
+                        itemStyle: {
+                            // color: '#91CC75'
+                        },
                     },
-                },
                 ]
             },
+
+            hasPredicted: false
         }
     },
 
@@ -156,9 +161,9 @@ export default {
             }
 
             this.data_name = file.name
-            this.data_length=data['length']
-            this.data_startTime=data['startTime']
-            this.data_endTime=data['endTime']
+            this.data_length = data['length']
+            this.data_startTime = data['startTime']
+            this.data_endTime = data['endTime']
             this.data_submmited = true
 
             this.$message({
@@ -204,10 +209,40 @@ export default {
             })
                 .then(response => response.json())
                 .then(data => {
-                    console.log(data)
+                    // console.log(data)
+                    this.hasPredicted = true
                     this.preOption.series[0].data = data['pre_val']
                     this.preOption.xAxis.data = data['time_list']
                     //数据处理
+                })
+        },
+        //下载
+        downloadResult() {
+            fetch(`http://127.0.0.1:5000/get_predict_csv`, {
+                headers: {
+                    'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+                    'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+                },
+                responseType: 'blob'
+            })
+                .then(response => response.blob())
+                .then(blob => {
+                    console.log(blob)
+                    const link = document.createElement('a');
+                    if (blob.size > 0) {
+                        try {
+                            let _fileName = this.createPic()+'.csv' 
+                            link.style.display = 'none';
+                            // 兼容不同浏览器的URL对象
+                            const url = window.URL || window.webkitURL || window.moxURL;
+                            link.href = url.createObjectURL(blob);
+                            link.download = _fileName;
+                            link.click();
+                            window.URL.revokeObjectURL(url);
+                        } catch (e) {
+                            console.log('下载的文件出错', e)
+                        }
+                    }
                 })
         },
         //获取风机名称封装函数
@@ -219,19 +254,34 @@ export default {
             }
             return windTurbineName
         },
+        //产生随机图片名称
+        createPic() {
+            var now = new Date();
+            var year = now.getFullYear(); //得到年份
+            var month = now.getMonth();//得到月份
+            var date = now.getDate();//得到日期
+            var hour = now.getHours();//得到小时
+            var minu = now.getMinutes();//得到分钟
+            month = month + 1;
+            if (month < 10) month = "0" + month;
+            if (date < 10) date = "0" + date;
+            var number = now.getSeconds() % 43; //这将产生一个基于目前时间的0到42的整数。
+            var time = year + month + date + hour + minu;
+            return time + "_" + number;
+        }
     },
 
     watch: {
-    'preOption': {
-      handler() {
-        const preChart = this.$refs.preChart;
-        if (preChart && preChart.setOption) {
-            preChart.setOption(this.preOption); //更新风速功率曲线图
-        }
-      },
-      deep: true
-    },
-  }
+        'preOption': {
+            handler() {
+                const preChart = this.$refs.preChart;
+                if (preChart && preChart.setOption) {
+                    preChart.setOption(this.preOption); //更新风速功率曲线图
+                }
+            },
+            deep: true
+        },
+    }
 
 }
 
@@ -251,9 +301,9 @@ export default {
     align-items: center;
 }
 
-.el-form-item{
+.el-form-item {
 
-margin-bottom: 0px !important;
+    margin-bottom: 0px !important;
 
 }
 </style>

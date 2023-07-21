@@ -364,6 +364,12 @@ def predict():
     }
     return json.dumps(dict, ensure_ascii=False,cls=DateEncoder)
 
+@app.route('/get_predict_csv', methods=['GET'])
+def get_predict_csv():
+    file=io.BytesIO(predictor.to_csv().getvalue()) #不知道为什么不这么写就会有bug，真是神秘
+    # print(file.getvalue())
+    return send_file(file,mimetype='application/octet-stream')
+
 @app.route('/get_users', methods=['GET'])
 def get_users():
     """

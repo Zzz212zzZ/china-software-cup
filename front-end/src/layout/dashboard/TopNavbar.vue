@@ -18,6 +18,18 @@
           </li> -->
 
 
+
+          <li class="nav-item d-flex align-items-center">
+            <i class="ti-map-alt"></i>
+            <button type="button" class="nav-link custom-link" @click="showModal">地图</button>
+            <modal name="my-modal" :width="700" height="500" :adaptive="true"  classes="modal-background">
+              <ChinaMap />
+            </modal>
+
+          </li>
+
+
+
           <drop-down class="nav-item" :title="selectedWindTurbineTitle" title-classes="nav-link" icon="ti-bell">
             <div class="custom-scroll" style="max-height: 240px; overflow-y: auto;">
               <a v-for="windTurbineNumber in 20" :key="windTurbineNumber" class="dropdown-item"
@@ -28,8 +40,12 @@
           </drop-down>
 
 
-          <li class="nav-item">
-            <a @click="logout()" class="nav-link">
+
+
+          <li class="nav-item d-flex align-items-center">
+
+            <i class="ti-arrow-right"></i>
+            <a @click="logout()" class="nav-link custom-link">
               <!-- <i class="ti-settings"></i> -->
               <p>退出登录</p>
             </a>
@@ -40,7 +56,11 @@
   </nav>
 </template>
 <script>
+import ChinaMap from './ChinaMap.vue'
 export default {
+  components: {
+    ChinaMap
+  },
   computed: {
     routeName() {
       const { name } = this.$route;
@@ -58,6 +78,10 @@ export default {
     };
   },
   methods: {
+    showModal() {
+      this.$modal.show('my-modal');
+    },
+
     updateSelectedWindTurbine(windTurbineName) {
       this.$store.commit('setSelectedWindTurbine', windTurbineName);
     },
@@ -88,7 +112,7 @@ export default {
   },
 };
 </script>
-<style scoped>
+<style >
 /* WebKit 浏览器（例如 Chrome 和 Safari） */
 .custom-scroll::-webkit-scrollbar {
   width: 12px !important;
@@ -119,4 +143,22 @@ export default {
   scrollbar-color: #888 #f1f1f1 !important;
   /* 滚动条颜色和滚动条轨道颜色 */
 }
+
+
+
+.custom-link {
+  cursor: pointer;
+  border: none;
+  transition: color 0.3s ease;
+  padding-left: 5px !important;
+}
+
+.modal-background {
+  background-color: rgba(0, 0, 0, 0) !important;  /* 使用 'rgba' 以及 'important' 来覆盖默认的背景色 */
+}
+.vm--modal{
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+
+
 </style>

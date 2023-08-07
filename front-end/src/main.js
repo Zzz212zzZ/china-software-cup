@@ -23,7 +23,8 @@ import store from './store';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'bootstrap/dist/js/bootstrap.js';
 import 'popper.js/dist/popper.js';
-import VueCookies from 'vue-cookies'
+import VueCookies from 'vue-cookies';
+import VModal from 'vue-js-modal';
 
 import {
   Message,
@@ -51,6 +52,7 @@ import {
   Avatar,
   Popover,
 } from 'element-ui';
+
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
 import 'element-ui/lib/theme-chalk/index.css';
 // import axios from 'axios'
@@ -88,6 +90,7 @@ Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm;
 
 Vue.use(VueCookies)
+Vue.use(VModal)
 
 /* eslint-disable no-new */
 new Vue({

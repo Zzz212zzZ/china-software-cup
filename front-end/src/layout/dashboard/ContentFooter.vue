@@ -9,16 +9,21 @@
         </ul>
       </nav>
       <div class="copyright d-flex flex-wrap">
-        &copy; Coded with
-        <i class="fa fa-heart heart"></i> by
-        <a href="https://github.com/cristijora" target="_blank">
-          &nbsp; Cristi Jora.</a
-        >&nbsp; Designed by
-        <a href="https://www.creative-tim.com/?ref=pdf-vuejs" target="_blank"
-          >&nbsp; Creative Tim.</a
-        >
+        &copy; Code uploaded in
+        <!-- <i class="fa fa-heart heart"></i> -->
+        
+        <a href="https://gitee.com/zzz212zzz/sftcup" target="_blank">
+          &nbsp; Gitee Repository
+          <i class="fa fa-brands fa-git" style="color: #74c4d0;"></i>
+        
+        </a>&nbsp; for the
+        <a href="https://aistudio.baidu.com/aistudio/competition/detail/887/0/introduction" target="_blank">&nbsp; "China
+          Software Cup" Design Competition
+          <i class="fa fa-solid fa-bolt fa-beat" style="color: #6bc1d6;"></i>
+        </a>
       </div>
     </div>
+
   </footer>
 </template>
 <script>

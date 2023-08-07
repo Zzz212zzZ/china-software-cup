@@ -267,7 +267,7 @@ def save_model():
         shutil.copy(copy_path + '/' + models[m], model_path[m])
         # with app.app_context():
         model=Model(analyst_id=g.user['user_id'],
-                    dataset=data['dataset'],
+                    dataset_id=data['dataset_id'],
                     model_type=models_type[m],
                     score=models_score[m],
                     comment=data['comment'])
@@ -338,7 +338,7 @@ def delete_model():
     with app.app_context():
         model=Model.query.filter_by(id=data['model_id']).first()
         path=f'model/{model.analyst.username}/{data["number"]}/{mapper[model.model_type]}/{model.score}'
-        print(path)
+        # print(path)
         if os.path.exists(path):
             shutil.rmtree(path)
         db.session.delete(model)
@@ -458,6 +458,47 @@ def get_datasets():
             dicts.append(d.to_dict())
 
     return json.dumps(dicts, ensure_ascii=False)
+
+@app.route('/update_dataset', methods=['POST'])
+def update_dataset_name():
+    data = json.loads(request.data)
+    with app.app_context():
+        Dataset.query.filter_by(id=data['dataset_id']).update({data['key']: data['value']})
+        db.session.commit()
+    return json.dumps({"result": "修改成功"}, ensure_ascii=False)
+
+@app.route('/update_location', methods=['POST'])
+def update_location():
+    data = json.loads(request.data)
+    with app.app_context():
+        Dataset.query.filter_by(id=data['dataset_id']).update({'location': data['location'],'longitude': data['longitude'],'latitude': data['latitude']})
+        db.session.commit()
+    return json.dumps({"result": "修改成功"}, ensure_ascii=False)
+
+@app.route('/delete_dataset', methods=['POST'])
+def delete_dataset():
+    data = json.loads(request.data)
+    with app.app_context():
+        try:
+            dataset=Dataset.query.filter_by(id=data['dataset_id']).first()
+            db.session.delete(dataset)
+            db.session.commit()
+        except:
+            return json.dumps({'error': '删除失败，请检查是否有模型使用该数据集'}, ensure_ascii=False)
+    return json.dumps({"result": "修改成功"}, ensure_ascii=False)
+
+@app.route('/add_dataset', methods=['POST'])
+def add_dataset():
+    data = json.loads(request.data)
+    with app.app_context():
+        try:
+            dataset = Dataset(dataset_name=data['dataset_name'], table_name=data['table_name'], location=data['location'], longitude=data['longitude'], latitude=data['latitude'])
+            db.session.add(dataset)
+            # dbcon.df_to_database() # 添加表
+            db.session.commit()
+        except:
+            json.dumps({"error": "添加失败"}, ensure_ascii=False)
+    return json.dumps({"result": "添加成功"}, ensure_ascii=False)
 
 
 login_api = Blueprint('login_api', __name__)

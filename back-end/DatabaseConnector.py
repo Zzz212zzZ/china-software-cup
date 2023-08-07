@@ -58,10 +58,12 @@ class Dataset(db.Model):
     __tablename__ = "dataset"  # 表名 默认使用类名的小写
     # 定义类属性 记录字段
     id = db.Column(db.Integer, primary_key=True)
-    dataset_name = db.Column(db.Text)
-    table_name=db.Column(db.Text)
+    dataset_name = db.Column(db.Text, unique=True)
+    table_name=db.Column(db.Text, unique=True)
     location=db.Column(db.Text)
-    upload_date=db.Column(db.Date)
+    longitude=db.Column(db.Float)
+    latitude=db.Column(db.Float)
+
 
     def __repr__(self):  # 自定义 交互模式 & print() 的对象打印
         return "(%s, %s, %s)" % (self.id, self.dataset_name, self.upload_date)
@@ -72,7 +74,8 @@ class Dataset(db.Model):
             'dataset_name':self.dataset_name,
             'table_name':self.table_name,
             'location':self.location,
-            'upload_date':self.upload_date
+            'longitude':self.longitude,
+            'latitude':self.latitude,
         }
 
 

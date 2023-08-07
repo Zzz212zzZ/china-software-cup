@@ -297,7 +297,7 @@ export default {
         const abnormalPie = this.$refs.abnormalPie;
         const missingPie = this.$refs.missingPie;
         if (preprocessMain && preprocessMain.setOption) {
-          preprocessMain.setOption(this.windPowerOption); //更新风速功率曲线图
+          // preprocessMain.setOption(this.windPowerOption); //更新风速功率曲线图
         }
         if (abnormalPie && abnormalPie.setOption) {
           abnormalPie.setOption(this.abnormalOption); //更新
@@ -358,12 +358,12 @@ export default {
     },
     //获取风机名称封装函数
     getWindTurbineName(windTurbineName) {
-      windTurbineName = windTurbineName.slice(3);
-      //如果windTurbineNumber编号为单个数字，前面加0
-      if (windTurbineName.length == 1) {
-        windTurbineName = '0' + windTurbineName;
-      }
-      return windTurbineName
+      // windTurbineName = windTurbineName.slice(3);
+      // //如果windTurbineNumber编号为单个数字，前面加0
+      // if (windTurbineName.length == 1) {
+      //   windTurbineName = '0' + windTurbineName;
+      // }
+      return windTurbineName.table_name
     },
   },
 };

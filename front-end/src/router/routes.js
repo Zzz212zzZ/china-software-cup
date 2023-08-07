@@ -19,6 +19,7 @@ import ModelManager from "@/pages/AnalystPage/modelManager.vue";
 
 // Admin pages
 import UserManager from "@/pages/AdminPage/UserManager.vue";
+import DatasetManager from "@/pages/AdminPage/DatasetManager.vue";
 
 
 // const routes = [
@@ -145,6 +146,11 @@ const routes = [
                 path: "UserManager",
                 name: "用户管理",
                 component: UserManager,
+              },
+              {
+                path: "DatasetManager",
+                name: "数据集管理",
+                component: DatasetManager,
               },
               {
                 path: "UserCenter",

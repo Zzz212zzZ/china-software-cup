@@ -232,7 +232,7 @@ export default {
         const histogramy = this.$refs.histogramy;
         // 如果存在 ref = correlation 并且 setOption 存在
         if (correlation && correlation.setOption) {
-          correlation.setOption(this.correlationOption); //更新相关性图
+          // correlation.setOption(this.correlationOption); //更新相关性图
           histogramx.setOption(this.histogramxOption); //更新直方图x
           histogramy.setOption(this.histogramyOption); //更新直方图y
         }
@@ -278,6 +278,7 @@ export default {
     },
     //把获取相关性数据封装为函数
     getCorrlationData(Number, y_name, x_name) {
+      if(!Number) return
       fetch(`http://127.0.0.1:5000/correlation?number=${Number}&y=${y_name}&x=${x_name}`,{
         headers:{
           'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
@@ -295,16 +296,18 @@ export default {
     },
     //获取风机名称封装函数
     getWindTurbineName(windTurbineName) {
-      windTurbineName = windTurbineName.slice(3);
-      //如果windTurbineNumber编号为单个数字，前面加0
-      if (windTurbineName.length == 1) {
-        windTurbineName = '0' + windTurbineName;
-      }
-      return windTurbineName
+      // windTurbineName = windTurbineName.slice(3);
+      // //如果windTurbineNumber编号为单个数字，前面加0
+      // if (windTurbineName.length == 1) {
+      //   windTurbineName = '0' + windTurbineName;
+      // }
+      // return windTurbineName
+      return windTurbineName.table_name
     },
     //更新头部四个card内容
     fetchStatsCardsData(windTurbineName) {
-      windTurbineName = this.getWindTurbineName(windTurbineName) //截取'风机 ',取后面的数字
+      windTurbineName = this.getWindTurbineName(windTurbineName) 
+      if(!windTurbineName) return
       fetch('http://127.0.0.1:5000/basic_info?number=' + windTurbineName,{
         headers:{
           'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON

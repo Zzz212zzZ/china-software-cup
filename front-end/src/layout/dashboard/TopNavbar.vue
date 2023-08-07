@@ -20,9 +20,9 @@
 
           <drop-down class="nav-item" :title="selectedWindTurbineTitle" title-classes="nav-link" icon="ti-bell">
             <div class="custom-scroll" style="max-height: 240px; overflow-y: auto;">
-              <a v-for="windTurbineNumber in 20" :key="windTurbineNumber" class="dropdown-item"
-                @click="updateSelectedWindTurbine(`风机 ${windTurbineNumber}`)" href="#">
-                风机 {{ windTurbineNumber }}
+              <a v-for="windTurbineNumber in datasets" :key="windTurbineNumber.dataset_id" class="dropdown-item"
+                @click="updateSelectedWindTurbine(windTurbineNumber)" href="#">
+                {{windTurbineNumber.dataset_name}}
               </a>
             </div>
           </drop-down>
@@ -49,12 +49,13 @@ export default {
     // 从 Vuex store 获取选中的风机
     selectedWindTurbineTitle() {
       // 如果 Vuex store 中有选中的风机，则使用其作为标题，默认为1
-      return this.$store.state.selectedWindTurbine;
+      return this.$store.state.selectedWindTurbine.dataset_name;
     }
   },
   data() {
     return {
       activeNotifications: false,
+      datasets:[],
     };
   },
   methods: {
@@ -84,7 +85,25 @@ export default {
       this.$cookies.remove("token")
 
       this.$router.push(`/login`)
-    }
+    },
+    //获取数据集
+    getDatasets() {
+            fetch(`http://127.0.0.1:5000/get_datasets`, {
+                headers: {
+                    'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+                    'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    this.datasets = data
+                    this.updateSelectedWindTurbine(this.datasets[0])
+                    // console.log(data)
+                })
+        },
+  },
+  created() {
+    this.getDatasets()
   },
 };
 </script>

@@ -92,12 +92,12 @@ export default {
 
         //获取风机名称封装函数
         getWindTurbineName(windTurbineName) {
-            windTurbineName = windTurbineName.split(/[\t\r\f\n\s]*/g).join('').slice(2);
-            //如果windTurbineNumber编号为单个数字，前面加0
-            if (windTurbineName.length == 1) {
-                windTurbineName = '0' + windTurbineName;
-            }
-            return windTurbineName
+            // windTurbineName = windTurbineName.split(/[\t\r\f\n\s]*/g).join('').slice(2);
+            // //如果windTurbineNumber编号为单个数字，前面加0
+            // if (windTurbineName.length == 1) {
+            //     windTurbineName = '0' + windTurbineName;
+            // }
+            return windTurbineName.table_name
         },
     },
 

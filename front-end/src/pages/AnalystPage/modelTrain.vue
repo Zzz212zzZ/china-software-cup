@@ -416,7 +416,7 @@ export default {
 
   computed: {
     windTurbineName() {
-      return this.$store.state.selectedWindTurbine
+      return this.$store.state.selectedWindTurbine.dataset_name
     }
   },
 
@@ -610,8 +610,8 @@ export default {
             body: JSON.stringify({
               // analyst_id: this.$cookies.get("user_id"),
               analyst: this.$cookies.get("username"),
-              number: this.getWindTurbineName(this.windTurbineName),
-              dataset: this.windTurbineName.split(/[\t\r\f\n\s]*/g).join(''),
+              number: this.getWindTurbineName(this.$store.state.selectedWindTurbine),
+              dataset: this.windTurbineName,
               nn_score: this.nn_score,
               rf_score: this.rf_score,
               models: this.form.model,
@@ -646,12 +646,12 @@ export default {
     },
     //获取风机名称封装函数
     getWindTurbineName(windTurbineName) {
-      windTurbineName = windTurbineName.slice(3);
-      //如果windTurbineNumber编号为单个数字，前面加0
-      if (windTurbineName.length == 1) {
-        windTurbineName = '0' + windTurbineName;
-      }
-      return windTurbineName
+      // windTurbineName = windTurbineName.slice(3);
+      // //如果windTurbineNumber编号为单个数字，前面加0
+      // if (windTurbineName.length == 1) {
+      //   windTurbineName = '0' + windTurbineName;
+      // }
+      return windTurbineName.table_name
     },
   },
 

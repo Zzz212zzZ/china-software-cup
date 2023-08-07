@@ -10,7 +10,7 @@ import shutil
 import os
 
 from BinProcessor import BinProcessor
-from DatabaseConnector import DatabaseConnector,User,Model
+from DatabaseConnector import DatabaseConnector,User,Model,Dataset
 from DataSource import DataSource
 from DateEncoder import DateEncoder
 from train_predict import train,args,predict_valid
@@ -317,7 +317,7 @@ def get_models():
         if dataset == 'None':
             models=Model.query.all()
         else:
-            models=Model.query.filter_by(dataset=dataset).all()
+            models=Model.query.filter_by(dataset_id=dataset).all()
         for m in models:
             dicts.append(m.to_dict())
 
@@ -443,6 +443,21 @@ def change_avatar():
     User.query.filter_by(id=g.user['user_id']).update({'avatar': request.files['file'].read()})
     db.session.commit()
     return json.dumps({"result": "修改完毕"}, ensure_ascii=False)
+
+@app.route('/get_datasets', methods=['GET'])
+def get_datasets():
+    """
+
+    :return: 从数据库获取数据集数据
+    """
+    dicts = []
+    # 数据库操作
+    with app.app_context():
+        datasets = Dataset.query.all()
+        for d in datasets:
+            dicts.append(d.to_dict())
+
+    return json.dumps(dicts, ensure_ascii=False)
 
 
 login_api = Blueprint('login_api', __name__)

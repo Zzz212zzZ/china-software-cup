@@ -32,22 +32,47 @@ class Model(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     analyst_id=db.Column(db.Integer, db.ForeignKey('user.id'))
     analyst=db.relationship('User')
-    dataset = db.Column(db.Text)
+    dataset_id=db.Column(db.Integer, db.ForeignKey('dataset.id'))
+    dataset=db.relationship('Dataset')
+    # dataset = db.Column(db.Text)
     model_type = db.Column(db.Text)
     score = db.Column(db.Text)
     comment = db.Column(db.Text)
 
     def __repr__(self):  # 自定义 交互模式 & print() 的对象打印
-        return "(%s, %s, %s, %s, %s, %s)" % (self.id, self.analyst.username, self.dataset, self.model_type, self.score, self.comment)
+        return "(%s, %s, %s, %s, %s, %s)" % (self.id, self.analyst.username, self.dataset.dataset_name, self.model_type, self.score, self.comment)
 
     def to_dict(self):
         return {
             'model_id':self.id,
             'analyst':self.analyst.username,
-            'dataset':self.dataset,
+            'dataset':self.dataset.dataset_name,
+            'table_name':self.dataset.table_name,
             'model_type':self.model_type,
             'score':self.score,
             'comment':self.comment,
+        }
+
+
+class Dataset(db.Model):
+    __tablename__ = "dataset"  # 表名 默认使用类名的小写
+    # 定义类属性 记录字段
+    id = db.Column(db.Integer, primary_key=True)
+    dataset_name = db.Column(db.Text)
+    table_name=db.Column(db.Text)
+    location=db.Column(db.Text)
+    upload_date=db.Column(db.Date)
+
+    def __repr__(self):  # 自定义 交互模式 & print() 的对象打印
+        return "(%s, %s, %s)" % (self.id, self.dataset_name, self.upload_date)
+
+    def to_dict(self):
+        return {
+            'dataset_id':self.id,
+            'dataset_name':self.dataset_name,
+            'table_name':self.table_name,
+            'location':self.location,
+            'upload_date':self.upload_date
         }
 
 

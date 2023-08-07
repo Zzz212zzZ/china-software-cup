@@ -39,7 +39,7 @@
                         </el-table-column>
                     </el-table>
                     <!-- 模型分数：0.999 模型训练师：rich 模型数据集：风机1 模型类型：神经网络 -->
-                    <el-button class="w-100" @click="modelSelectDialog = true">
+                    <el-button class="w-100" @click="getModels();modelSelectDialog = true">
                         选择模型
                     </el-button>
                 </div>
@@ -144,9 +144,9 @@ export default {
         }
     },
 
-    created() {
-        this.getModels()
-    },
+    // created() {
+    //     this.getModels()
+    // },
 
     methods: {
         //数据完成上传
@@ -181,7 +181,7 @@ export default {
         },
         //获取模型
         getModels() {
-            var dataset = this.$store.state.selectedWindTurbine.split(/[\t\r\f\n\s]*/g).join('')
+            var dataset = this.$store.state.selectedWindTurbine.dataset_id//.split(/[\t\r\f\n\s]*/g).join('')
             fetch(`http://127.0.0.1:5000/get_models?dataset=${dataset}`, {
                 headers: {
                     'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
@@ -198,7 +198,7 @@ export default {
         predict() {
             // console.log(this.selected_model[0])
             var analyst = this.selected_model[0].analyst
-            var number = this.getWindTurbineName(this.selected_model[0].dataset)
+            var number = this.selected_model[0].table_name
             var score = this.selected_model[0].score
             var model_type = this.selected_model[0].model_type
             fetch(`http://127.0.0.1:5000/predict?analyst=${analyst}&number=${number}&score=${score}&model_type=${model_type}`, {
@@ -247,12 +247,12 @@ export default {
         },
         //获取风机名称封装函数
         getWindTurbineName(windTurbineName) {
-            windTurbineName = windTurbineName.split(/[\t\r\f\n\s]*/g).join('').slice(2);
-            //如果windTurbineNumber编号为单个数字，前面加0
-            if (windTurbineName.length == 1) {
-                windTurbineName = '0' + windTurbineName;
-            }
-            return windTurbineName
+            // windTurbineName = windTurbineName.split(/[\t\r\f\n\s]*/g).join('').slice(2);
+            // //如果windTurbineNumber编号为单个数字，前面加0
+            // if (windTurbineName.length == 1) {
+            //     windTurbineName = '0' + windTurbineName;
+            // }
+            return windTurbineName.table_name
         },
         //产生随机图片名称
         createPic() {

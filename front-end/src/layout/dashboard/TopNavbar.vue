@@ -22,7 +22,7 @@
           <li class="nav-item d-flex align-items-center">
             <i class="ti-map-alt"></i>
             <button type="button" class="nav-link custom-link" @click="showModal">地图</button>
-            <modal name="my-modal" :width="700" height="500" :adaptive="true"  classes="modal-background">
+            <modal name="my-modal" :width="700" height="500" :adaptive="true" classes="modal-background">
               <ChinaMap />
             </modal>
 
@@ -34,7 +34,7 @@
             <div class="custom-scroll" style="max-height: 240px; overflow-y: auto;">
               <a v-for="windTurbineNumber in datasets" :key="windTurbineNumber.dataset_id" class="dropdown-item"
                 @click="updateSelectedWindTurbine(windTurbineNumber)" href="#">
-                {{windTurbineNumber.dataset_name}}
+                {{ windTurbineNumber.dataset_name }}
               </a>
             </div>
           </drop-down>
@@ -62,20 +62,22 @@ export default {
     ChinaMap
   },
   computed: {
+    datasets() {
+      return this.$store.state.datasets; // 从全局状态中获取数据集
+    },
     routeName() {
       const { name } = this.$route;
       return this.capitalizeFirstLetter(name);
     },
     // 从 Vuex store 获取选中的风机
     selectedWindTurbineTitle() {
-      // 如果 Vuex store 中有选中的风机，则使用其作为标题，默认为1
-      return this.$store.state.selectedWindTurbine.dataset_name;
+      return this.$store.state.selectedWindTurbine;
     }
   },
   data() {
     return {
       activeNotifications: false,
-      datasets:[],
+      // datasets: [],
     };
   },
   methods: {
@@ -84,7 +86,8 @@ export default {
     },
 
     updateSelectedWindTurbine(windTurbineName) {
-      this.$store.commit('setSelectedWindTurbine', windTurbineName);
+      console.log(windTurbineName.dataset_name)
+      this.$store.commit('setSelectedWindTurbine', windTurbineName.dataset_name);
     },
 
     capitalizeFirstLetter(string) {
@@ -112,19 +115,20 @@ export default {
     },
     //获取数据集
     getDatasets() {
-            fetch(`http://127.0.0.1:5000/get_datasets`, {
-                headers: {
-                    'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
-                    'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    this.datasets = data
-                    this.updateSelectedWindTurbine(this.datasets[0])
-                    // console.log(data)
-                })
-        },
+      fetch(`http://127.0.0.1:5000/get_datasets`, {
+        headers: {
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
+        }
+      })
+        .then(response => response.json())
+        .then(data => {
+          this.$store.commit('setSelectedWindTurbine', data[0].dataset_name); // 更新全局状态
+          this.$store.commit('updateDatasets', data); // 更新全局状态
+          // console.log(data)
+        });
+    },
+
   },
   created() {
     this.getDatasets()
@@ -173,11 +177,11 @@ export default {
 }
 
 .modal-background {
-  background-color: rgba(0, 0, 0, 0) !important;  /* 使用 'rgba' 以及 'important' 来覆盖默认的背景色 */
+  background-color: rgba(0, 0, 0, 0) !important;
+  /* 使用 'rgba' 以及 'important' 来覆盖默认的背景色 */
 }
-.vm--modal{
+
+.vm--modal {
   background-color: rgba(0, 0, 0, 0) !important;
 }
-
-
 </style>

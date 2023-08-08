@@ -10,65 +10,20 @@ import china from '@/assets/json/china.json'
 export default {
   data() {
     return {
-      selectedPoint: this.getAreaNameFromWindTurbine(this.$store.state.selectedWindTurbine), // 初始化时选中的地名
+      selectedPoint: { longitude: null, latitude: null },
       chart: null,
-      windTurbineMapping: {
-        '北京': '风机 1',
-        '新疆': '风机 2',
-        '四川': '风机 3',
-        '甘肃': '风机 4',
-        '云南': '风机 5',
-        '广西': '风机 6',
-        '湖南': '风机 7',
-        '山东': '风机 8',
-        '河南': '风机 9',
-        '山西': '风机 10',
-        '福建': '风机 11',
-        '浙江': '风机 12',
-        '江苏': '风机 13',
-        '陕西': '风机 14',
-        '广东': '风机 15',
-        '重庆': '风机 16',
-        '青海': '风机 17',
-        '贵州': '风机 18',
-        '吉林': '风机 19',
-        '海南': '风机 20'
-      },
-
-      points: [
-      { name: '北京', value: [116.407387, 39.904179] },
-      { name: '新疆', value: [87.628579, 43.793301] },
-      { name: '四川', value: [104.076452, 30.651696] },
-      { name: '甘肃', value: [103.826777, 36.060634] },
-      { name: '云南', value: [102.709372, 25.046432] },
-      { name: '广西', value: [108.327537, 22.816659] },
-      { name: '湖南', value: [112.982951, 28.116007] },
-      { name: '山东', value: [117.020725, 36.670201] },
-      { name: '河南', value: [113.753094, 34.767052] },
-      { name: '山西', value: [112.578781, 37.813948] },
-      { name: '福建', value: [119.296194, 26.101082] },
-      { name: '浙江', value: [120.152575, 29.966619] },
-      { name: '江苏', value: [119.763563, 32.061377] },
-      { name: '陕西', value: [108.953939, 34.266611] },
-      { name: '广东', value: [113.266887, 23.133306] },
-      { name: '重庆', value: [107.551643, 29.562849] },
-      { name: '青海', value: [97.780199, 36.620901] },
-      { name: '贵州', value: [106.70546, 26.600055] },
-      { name: '吉林', value: [125.32568, 43.897016] },
-      { name: '海南', value: [110.349228, 20.017377] }
-    ],
+      windTurbineMapping: {},
+      points: [],
     }
   },
-  mounted() {
-    this.selectedPoint = this.getAreaNameFromWindTurbine(this.$store.state.selectedWindTurbine);
-    // console.log(this.selectedPoint)
-    this.points = this.points.map(point => {
-      point.itemStyle = this.getItemStyle(point.name);
-      return point;
-    })
-    this.initCharts()
-    window.addEventListener('resize', this.handleResize)
+  created() {
+    console.log("created")
+    // 从后端获取风机名称和地名的映射
+    this.getWindTurbines();
   },
+
+
+
   beforeDestroy() {
     window.removeEventListener('resize', this.handleResize);
     if (this.chart) {
@@ -76,18 +31,60 @@ export default {
     }
   },
   methods: {
-    getAreaNameFromWindTurbine(windTurbine) {
-      // 从风机名称映射回地名
-      for (let area in this.windTurbineMapping) {
-        if (this.windTurbineMapping[area] === windTurbine) {
-          return area;
+    getWindTurbines() {
+      fetch(`http://127.0.0.1:5000/get_datasets`, {
+        headers: {
+          'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
+          'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息
         }
-      }
-      return null;
+      })
+        .then(response => response.json())
+        .then(data => {
+          // 将数据转换为地图组件所需的格式
+          this.points = data.map(item => {
+            return {
+              name: item.dataset_name,
+              value: [item.longitude, item.latitude]
+            };
+          });
+
+          // 更新风机映射
+          this.windTurbineMapping = data.reduce((mapping, item) => {
+            mapping[item.dataset_name] = { longitude: item.longitude, latitude: item.latitude };
+            return mapping;
+          }, {});
+
+
+          // 初始化选中的经纬度
+          const windTurbine = this.$store.state.selectedWindTurbine;
+          const selectedTurbine = data.find(item => item.dataset_name === windTurbine);
+          if (selectedTurbine) {
+            this.selectedPoint = {
+              longitude: selectedTurbine.longitude,
+              latitude: selectedTurbine.latitude
+            };
+          }
+
+          console.log(this.selectedPoint)
+
+          this.points = this.points.map(point => {
+            point.itemStyle = this.getItemStyle(point.name);
+            return point;
+          })
+          this.initCharts()
+          window.addEventListener('resize', this.handleResize)
+        });
     },
+
+
     getItemStyle(name) {
-      return { color: name === this.selectedPoint ? '#F9B384' : '#00EEFF' };
+      const point = this.points.find(point => point.name === name);
+      if (point && point.value[0] === this.selectedPoint.longitude && point.value[1] === this.selectedPoint.latitude) {
+        return { color: '#F9B384' };
+      }
+      return { color: '#00EEFF' };
     },
+
     initCharts() {
       this.chart = echarts.init(this.$refs['charts'])
 
@@ -166,18 +163,31 @@ export default {
       this.chart.setOption(option)
       this.chart.on('click', (params) => {
         if (params.componentType === 'series') {
-          this.selectedPoint = params.name;
-          this.$store.commit('setSelectedWindTurbine', this.windTurbineMapping[params.name]);
-          console.log(this.$store.state.selectedWindTurbine)  
+          const [longitude, latitude] = params.value;
+          this.selectedPoint = { longitude, latitude };
+
+          // 找到对应的风机数据
+          const selectedTurbine = Object.keys(this.windTurbineMapping).find(
+            key => this.windTurbineMapping[key].longitude === longitude && this.windTurbineMapping[key].latitude === latitude
+          );
+
+          // 如果找到了对应的风机数据，更新全局状态
+          if (selectedTurbine) {
+            this.$store.commit('setSelectedWindTurbine', selectedTurbine);
+          }
+
+          // 创建新的points数组
           const newData = this.points.map(point => {
             point.itemStyle = this.getItemStyle(point.name);
             return point;
-          })
-          // Update the chart with the new data
-          option.series[0].data = newData
-          this.chart.setOption(option, true)
+          });
+
+          // 更新图表选项
+          option.series[0].data = newData;
+          this.chart.setOption(option, true);
         }
-      })
+      });
+
 
 
     },
@@ -208,7 +218,8 @@ export default {
   border: 4px solid #aec2f1;
   border-radius: 20px;
   /* 添加圆角，你可以根据需要更改数值 */
-  box-shadow: 0 0 20px rgb(154, 151, 216); /* 新增的代码 */
+  box-shadow: 0 0 20px rgb(154, 151, 216);
+  /* 新增的代码 */
 }
 
 .chart {

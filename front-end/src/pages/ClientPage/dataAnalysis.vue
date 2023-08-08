@@ -296,13 +296,20 @@ export default {
     },
     //获取风机名称封装函数
     getWindTurbineName(windTurbineName) {
-      // windTurbineName = windTurbineName.slice(3);
-      // //如果windTurbineNumber编号为单个数字，前面加0
-      // if (windTurbineName.length == 1) {
-      //   windTurbineName = '0' + windTurbineName;
-      // }
-      // return windTurbineName
-      return windTurbineName.table_name
+      // // windTurbineName = windTurbineName.slice(3);
+      // // //如果windTurbineNumber编号为单个数字，前面加0
+      // // if (windTurbineName.length == 1) {
+      // //   windTurbineName = '0' + windTurbineName;
+      // // }
+      // // return windTurbineName
+      // console.log("windTurbineName",windTurbineName)
+      windTurbineName = windTurbineName.slice(2);
+      //如果windTurbineNumber编号为单个数字，前面加0
+      if (windTurbineName.length == 1) {
+        windTurbineName = '0' + windTurbineName;
+      }
+      console.log("windTurbineName",windTurbineName)
+      return windTurbineName
     },
     //更新头部四个card内容
     fetchStatsCardsData(windTurbineName) {

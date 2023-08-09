@@ -37,6 +37,7 @@ with app.app_context():
 
 data_src=DataSource(dbcon)
 predictor=Predictor()
+uploadData=None #暂存上传的数据集
 
 
 @app.before_request
@@ -494,11 +495,36 @@ def add_dataset():
         try:
             dataset = Dataset(dataset_name=data['dataset_name'], table_name=data['table_name'], location=data['location'], longitude=data['longitude'], latitude=data['latitude'])
             db.session.add(dataset)
-            # dbcon.df_to_database() # 添加表
+            dbcon.df_to_database(uploadData,data['table_name']) # 添加表
             db.session.commit()
         except:
             json.dumps({"error": "添加失败"}, ensure_ascii=False)
-    return json.dumps({"result": "添加成功"}, ensure_ascii=False)
+    return json.dumps({"result": "添加成功","dataset":dataset.to_dict()}, ensure_ascii=False)
+
+@app.route('/receive_dataset_data', methods=['POST'])
+def receive_dataset_data():
+    if request.files is None:
+        return json.dumps({'error': '传输失败'}, ensure_ascii=False)
+    try:
+        csv_data = pd.read_csv(request.files['file'])
+        csv_data['DATATIME'] = pd.to_datetime(csv_data['DATATIME'])
+    except:
+        return json.dumps({'error': '无法读取文件'}, ensure_ascii=False)
+    # 判断是否存在关键行
+    cols = ['DATATIME', 'WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE','PREPOWER','ROUND(A.WS,1)','ROUND(A.POWER,0)','YD15']
+    col_exists=True
+    for c in cols:
+        col_exists=col_exists and (c in csv_data.columns)
+    if not col_exists:
+        return json.dumps({'error': '文件格式有误'}, ensure_ascii=False)
+
+    global uploadData
+    uploadData=csv_data
+    print(csv_data.head())
+    dict={
+        'result': '传输完成',
+    }
+    return json.dumps(dict, ensure_ascii=False)
 
 
 login_api = Blueprint('login_api', __name__)

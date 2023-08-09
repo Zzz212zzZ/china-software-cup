@@ -71,7 +71,7 @@ export default {
     },
     // 从 Vuex store 获取选中的风机
     selectedWindTurbineTitle() {
-      return this.$store.state.selectedWindTurbine;
+      return this.$store.state.selectedWindTurbine.dataset_name;
     }
   },
   data() {
@@ -86,8 +86,8 @@ export default {
     },
 
     updateSelectedWindTurbine(windTurbineName) {
-      console.log(windTurbineName.dataset_name)
-      this.$store.commit('setSelectedWindTurbine', windTurbineName.dataset_name);
+      // console.log(windTurbineName.dataset_name)
+      this.$store.commit('setSelectedWindTurbine', windTurbineName);
     },
 
     capitalizeFirstLetter(string) {
@@ -123,7 +123,7 @@ export default {
       })
         .then(response => response.json())
         .then(data => {
-          this.$store.commit('setSelectedWindTurbine', data[0].dataset_name); // 更新全局状态
+          this.$store.commit('setSelectedWindTurbine', data[0]); // 更新全局状态
           this.$store.commit('updateDatasets', data); // 更新全局状态
           // console.log(data)
         });

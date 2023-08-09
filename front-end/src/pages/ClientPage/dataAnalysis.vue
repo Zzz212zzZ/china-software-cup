@@ -303,13 +303,13 @@ export default {
       // // }
       // // return windTurbineName
       // console.log("windTurbineName",windTurbineName)
-      windTurbineName = windTurbineName.slice(2);
-      //如果windTurbineNumber编号为单个数字，前面加0
-      if (windTurbineName.length == 1) {
-        windTurbineName = '0' + windTurbineName;
-      }
-      console.log("windTurbineName",windTurbineName)
-      return windTurbineName
+      // windTurbineName = windTurbineName.slice(2);
+      // //如果windTurbineNumber编号为单个数字，前面加0
+      // if (windTurbineName.length == 1) {
+      //   windTurbineName = '0' + windTurbineName;
+      // }
+      // console.log("windTurbineName",windTurbineName)
+      return windTurbineName.table_name
     },
     //更新头部四个card内容
     fetchStatsCardsData(windTurbineName) {

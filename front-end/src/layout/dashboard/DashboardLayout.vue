@@ -8,9 +8,9 @@
       <mobile-menu>
         <drop-down class="nav-item" :title="selectedWindTurbineTitle" title-classes="nav-link">
             <div class="custom-scroll" style="max-height: 240px; overflow-y: auto; background-color: rgb(18, 18, 18);">
-              <a v-for="windTurbineNumber in 20" :key="windTurbineNumber" class="dropdown-item"
-                @click="updateSelectedWindTurbine(`风机 ${windTurbineNumber}`)" href="#">
-                风机 {{ windTurbineNumber }}
+              <a v-for="windTurbineNumber in datasets" :key="windTurbineNumber.dataset_id" class="dropdown-item"
+                @click="updateSelectedWindTurbine(windTurbineNumber)" href="#">
+                {{ windTurbineNumber.dataset_name }}
               </a>
             </div>
           </drop-down>
@@ -74,8 +74,11 @@ export default {
     },
     selectedWindTurbineTitle() {
       // 如果 Vuex store 中有选中的风机，则使用其作为标题，默认为1
-      return this.$store.state.selectedWindTurbine;
-    }
+      return this.$store.state.selectedWindTurbine.dataset_name;
+    },
+    datasets() {
+      return this.$store.state.datasets; // 从全局状态中获取数据集
+    },
   }
 };
 </script>

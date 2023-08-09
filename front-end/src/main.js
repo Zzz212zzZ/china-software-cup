@@ -51,6 +51,8 @@ import {
   Link,
   Avatar,
   Popover,
+  Steps,
+  Step,
 } from 'element-ui';
 
 import CollapseTransition from 'element-ui/lib/transitions/collapse-transition';
@@ -86,6 +88,8 @@ Vue.use(DescriptionsItem)
 Vue.use(Link)
 Vue.use(Avatar)
 Vue.use(Popover)
+Vue.use(Steps)
+Vue.use(Step)
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm;
 

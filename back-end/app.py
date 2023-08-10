@@ -476,17 +476,24 @@ def update_location():
         db.session.commit()
     return json.dumps({"result": "修改成功"}, ensure_ascii=False)
 
+
 @app.route('/delete_dataset', methods=['POST'])
 def delete_dataset():
     data = json.loads(request.data)
     with app.app_context():
         try:
-            dataset=Dataset.query.filter_by(id=data['dataset_id']).first()
+            dataset = Dataset.query.filter_by(id=data['dataset_id']).first()
+            table_name = dataset.table_name
             db.session.delete(dataset)
+            # 删除实际数据表
+            dbcon.drop_table(table_name)
+
             db.session.commit()
-        except:
-            return json.dumps({'error': '删除失败，请检查是否有模型使用该数据集'}, ensure_ascii=False)
-    return json.dumps({"result": "修改成功"}, ensure_ascii=False)
+
+        except Exception as e:
+            return json.dumps({'error': f'删除失败，请检查是否有模型使用该数据集。错误: {str(e)}'}, ensure_ascii=False)
+    return json.dumps({"result": "删除成功"}, ensure_ascii=False)
+
 
 @app.route('/add_dataset', methods=['POST'])
 def add_dataset():
@@ -495,11 +502,11 @@ def add_dataset():
         try:
             dataset = Dataset(dataset_name=data['dataset_name'], table_name=data['table_name'], location=data['location'], longitude=data['longitude'], latitude=data['latitude'])
             db.session.add(dataset)
-            dbcon.df_to_database(uploadData,data['table_name']) # 添加表
+            dbcon.df_to_database(uploadData, data['table_name']) # 添加表
             db.session.commit()
-        except:
-            json.dumps({"error": "添加失败"}, ensure_ascii=False)
-    return json.dumps({"result": "添加成功","dataset":dataset.to_dict()}, ensure_ascii=False)
+            return json.dumps({"result": "添加成功", "dataset": dataset.to_dict()}, ensure_ascii=False)
+        except Exception as e:
+            return json.dumps({"error": f"添加失败, 错误: {str(e)}"}, ensure_ascii=False)
 
 @app.route('/receive_dataset_data', methods=['POST'])
 def receive_dataset_data():

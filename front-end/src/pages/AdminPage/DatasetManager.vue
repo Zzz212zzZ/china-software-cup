@@ -51,11 +51,11 @@
             <ModifyChinaMap :longitude="selectedPoint.longitude" :latitude="selectedPoint.latitude"
                 :dataset_id="selectedPoint.dataset_id" :dataset_name="selectedPoint.dataset_name"
                 @close-map-modal="hideMapModal" @update-location="handleUpdateLocation" />
-
         </modal>
 
         <!-- 数据集上传对话框 -->
-        <el-dialog title="上传数据集" :visible.sync="uploadDialog" width="30%" :append-to-body="true">
+        <el-dialog title="上传数据集" :visible.sync="uploadDialog" width="30%" :append-to-body="true" class="custom-dialog"
+            z-index="1000">
             <el-steps :active="uploadStep" finish-status="success" align-center>
                 <el-step title="上传数据集"></el-step>
                 <el-step title="填写数据集信息"></el-step>
@@ -73,8 +73,8 @@
                         <template v-else>未选择</template>
                     </span>
                     <!-- 这里是需要呼出对话框的按钮 -->
-                    <el-link icon="el-icon-location-outline" type="info" style="margin-left: 2px;">
-                    </el-link>
+                    <el-link icon="el-icon-location-outline" type="info" style="margin-left: 2px;"
+                        @click="showMapModalInUpload"></el-link>
                 </el-form-item>
                 <el-form-item label="经度" prop="longitude">
 
@@ -104,7 +104,22 @@
                 <el-button v-if="uploadStep == 1" type="primary" @click="submitForm('upload')">确
                     认</el-button>
             </span>
+
+
+            <modal name="location-modal" :width="880" height="580" :adaptive="true" classes="modal-background"
+                style="z-index: 3000;">
+                <UploadChinaMap :longitude="form.longitude" :latitude="form.latitude"
+                    @close-location-modal="hideLocationModal" @update-location="handleUpdateLocationInUpload"
+                    style="z-index: 3001 !important;" />
+            </modal>
+
         </el-dialog>
+
+
+
+
+
+
 
     </card>
 </template>
@@ -112,10 +127,12 @@
 <script>
 import { Card } from "@/components/index";
 import ModifyChinaMap from "./ModifyChinaMap.vue";
+import UploadChinaMap from "./UploadChinaMap.vue";
 export default {
     components: {
         Card,
-        ModifyChinaMap
+        ModifyChinaMap,
+        UploadChinaMap
     },
 
     data() {
@@ -124,6 +141,7 @@ export default {
                 longitude: null,
                 latitude: null,
             },
+            showLocationModal: false, // 控制位置模态框的显示/隐藏
             datasets: [],
             activeIndex: -1,     //正在修改的行号
             activeColumn: '',    //正在修改的列名
@@ -168,6 +186,16 @@ export default {
 
     methods: {
 
+        handleUpdateLocationInUpload(newLocation) {
+            console.log("newLocation", newLocation)
+            // Logic to update the location in the upload form
+            this.form.longitude = newLocation.longitude;
+            this.form.latitude = newLocation.latitude;
+            this.form.location = newLocation.locationName;
+        },
+
+
+
         handleUpdateLocation(newLocation) {
             this.selectedPoint.longitude = newLocation.longitude;
             this.selectedPoint.latitude = newLocation.latitude;
@@ -182,6 +210,24 @@ export default {
         },
 
 
+        //---------------------------新建数据集位置组件---------------------------------
+        showMapModalInUpload() {
+            this.$modal.show('location-modal', {
+                longitude: this.form.longitude, // 传递经度
+                latitude: this.form.latitude, // 传递纬度
+            });
+        },
+
+
+        hideLocationModal() {
+            // 通过库的 API 隐藏模态框
+            this.$modal.hide('location-modal');
+            // 关闭名为'map-modal'的模态框
+        },
+        //---------------------------新建数据集位置组件---------------------------------
+
+
+
         hideMapModal() {
             // 关闭名为'map-modal'的模态框
             this.$modal.hide('map-modal');
@@ -190,36 +236,38 @@ export default {
         showMapModal(row) {
             this.selectedPoint.longitude = row.longitude;
             this.selectedPoint.latitude = row.latitude;
-            this.selectedPoint.dataset_id = row.dataset_id; // 修改这一行
-            this.selectedPoint.dataset_name = row.dataset_name; // 修改这一行
+            this.selectedPoint.dataset_id = row.dataset_id;
+            this.selectedPoint.dataset_name = row.dataset_name;
             this.$modal.show('map-modal');
         },
 
-        showMapModalInUpload() {
 
-        },
-
-
-        //数据完成上传
+        // 数据完成上传
         uploadSuccess(response, file, fileList) {
-            var data = response
+            var data = response;
             if (data.hasOwnProperty('error')) {
                 this.$message({
                     message: data['error'],
                     type: 'warning'
-                })
-                return
+                });
+                return;
             }
 
-            this.form.dataset_name = '风机 '+file.name.split('.')[0]
-            this.form.table_name = file.name.split('.')[0]
-            this.data_submmited = true
+            // 清除表单的经纬度
+            this.form.longitude = '';
+            this.form.latitude = '';
+            this.form.location = '';
+
+            this.form.dataset_name = '风机 ' + file.name.split('.')[0];
+            this.form.table_name = file.name.split('.')[0];
+            this.data_submmited = true;
 
             this.$message({
                 message: data['result'],
                 type: 'success'
-            })
+            });
         },
+
 
 
         //获取数据集
@@ -371,6 +419,10 @@ export default {
                                 message: data['result'],
                                 type: 'success'
                             })
+                            //然后关闭对话框
+                            this.cleanUpload()
+                            this.uploadDialog=false
+                            
                         })
 
                 } else {
@@ -397,4 +449,10 @@ export default {
 }
 </script>
 
-<style></style>
+
+<style>
+.custom-dialog .el-dialog {
+    z-index: 2000;
+    /* Or any value lower than the z-index of location-modal */
+}
+</style>

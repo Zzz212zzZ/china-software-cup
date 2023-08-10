@@ -112,3 +112,7 @@ class DatabaseConnector(object):
         select_sql += " FROM `" + table_name + '`'
         df = pd.read_sql(select_sql, self.engine, parse_dates=['DATATIME'])
         return df
+
+    def drop_table(self, table_name):
+        sql = f"DROP TABLE IF EXISTS `{table_name}`"
+        self.engine.execute(sql)

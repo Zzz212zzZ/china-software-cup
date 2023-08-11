@@ -611,7 +611,7 @@ export default {
               // analyst_id: this.$cookies.get("user_id"),
               analyst: this.$cookies.get("username"),
               number: this.getWindTurbineName(this.$store.state.selectedWindTurbine),
-              dataset: this.windTurbineName,
+              dataset_id: this.$store.state.selectedWindTurbine.dataset_id,
               nn_score: this.nn_score,
               rf_score: this.rf_score,
               models: this.form.model,

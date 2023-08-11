@@ -45,6 +45,7 @@
 </template>
   
 <script>
+import { sha256 } from 'js-sha256'
 export default {
     name: 'LoginPage',
     data() {
@@ -91,7 +92,7 @@ export default {
                         method: 'post',
                         body: JSON.stringify({
                             username: this.signUpData.username,
-                            password: this.signUpData.password
+                            password: sha256(this.signUpData.password)
                         })
                     })
                         .then(response => response.json())
@@ -129,7 +130,7 @@ export default {
                         method: 'post',
                         body: JSON.stringify({
                             username: this.logInData.username,
-                            password: this.logInData.password
+                            password: sha256(this.logInData.password)
                         })
                     })
                         .then(response => response.json())
@@ -158,6 +159,8 @@ export default {
                 }
             });
         }
+    },
+    created(){
     }
 };
 </script>

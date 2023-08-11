@@ -1,4 +1,4 @@
-from train_predict import predict
+from train_predict import predict,predict_model
 from io import BytesIO
 import pandas as pd
 
@@ -11,6 +11,12 @@ class Predictor(object):
 
     def predict(self, read_path, model_type):
         time_list, pre_val=predict(self.data, read_path, model_type, self.data.shape[0])
+        self.time_list=time_list
+        self.pre_val=pre_val
+        return time_list, pre_val
+
+    def predict_model(self, model):
+        time_list, pre_val=predict_model(self.data, model, self.data.shape[0])
         self.time_list=time_list
         self.pre_val=pre_val
         return time_list, pre_val

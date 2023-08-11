@@ -39,6 +39,11 @@ class Model(db.Model):
     score = db.Column(db.Text)
     comment = db.Column(db.Text)
 
+    args=db.Column(db.LargeBinary)
+    model=db.Column(db.LargeBinary)
+    scaler_x=db.Column(db.LargeBinary)
+    scaler_y=db.Column(db.LargeBinary)
+
     def __repr__(self):  # 自定义 交互模式 & print() 的对象打印
         return "(%s, %s, %s, %s, %s, %s)" % (self.id, self.analyst.username, self.dataset.dataset_name, self.model_type, self.score, self.comment)
 

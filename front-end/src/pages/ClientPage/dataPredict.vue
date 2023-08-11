@@ -197,11 +197,12 @@ export default {
         //进行模型预测
         predict() {
             // console.log(this.selected_model[0])
+            var model_id = this.selected_model[0].model_id
             var analyst = this.selected_model[0].analyst
             var number = this.selected_model[0].table_name
             var score = this.selected_model[0].score
             var model_type = this.selected_model[0].model_type
-            fetch(`http://127.0.0.1:5000/predict?analyst=${analyst}&number=${number}&score=${score}&model_type=${model_type}`, {
+            fetch(`http://127.0.0.1:5000/predict?analyst=${analyst}&number=${number}&score=${score}&model_type=${model_type}&model_id=${model_id}`, {
                 headers: {
                     'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON
                     'Authorization': `Bearer ${this.$cookies.get('token')}`, // 设置授权头部信息

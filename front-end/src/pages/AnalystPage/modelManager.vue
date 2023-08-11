@@ -58,7 +58,7 @@ export default {
                         method: 'post',
                         body: JSON.stringify({
                             model_id: row.model_id,
-                            number: this.getWindTurbineName(row.dataset)
+                            // number: this.getWindTurbineName(row.dataset)
                         }),
                         headers: {
                             'Content-Type': 'application/json', // 设置内容类型头部信息为 JSON

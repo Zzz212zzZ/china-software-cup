@@ -1,3 +1,4 @@
+import io
 import math
 import os
 import datetime
@@ -12,6 +13,7 @@ from util import *
 import matplotlib.pyplot as plt
 from sklearn.ensemble import RandomForestRegressor
 import joblib
+from DatabaseConnector import Model
 # 随机种子，保证实验能复现
 import random
 seed = 142
@@ -63,12 +65,18 @@ class args():
         f_save.close()
 
     def load(self,path):
-        f_read = open(path+'/args.pkl', 'rb')
+        f_read = None
+        if isinstance(path,str):
+            f_read = open(path+'/args.pkl', 'rb')
+        elif isinstance(path,io.BytesIO):
+            f_read = path
+        if f_read is None:return
         dict = pickle.load(f_read)
         f_read.close()
 
         for name, value in vars(self).items():
             setattr(self,name,dict[name])
+            # print(f'{name}:{dict[name]}')
 
 
 def data_preprocess(df):
@@ -391,7 +399,7 @@ def predict_valid(df, read_path):
 
     return tru_val, nn_pre_val, random_pre_val, nn_score, random_score
 
-def predict(df, read_path, model_type, pre_len):
+def predict(df, read_path,model_type, pre_len):
     args_db=args()
     args_db.load(read_path)
     df = data_preprocess(df)
@@ -427,6 +435,44 @@ def predict(df, read_path, model_type, pre_len):
     time_list = df['DATATIME'].tolist()[:pre_len]
 
     return time_list, pre_val
+
+def predict_model(df, model_data:Model, pre_len):
+    args_db=args()
+    args_db.load(io.BytesIO(model_data.args))
+    df = data_preprocess(df)
+
+    if model_data.model_type == '神经网络':
+        model = pre_model(args_db.pri_use_cols, args_db.sec_use_cols, args_db.embedding_size,
+                          args_db.GRU_layers, args_db.agg_method)
+        # 导入模型权重文件
+        model.set_state_dict(paddle.load(io.BytesIO(model_data.model)))
+        model.eval()  # 开启预测
+
+        scaler_y = pickle.load(io.BytesIO(model_data.scaler_y))
+        scaler_x = pickle.load(io.BytesIO(model_data.scaler_x))
+
+        input = np.array(df[['WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']])
+        input = scaler_x.transform(input)
+        input = paddle.to_tensor(input, dtype='float32')
+
+        output = model(input)
+        output = scaler_y.inverse_transform(output)
+
+        pre = [x for x in output.squeeze()]
+        pre_val = pre[:pre_len]
+
+    elif model_data.model_type == '随机森林':
+        regressor = joblib.load(io.BytesIO(model_data.model))
+        all_columns = ['WINDDIRECTION', 'WINDSPEED', 'TEMPERATURE', 'HUMIDITY', 'PRESSURE']
+        columns = []
+        for index in args_db.random_use_cols:
+            columns.append(all_columns[index])
+        pre_val = regressor.predict(df[columns]).tolist()[:pre_len]
+
+    time_list = df['DATATIME'].tolist()[:pre_len]
+
+    return time_list, pre_val
+
 
 
 if __name__ == '__main__':

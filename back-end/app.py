@@ -240,15 +240,15 @@ def save_model():
     if not os.path.exists(copy_path):
         return json.dumps({'error':'没有模型'}, ensure_ascii=False)
 
-    common_files=['args.pkl','scaler_x.pkl','scaler_y.pkl']
+    # common_files=['args.pkl','scaler_x.pkl','scaler_y.pkl']
     models={
         "上传神经网络模型":'model_nn.pdparams',
         "上传随机森林模型":'model_random.pkl'
     }
-    model_path={
-        "上传神经网络模型": f'model/{data["analyst"]}/{data["number"]}/model_nn/{data["nn_score"]}',
-        "上传随机森林模型": f'model/{data["analyst"]}/{data["number"]}/model_random/{data["rf_score"]}'
-    }
+    # model_path={
+    #     "上传神经网络模型": f'model/{data["analyst"]}/{data["number"]}/model_nn/{data["nn_score"]}',
+    #     "上传随机森林模型": f'model/{data["analyst"]}/{data["number"]}/model_random/{data["rf_score"]}'
+    # }
     models_type = {
         "上传神经网络模型": '神经网络',
         "上传随机森林模型": '随机森林'
@@ -259,19 +259,27 @@ def save_model():
     }
 
     for m in data['models']:
-        if os.path.exists(model_path[m]):
-            shutil.rmtree(model_path[m])
-        os.makedirs(model_path[m])
-
-        for f in common_files:
-            shutil.copy(copy_path + '/' + f, model_path[m])
-        shutil.copy(copy_path + '/' + models[m], model_path[m])
+        # if os.path.exists(model_path[m]):
+        #     shutil.rmtree(model_path[m])
+        # os.makedirs(model_path[m])
+        #
+        # for f in common_files:
+        #     shutil.copy(copy_path + '/' + f, model_path[m])
+        # shutil.copy(copy_path + '/' + models[m], model_path[m])
         # with app.app_context():
-        model=Model(analyst_id=g.user['user_id'],
-                    dataset_id=data['dataset_id'],
-                    model_type=models_type[m],
-                    score=models_score[m],
-                    comment=data['comment'])
+        with open(copy_path + '/args.pkl','rb') as args:
+            with open(copy_path + '/' + models[m], 'rb') as model:
+                with open(copy_path + '/scaler_x.pkl', 'rb') as scaler_x:
+                    with open(copy_path + '/scaler_y.pkl', 'rb') as scaler_y:
+                        model=Model(analyst_id=g.user['user_id'],
+                                    dataset_id=data['dataset_id'],
+                                    model_type=models_type[m],
+                                    score=models_score[m],
+                                    comment=data['comment'],
+                                    args=args.read(),
+                                    model=model.read(),
+                                    scaler_x=scaler_x.read(),
+                                    scaler_y=scaler_y.read())
         db.session.add(model)
         db.session.commit()
 
@@ -338,7 +346,7 @@ def delete_model():
     }
     with app.app_context():
         model=Model.query.filter_by(id=data['model_id']).first()
-        path=f'model/{model.analyst.username}/{data["number"]}/{mapper[model.model_type]}/{model.score}'
+        path=f'model/{model.analyst.username}/{model.dataset.table_name}/{mapper[model.model_type]}/{model.score}'
         # print(path)
         if os.path.exists(path):
             shutil.rmtree(path)
@@ -352,12 +360,14 @@ def predict():
 
     :return: 预测数据
     """
-    model_types={
-        '神经网络':'model_nn',
-        '随机森林':'model_random'
-    }
-    path=f'model/{request.args["analyst"]}/{request.args["number"]}/{model_types[request.args["model_type"]]}/{request.args["score"]}'
-    time_list, pre_val=predictor.predict(path,model_types[request.args["model_type"]])
+    # model_types={
+    #     '神经网络':'model_nn',
+    #     '随机森林':'model_random'
+    # }
+    # path=f'model/{request.args["analyst"]}/{request.args["number"]}/{model_types[request.args["model_type"]]}/{request.args["score"]}'
+    # time_list, pre_val=predictor.predict(path,model_types[request.args["model_type"]])
+    model=Model.query.filter_by(id=request.args["model_id"]).one()
+    time_list, pre_val=predictor.predict_model(model)
 
     dict = {
         'time_list':time_list,

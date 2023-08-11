@@ -297,7 +297,7 @@ export default {
         const abnormalPie = this.$refs.abnormalPie;
         const missingPie = this.$refs.missingPie;
         if (preprocessMain && preprocessMain.setOption) {
-          // preprocessMain.setOption(this.windPowerOption); //更新风速功率曲线图
+          preprocessMain.setOption(this.windPowerOption); //更新风速功率曲线图
         }
         if (abnormalPie && abnormalPie.setOption) {
           abnormalPie.setOption(this.abnormalOption); //更新

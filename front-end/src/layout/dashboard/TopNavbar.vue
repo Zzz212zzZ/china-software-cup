@@ -21,7 +21,7 @@
 
           <li class="nav-item d-flex align-items-center">
             <i class="ti-map-alt"></i>
-            <button type="button" class="nav-link custom-link" @click="showModal">地图</button>
+            <a type="button" class="nav-link custom-link" @click="showModal">地图</a>
             <modal name="my-modal" :width="700" height="500" :adaptive="true" classes="modal-background">
               <ChinaMap />
             </modal>

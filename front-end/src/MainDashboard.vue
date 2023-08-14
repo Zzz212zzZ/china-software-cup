@@ -3,7 +3,7 @@
     <div :class="{ 'nav-open': $sidebar.showSidebar }">
         <notifications></notifications>
         <router-view></router-view>
-        <h1>1213213</h1>
+        <!-- <h1>1213213</h1> -->
     </div>
 </template>
 

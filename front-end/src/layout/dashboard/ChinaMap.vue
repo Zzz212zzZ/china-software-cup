@@ -43,21 +43,21 @@ export default {
           // 将数据转换为地图组件所需的格式
           this.points = data.map(item => {
             return {
-              name: item.dataset_name,
+              name: item.dataset_id,
               value: [item.longitude, item.latitude]
             };
           });
 
           // 更新风机映射
           this.windTurbineMapping = data.reduce((mapping, item) => {
-            mapping[item.dataset_name] = { longitude: item.longitude, latitude: item.latitude };
+            mapping[item.dataset_id] = { longitude: item.longitude, latitude: item.latitude };
             return mapping;
           }, {});
 
 
           // 初始化选中的经纬度
           const windTurbine = this.$store.state.selectedWindTurbine;
-          const selectedTurbine = data.find(item => item.dataset_name === windTurbine);
+          const selectedTurbine = data.find(item => item.dataset_id === windTurbine.dataset_id);
           if (selectedTurbine) {
             this.selectedPoint = {
               longitude: selectedTurbine.longitude,
@@ -166,14 +166,19 @@ export default {
           const [longitude, latitude] = params.value;
           this.selectedPoint = { longitude, latitude };
 
+          console.log(this.windTurbineMapping)
           // 找到对应的风机数据
-          const selectedTurbine = Object.keys(this.windTurbineMapping).find(
+          const selectedTurbine_id = Object.keys(this.windTurbineMapping).find(
             key => this.windTurbineMapping[key].longitude === longitude && this.windTurbineMapping[key].latitude === latitude
           );
 
           // 如果找到了对应的风机数据，更新全局状态
-          if (selectedTurbine) {
-            this.$store.commit('setSelectedWindTurbine', selectedTurbine);
+          // console.log(selectedTurbine_id)
+          if (selectedTurbine_id) {
+            // console.log(this.$store.state.datasets)
+            const turbine=this.$store.state.datasets.find(dataset => dataset.dataset_id == selectedTurbine_id)
+            // console.log(turbine)
+            this.$store.commit('setSelectedWindTurbine', turbine);
           }
 
           // 创建新的points数组

@@ -1,6 +1,7 @@
 import os
 import sys
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 import pandas as pd
 from external import db
 
@@ -119,5 +120,5 @@ class DatabaseConnector(object):
         return df
 
     def drop_table(self, table_name):
-        sql = f"DROP TABLE IF EXISTS `{table_name}`"
-        self.engine.execute(sql)
+        sql = f"DROP TABLE `{table_name}`"
+        self.engine.connect().execute(text(sql))
